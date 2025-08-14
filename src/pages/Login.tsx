@@ -4,30 +4,26 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { Loader2, Phone, Shield } from "lucide-react";
+import { Loader2, ChevronLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiService } from "@/services/api";
 import { saveUserData, extractPodFromUrl, isLoggedIn } from "@/utils/storage";
-import qikpodLogo from "@/assets/qikpod-logo.png";
 
 export default function Login() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  
-  const [phoneNumber, setPhoneNumber] = useState("");
+
+  const [phoneNumber, setPhoneNumber] = useState("6374719920");
   const [otp, setOtp] = useState("");
-  const [step, setStep] = useState<'phone' | 'otp'>('phone');
+  const [step, setStep] = useState<'phone' | 'otp'>('otp'); // Start with OTP step for demo
   const [loading, setLoading] = useState(false);
   const [countdown, setCountdown] = useState(0);
 
   useEffect(() => {
-    // Check if user is already logged in
     if (isLoggedIn()) {
       navigate('/dashboard');
       return;
     }
-
-    // Extract POD value from URL if present
     extractPodFromUrl();
   }, [navigate]);
 
@@ -85,12 +81,6 @@ export default function Login() {
     try {
       const response = await apiService.validateOTP(phoneNumber, otp);
       saveUserData(response);
-      
-      toast({
-        title: "Login Successful",
-        description: `Welcome back, ${response.user_name}!`,
-      });
-      
       navigate('/dashboard');
     } catch (error) {
       toast({
@@ -110,85 +100,87 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="mobile-container max-w-sm w-full">
-        <div className="text-center mb-10 animate-fade-in">
-          <img src={qikpodLogo} alt="Qikpod" className="w-24 h-24 mx-auto mb-6 rounded-3xl card-glow" />
-          <h1 className="text-4xl font-bold text-foreground mb-3 tracking-tight">Welcome to Qikpod</h1>
-          <p className="text-muted-foreground text-lg">Secure smart locker access</p>
-        </div>
+    <div className="min-h-screen bg-white flex flex-col items-center p-6">
+      <div className="w-full max-w-md">
+        {step === 'otp' && (
+          <button
+            onClick={() => setStep('phone')}
+            className="flex items-center text-gray-600 mb-6"
+          >
+            <ChevronLeft className="w-5 h-5" />
+            <span className="ml-1">Back</span>
+          </button>
+        )}
 
-        <Card className="white-card card-3d border-border/30 p-8 animate-slide-up">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          {step === 'phone' ? 'Welcome Back' : 'Enter 6-digit code'}
+        </h1>
+
+        <p className="text-gray-600 mb-8">
+          {step === 'phone'
+            ? 'Login to Qikpod'
+            : `sent to ${phoneNumber}`
+          }
+        </p>
+
+        <div className="space-y-6">
           {step === 'phone' ? (
-            <div className="space-y-8">
-              <div className="space-y-3">
-                <label className="text-base font-semibold text-foreground block">
-                  Mobile Number
-                </label>
-                <div className="relative">
-                  <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
-                  <Input
-                    type="tel"
-                    placeholder="Enter 10-digit mobile number"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                    className="pl-12 h-14 text-lg border-2 rounded-xl focus:ring-2 focus:ring-primary/20"
-                    maxLength={10}
-                  />
-                </div>
+            <>
+              <div className="space-y-2">
+                <Input
+                  type="tel"
+                  placeholder="Enter phone number"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                  className="h-12 text-base border-gray-300 rounded-lg"
+                  maxLength={10}
+                />
               </div>
-              
-              <Button 
-                onClick={handleSendOTP} 
+
+              <Button
+                onClick={handleSendOTP}
                 disabled={loading || phoneNumber.length !== 10}
-                className="btn-qikpod w-full h-14 text-lg font-semibold rounded-xl"
+                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
               >
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Sending OTP...
+                    Sending...
                   </>
                 ) : (
                   'Get OTP'
                 )}
               </Button>
-            </div>
-          ) : (
-            <div className="space-y-8">
-              <div className="space-y-4">
-                <div className="text-center">
-                  <Shield className="w-8 h-8 text-primary mx-auto mb-3" />
-                  <label className="text-base font-semibold text-foreground block mb-2">
-                    Verification Code
-                  </label>
-                  <p className="text-sm text-muted-foreground">
-                    OTP sent to +91 {phoneNumber}
-                  </p>
-                </div>
-                
-                <div className="flex justify-center">
-                  <InputOTP
-                    maxLength={6}
-                    value={otp}
-                    onChange={(value) => setOtp(value)}
-                    className="gap-3"
-                  >
-                    <InputOTPGroup className="gap-3">
-                      <InputOTPSlot index={0} className="w-12 h-12 text-xl font-semibold border-2 rounded-lg" />
-                      <InputOTPSlot index={1} className="w-12 h-12 text-xl font-semibold border-2 rounded-lg" />
-                      <InputOTPSlot index={2} className="w-12 h-12 text-xl font-semibold border-2 rounded-lg" />
-                      <InputOTPSlot index={3} className="w-12 h-12 text-xl font-semibold border-2 rounded-lg" />
-                      <InputOTPSlot index={4} className="w-12 h-12 text-xl font-semibold border-2 rounded-lg" />
-                      <InputOTPSlot index={5} className="w-12 h-12 text-xl font-semibold border-2 rounded-lg" />
-                    </InputOTPGroup>
-                  </InputOTP>
-                </div>
+
+              <div className="text-center text-sm text-gray-600">
+                Don't have an account? <span className="text-blue-600">Sign up</span>
               </div>
-              
-              <Button 
-                onClick={handleVerifyOTP} 
+            </>
+          ) : (
+            <>
+              <div className="flex justify-center">
+                <InputOTP
+                  maxLength={6}
+                  value={otp}
+                  onChange={(value) => setOtp(value)}
+                  className="gap-2"
+                >
+                  <InputOTPGroup className="gap-2">
+                    {[...Array(6)].map((_, i) => (
+                      <InputOTPSlot
+                        key={i}
+                        index={i}
+                        className="w-12 h-14 text-lg border-gray-300 rounded-lg"
+                      />
+                    ))}
+                  </InputOTPGroup>
+                </InputOTP>
+              </div>
+
+              <Button
+                onClick={handleVerifyOTP}
                 disabled={loading || otp.length !== 6}
-                className="btn-qikpod w-full h-14 text-lg font-semibold rounded-xl"
+                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
               >
                 {loading ? (
                   <>
@@ -196,31 +188,34 @@ export default function Login() {
                     Verifying...
                   </>
                 ) : (
-                  'Verify & Login'
+                  'Login to Qikpod'
                 )}
               </Button>
 
-              <div className="text-center space-y-3">
+              <div className="text-center space-y-4">
                 <button
                   onClick={handleResendOTP}
                   disabled={countdown > 0}
-                  className="text-base font-medium text-primary disabled:text-muted-foreground transition-colors"
+                  className={`text-sm ${countdown > 0 ? 'text-gray-400' : 'text-blue-600'}`}
                 >
                   {countdown > 0 ? `Resend in ${countdown}s` : 'Resend OTP'}
                 </button>
                 <button
-                  onClick={() => {
-                    setStep('phone');
-                    setOtp('');
-                  }}
-                  className="block text-base text-muted-foreground hover:text-foreground mx-auto transition-colors"
+                  onClick={() => setStep('phone')}
+                  className="block text-sm text-gray-600 mx-auto"
                 >
                   Change number
                 </button>
               </div>
-            </div>
+            </>
           )}
-        </Card>
+        </div>
+
+        {step === 'phone' && (
+          <div className="mt-8 text-center">
+            <button className="text-sm text-gray-600">How it works?</button>
+          </div>
+        )}
       </div>
     </div>
   );
