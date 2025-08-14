@@ -1,24 +1,22 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { Loader2, ChevronLeft } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiService } from "@/services/api";
 import { saveUserData, extractPodFromUrl, isLoggedIn } from "@/utils/storage";
-import qikpodLogo from "@/assets/qikpod-logo.png";
 
 export default function Login() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [otp, setOtp] = useState("");
+  const [otp, setOtp] = useState<string[]>(Array(6).fill(''));
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [loading, setLoading] = useState(false);
-  const [countdown, setCountdown] = useState(0);
+  const [error, setError] = useState('');
+  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
     if (isLoggedIn()) {
@@ -29,103 +27,104 @@ export default function Login() {
   }, [navigate]);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (countdown > 0) {
-      interval = setInterval(() => {
-        setCountdown(prev => prev - 1);
-      }, 1000);
+    if (step === 'otp' && otpInputRefs.current[0]) {
+      otpInputRefs.current[0]?.focus();
     }
-    return () => clearInterval(interval);
-  }, [countdown]);
+  }, [step]);
 
   const handleSendOTP = async () => {
     if (!phoneNumber || phoneNumber.length !== 10) {
-      toast({
-        title: "Invalid Phone Number",
-        description: "Please enter a valid 10-digit phone number.",
-        variant: "destructive",
-      });
+      setError('Please enter a valid 10-digit phone number');
       return;
     }
 
     setLoading(true);
+    setError('');
     try {
-      await apiService.generateOTP(phoneNumber);
-      toast({
-        title: "OTP Sent",
-        description: "Please check your phone for the verification code.",
-      });
-      setStep('otp');
-      setCountdown(30);
+      const response = await apiService.generateOTP(phoneNumber);
+
+      if (response.success === true || response.status === 'success') {
+        setStep('otp');
+        toast({
+          title: "✅ OTP Sent Successfully",
+          description: "OTP has been sent to your registered mobile number",
+          className: "bg-green-50 border border-green-200 text-green-800",
+          duration: 3000
+        });
+      } else {
+        setError(response.message || 'This phone number is not registered. Please register to continue.');
+      }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to send OTP. Please try again.",
-        variant: "destructive",
-      });
+      setError('Failed to generate OTP. Please try again.');
+      console.error('OTP generation error:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleOTPChange = (index: number, value: string) => {
+    if (/^\d*$/.test(value) && value.length <= 1) {
+      const newOtp = [...otp];
+      newOtp[index] = value;
+      setOtp(newOtp);
+
+      if (value && index < 5) {
+        otpInputRefs.current[index + 1]?.focus();
+      }
+    }
+  };
+
+  const handleOTPKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      otpInputRefs.current[index - 1]?.focus();
     }
   };
 
   const handleVerifyOTP = async () => {
-    if (!otp || otp.length !== 6) {
-      toast({
-        title: "Invalid OTP",
-        description: "Please enter the 6-digit verification code.",
-        variant: "destructive",
-      });
+    const otpString = otp.join('');
+    if (otpString.length !== 6) {
+      setError('Please enter a 6-digit OTP');
       return;
     }
 
     setLoading(true);
+    setError('');
     try {
-      const response = await apiService.validateOTP(phoneNumber, otp);
-      saveUserData(response);
-      navigate('/dashboard');
+      const response = await apiService.validateOTP(phoneNumber, otpString);
+      if (response.success) {
+        saveUserData(response);
+        navigate('/dashboard');
+      } else {
+        setError(response.message || 'Invalid OTP. Please try again.');
+      }
     } catch (error) {
-      toast({
-        title: "Invalid OTP",
-        description: "The verification code is incorrect. Please try again.",
-        variant: "destructive",
-      });
+      setError('Failed to validate OTP. Please try again.');
+      console.error('OTP validation error:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleResendOTP = () => {
-    if (countdown === 0) {
-      handleSendOTP();
-    }
+  const resetToPhoneStep = () => {
+    setStep('phone');
+    setOtp(Array(6).fill(''));
+    setError('');
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-[#f8f9fa] to-[#e9ecef] flex items-center justify-center p-4 md:p-8">
       <div className="w-full max-w-md">
-        {step === 'otp' && (
-          <button
-            onClick={() => setStep('phone')}
-            className="flex items-center text-gray-600 mb-6"
-          >
-            <ChevronLeft className="w-5 h-5" />
-            <span className="ml-1">Back</span>
-          </button>
-        )}
-
         <div className="text-center mb-8">
           <div className="mb-6 flex justify-center">
             <div className="bg-[#ffe448] p-3 rounded-lg shadow-sm inline-flex">
               <img
-                src={qikpodLogo}
+                src="https://leapmile-website.blr1.cdn.digitaloceanspaces.com/Qikpod/Images/q70.png"
                 alt="Qikpod"
                 className="h-10 w-auto"
               />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {step === 'phone' ? 'Welcome Back' : 'Enter Verification Code'}
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
           <p className="text-gray-600">
             {step === 'phone'
               ? 'Sign in with your registered mobile number'
@@ -147,6 +146,7 @@ export default function Login() {
                     </div>
                     <Input
                       type="tel"
+                      required
                       className="block w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffe448] focus:border-[#ffe448] outline-none transition"
                       placeholder="98765 43210"
                       value={phoneNumber}
@@ -156,20 +156,28 @@ export default function Login() {
                   </div>
                 </div>
 
-                <Button
-                  onClick={handleSendOTP}
-                  disabled={loading || phoneNumber.length !== 10}
-                  className="w-full bg-[#ffe448] hover:bg-[#f5d840] text-gray-900 py-3 rounded-lg font-medium transition duration-200"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Sending OTP...
-                    </>
-                  ) : (
-                    'Continue with OTP'
-                  )}
-                </Button>
+                {error && (
+                  <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+                    <p className="text-sm text-red-700">{error}</p>
+                  </div>
+                )}
+
+                <div className="pt-2">
+                  <Button
+                    onClick={handleSendOTP}
+                    disabled={loading || phoneNumber.length !== 10}
+                    className="w-full bg-[#ffe448] hover:bg-[#f5d840] text-gray-900 py-3 rounded-lg font-medium transition duration-200"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Sending OTP...
+                      </>
+                    ) : (
+                      'Continue with OTP'
+                    )}
+                  </Button>
+                </div>
 
                 <div className="text-xs text-gray-500 text-center pt-2">
                   By continuing, you agree to our Terms of Service and Privacy Policy
@@ -181,58 +189,72 @@ export default function Login() {
                   <label className="block text-sm font-bold text-gray-700 mb-2">
                     Enter 6-digit OTP
                   </label>
-                  <div className="flex justify-center">
-                    <InputOTP
-                      maxLength={6}
-                      value={otp}
-                      onChange={(value) => setOtp(value)}
-                      className="gap-2"
-                    >
-                      <InputOTPGroup className="gap-2">
-                        {[...Array(6)].map((_, i) => (
-                          <InputOTPSlot
-                            key={i}
-                            index={i}
-                            className="w-12 h-12 text-lg border-gray-300 rounded-lg"
-                          />
-                        ))}
-                      </InputOTPGroup>
-                    </InputOTP>
+                  <div className="flex justify-between space-x-2">
+                    {[...Array(6)].map((_, index) => (
+                      <input
+                        key={index}
+                        ref={(el) => (otpInputRefs.current[index] = el)}
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={1}
+                        className="w-full h-12 text-center text-xl font-medium border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffe448] focus:border-[#ffe448] outline-none transition"
+                        value={otp[index]}
+                        onChange={(e) => handleOTPChange(index, e.target.value)}
+                        onKeyDown={(e) => handleOTPKeyDown(index, e)}
+                        autoFocus={index === 0}
+                      />
+                    ))}
                   </div>
                 </div>
 
-                <Button
-                  onClick={handleVerifyOTP}
-                  disabled={loading || otp.length !== 6}
-                  className="w-full bg-[#ffe448] hover:bg-[#f5d840] text-gray-900 py-3 rounded-lg font-medium transition duration-200"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Verifying...
-                    </>
-                  ) : (
-                    'Login to Qikpod'
-                  )}
-                </Button>
+                {error && (
+                  <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+                    <p className="text-sm text-red-700">{error}</p>
+                  </div>
+                )}
 
-                <div className="text-center space-y-3">
-                  <button
-                    onClick={handleResendOTP}
-                    disabled={countdown > 0}
-                    className={`text-sm ${countdown > 0 ? 'text-gray-400' : 'text-blue-600'}`}
+                <div className="space-y-3">
+                  <Button
+                    onClick={handleVerifyOTP}
+                    disabled={loading || otp.join('').length !== 6}
+                    className="w-full bg-[#ffe448] hover:bg-[#f5d840] text-gray-900 py-3 rounded-lg font-medium transition duration-200"
                   >
-                    {countdown > 0 ? `Resend in ${countdown}s` : 'Resend OTP'}
-                  </button>
-                  <button
-                    onClick={() => setStep('phone')}
-                    className="block text-sm text-gray-600 mx-auto"
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Verifying...
+                      </>
+                    ) : (
+                      'Login to Qikpod'
+                    )}
+                  </Button>
+
+                  <Button
+                    type="button"
+                    onClick={resetToPhoneStep}
+                    className="w-full py-3 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition border border-gray-200"
                   >
-                    Change number
-                  </button>
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Change Number
+                  </Button>
                 </div>
               </div>
             )}
+
+            <div className="pt-4 border-t border-gray-200 space-y-3">
+              <Link
+                to="/register"
+                className="block text-center text-sm font-medium text-blue-600 hover:underline"
+              >
+                Don't have an account? Sign up
+              </Link>
+              <Link
+                to="/how-it-works"
+                className="block text-center text-sm font-medium text-blue-600 hover:underline"
+              >
+                How it works?
+              </Link>
+            </div>
           </div>
         </div>
       </div>
