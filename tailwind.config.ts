@@ -63,11 +63,14 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				qikpod: {
-					yellow: 'hsl(var(--qikpod-yellow))',
-					black: 'hsl(var(--qikpod-black))',
-					'off-white': 'hsl(var(--qikpod-off-white))',
-					'light-grey': 'hsl(var(--qikpod-light-grey))'
+					blue: 'hsl(var(--qikpod-blue))',
+					gray: 'hsl(var(--qikpod-gray))',
+					'light-bg': 'hsl(var(--qikpod-light-bg))',
+					white: 'hsl(var(--qikpod-white))'
 				}
+			},
+			fontFamily: {
+				sans: ['Inter', 'system-ui', 'sans-serif'],
 			},
 			backdropBlur: {
 				xs: '2px',

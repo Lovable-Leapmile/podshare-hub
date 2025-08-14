@@ -1,13 +1,25 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
-import { Package, Plus, Clock, CheckCircle, XCircle } from "lucide-react";
+import { Package, Plus, Clock, MapPin, User, LogOut, HelpCircle } from "lucide-react";
 import { Header } from "@/components/Header";
-import { ReservationCard } from "@/components/ReservationCard";
 import { getUserData, getPodValue, isLoggedIn } from "@/utils/storage";
 import { Reservation } from "@/types";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 // Dummy reservation data
 const dummyReservations: Reservation[] = [
@@ -56,7 +68,7 @@ const dummyReservations: Reservation[] = [
 export default function Dashboard() {
   const navigate = useNavigate();
   const [currentPod, setCurrentPod] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('drop-pending');
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   useEffect(() => {
     if (!isLoggedIn()) {
@@ -70,152 +82,188 @@ export default function Dashboard() {
 
   const user = getUserData();
   
-  const dropPending = dummyReservations.filter(r => r.type === 'drop' && r.status === 'pending');
-  const pickupPending = dummyReservations.filter(r => r.type === 'pickup' && r.status === 'pending');
-  const pickupCompleted = dummyReservations.filter(r => r.type === 'pickup' && r.status === 'completed');
-  const dropCancelled = dummyReservations.filter(r => r.type === 'drop' && r.status === 'cancelled');
+  const recentActivities = dummyReservations.slice(0, 4); // Show recent 4 activities
 
-  const getTabIcon = (tab: string) => {
-    switch (tab) {
-      case 'drop-pending':
-        return <Package className="w-4 h-4" />;
-      case 'pickup-pending':
-        return <Clock className="w-4 h-4" />;
-      case 'pickup-completed':
-        return <CheckCircle className="w-4 h-4" />;
-      case 'drop-cancelled':
-        return <XCircle className="w-4 h-4" />;
-      default:
-        return <Package className="w-4 h-4" />;
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 17) return "Good afternoon";
+    return "Good evening";
+  };
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate('/login');
+  };
+
+  const getActivityText = (reservation: Reservation) => {
+    const timeAgo = getTimeAgo(new Date(reservation.timestamp));
+    if (reservation.status === 'completed') {
+      return `Package ${reservation.type === 'drop' ? 'delivered to' : 'picked up from'} ${reservation.podName} | ${timeAgo}`;
     }
+    return `${reservation.description} | ${timeAgo}`;
+  };
+
+  const getTimeAgo = (date: Date) => {
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffHours / 24);
+    
+    if (diffDays > 0) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    if (diffHours > 0) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    return 'Just now';
   };
 
   return (
     <div className="min-h-screen bg-background">
-      <Header title="Customer Dashboard" />
-      
-      <div className="mobile-container space-y-6">
-        {/* Current Pod Section */}
-        {currentPod && (
-          <Card className="card-3d bg-gradient-primary p-6 text-qikpod-black animate-fade-in">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-bold mb-1">Current Pod</h2>
-                <p className="text-2xl font-black">POD-{currentPod}</p>
-                <p className="text-sm opacity-80">Koramangala Block 5</p>
-              </div>
-              <Package className="w-12 h-12 opacity-30" />
-            </div>
-            <Button 
-              onClick={() => navigate('/reservation')}
-              className="w-full mt-4 bg-qikpod-black text-primary hover:bg-qikpod-black/90"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Create Reservation
-            </Button>
-          </Card>
-        )}
+      {/* Header */}
+      <div className="bg-qikpod-light-bg px-4 py-4">
+        <div className="flex items-center justify-between max-w-md mx-auto">
+          <div className="flex items-center space-x-3">
+            <img src="/src/assets/qikpod-logo.png" alt="Qikpod" className="w-8 h-8" />
+            <span className="font-semibold text-foreground">Customer Dashboard</span>
+          </div>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <User className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => navigate('/profile')}>
+                <User className="mr-2 h-4 w-4" />
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/locations')}>
+                <MapPin className="mr-2 h-4 w-4" />
+                Locations
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/support')}>
+                <HelpCircle className="mr-2 h-4 w-4" />
+                Support
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setShowLogoutDialog(true)}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
 
-        {/* Welcome Message */}
-        <div className="animate-fade-in">
-          <h1 className="text-2xl font-bold text-foreground mb-2">
-            Welcome back, {user?.user_name || 'Customer'}!
+      {/* Main Content */}
+      <div className="p-4 max-w-md mx-auto space-y-6">
+        {/* Greeting */}
+        <div>
+          <h1 className="text-2xl font-bold text-foreground mb-1">
+            {getGreeting()}, {user?.user_name || 'User'}!
           </h1>
-          <p className="text-muted-foreground">
-            Manage your locker reservations and deliveries
-          </p>
+          {currentPod && (
+            <p className="text-muted-foreground">
+              Currently at POD-{currentPod}
+            </p>
+          )}
         </div>
 
-        {/* Reservations Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full animate-slide-up">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 bg-card/50 backdrop-blur-sm">
-            <TabsTrigger value="drop-pending" className="flex items-center space-x-1 text-xs">
-              {getTabIcon('drop-pending')}
-              <span className="hidden sm:inline">Drop Pending</span>
-              <span className="sm:hidden">Drop</span>
-            </TabsTrigger>
-            <TabsTrigger value="pickup-pending" className="flex items-center space-x-1 text-xs">
-              {getTabIcon('pickup-pending')}
-              <span className="hidden sm:inline">Pickup Pending</span>
-              <span className="sm:hidden">Pickup</span>
-            </TabsTrigger>
-            <TabsTrigger value="pickup-completed" className="flex items-center space-x-1 text-xs">
-              {getTabIcon('pickup-completed')}
-              <span className="hidden sm:inline">Completed</span>
-              <span className="sm:hidden">Done</span>
-            </TabsTrigger>
-            <TabsTrigger value="drop-cancelled" className="flex items-center space-x-1 text-xs">
-              {getTabIcon('drop-cancelled')}
-              <span className="hidden sm:inline">Cancelled</span>
-              <span className="sm:hidden">Cancel</span>
-            </TabsTrigger>
-          </TabsList>
+        {/* Quick Actions */}
+        <div>
+          <h2 className="text-lg font-semibold text-foreground mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-2 gap-3">
+            <Button
+              onClick={() => navigate('/reservation')}
+              className="btn-primary h-16 flex-col space-y-1"
+            >
+              <Plus className="w-5 h-5" />
+              <span className="text-sm">Create Booking</span>
+            </Button>
+            
+            <Button
+              onClick={() => navigate('/locations')}
+              variant="outline"
+              className="h-16 flex-col space-y-1"
+            >
+              <MapPin className="w-5 h-5" />
+              <span className="text-sm">Find Pods</span>
+            </Button>
+            
+            <Button
+              onClick={() => navigate('/support')}
+              variant="outline"
+              className="h-16 flex-col space-y-1"
+            >
+              <HelpCircle className="w-5 h-5" />
+              <span className="text-sm">Get Help</span>
+            </Button>
+            
+            <Button
+              onClick={() => navigate('/profile')}
+              variant="outline"
+              className="h-16 flex-col space-y-1"
+            >
+              <User className="w-5 h-5" />
+              <span className="text-sm">My Profile</span>
+            </Button>
+          </div>
+        </div>
 
-          <TabsContent value="drop-pending" className="space-y-4 mt-6">
-            {dropPending.length > 0 ? (
-              dropPending.map((reservation) => (
-                <ReservationCard key={reservation.id} reservation={reservation} />
-              ))
-            ) : (
-              <Card className="p-8 text-center bg-card/50 backdrop-blur-sm">
+        {/* Recent Activity */}
+        <div className="bg-secondary rounded-xl p-4">
+          <h2 className="text-lg font-semibold text-foreground mb-4">Recent Activity</h2>
+          <div className="space-y-3">
+            {recentActivities.map((activity) => (
+              <div key={activity.id} className="activity-card">
+                <div className="flex items-start space-x-3">
+                  <div className={`w-2 h-2 rounded-full mt-2 ${
+                    activity.status === 'completed' ? 'bg-green-500' :
+                    activity.status === 'pending' ? 'bg-yellow-500' : 'bg-red-500'
+                  }`} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-foreground font-medium">
+                      {getActivityText(activity)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            {recentActivities.length === 0 && (
+              <div className="text-center py-8">
                 <Package className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                <h3 className="font-semibold text-foreground mb-2">No Pending Drops</h3>
-                <p className="text-muted-foreground text-sm">
-                  You don't have any pending drop-off reservations.
-                </p>
-              </Card>
+                <p className="text-muted-foreground">No recent activity</p>
+              </div>
             )}
-          </TabsContent>
-
-          <TabsContent value="pickup-pending" className="space-y-4 mt-6">
-            {pickupPending.length > 0 ? (
-              pickupPending.map((reservation) => (
-                <ReservationCard key={reservation.id} reservation={reservation} />
-              ))
-            ) : (
-              <Card className="p-8 text-center bg-card/50 backdrop-blur-sm">
-                <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                <h3 className="font-semibold text-foreground mb-2">No Pending Pickups</h3>
-                <p className="text-muted-foreground text-sm">
-                  You don't have any pending pickup reservations.
-                </p>
-              </Card>
-            )}
-          </TabsContent>
-
-          <TabsContent value="pickup-completed" className="space-y-4 mt-6">
-            {pickupCompleted.length > 0 ? (
-              pickupCompleted.map((reservation) => (
-                <ReservationCard key={reservation.id} reservation={reservation} />
-              ))
-            ) : (
-              <Card className="p-8 text-center bg-card/50 backdrop-blur-sm">
-                <CheckCircle className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                <h3 className="font-semibold text-foreground mb-2">No Completed Pickups</h3>
-                <p className="text-muted-foreground text-sm">
-                  Your completed pickup history will appear here.
-                </p>
-              </Card>
-            )}
-          </TabsContent>
-
-          <TabsContent value="drop-cancelled" className="space-y-4 mt-6">
-            {dropCancelled.length > 0 ? (
-              dropCancelled.map((reservation) => (
-                <ReservationCard key={reservation.id} reservation={reservation} />
-              ))
-            ) : (
-              <Card className="p-8 text-center bg-card/50 backdrop-blur-sm">
-                <XCircle className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                <h3 className="font-semibold text-foreground mb-2">No Cancelled Drops</h3>
-                <p className="text-muted-foreground text-sm">
-                  Your cancelled reservations will appear here.
-                </p>
-              </Card>
-            )}
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
       </div>
+
+      {/* Logout Confirmation Dialog */}
+      <Dialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <DialogContent className="max-w-sm mx-auto">
+          <DialogHeader>
+            <DialogTitle>Are you sure you want to logout?</DialogTitle>
+            <DialogDescription>
+              You will need to sign in again to access your account.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex space-x-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowLogoutDialog(false)}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleLogout}
+              className="flex-1 btn-primary"
+            >
+              Logout
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

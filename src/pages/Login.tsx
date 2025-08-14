@@ -3,10 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Loader2, Phone, Shield } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiService } from "@/services/api";
 import { saveUserData, extractPodFromUrl, isLoggedIn } from "@/utils/storage";
+import { OTPInput } from "@/components/OTPInput";
 import qikpodLogo from "@/assets/qikpod-logo.png";
 
 export default function Login() {
@@ -109,107 +110,140 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="mobile-container max-w-sm w-full">
-        <div className="text-center mb-8 animate-fade-in">
-          <img src={qikpodLogo} alt="Qikpod" className="w-20 h-20 mx-auto mb-4 rounded-2xl card-glow" />
-          <h1 className="text-3xl font-bold text-foreground mb-2">Welcome to Qikpod</h1>
-          <p className="text-muted-foreground">Secure smart locker access</p>
-        </div>
-
-        <Card className="card-3d bg-card/80 backdrop-blur-md border-border/50 p-6 animate-slide-up">
-          {step === 'phone' ? (
-            <div className="space-y-6">
-              <div>
-                <label className="text-sm font-medium text-foreground mb-2 block">
-                  Mobile Number
-                </label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                  <Input
-                    type="tel"
-                    placeholder="Enter 10-digit mobile number"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                    className="pl-10 h-12 text-lg"
-                    maxLength={10}
-                  />
-                </div>
-              </div>
-              
-              <Button 
-                onClick={handleSendOTP} 
-                disabled={loading || phoneNumber.length !== 10}
-                className="btn-qikpod w-full h-12 text-lg"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending OTP...
-                  </>
-                ) : (
-                  'Get OTP'
-                )}
-              </Button>
+    <div className="min-h-screen bg-qikpod-light-bg flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {step === 'phone' ? (
+          <>
+            {/* Header */}
+            <div className="text-center mb-8">
+              <img src={qikpodLogo} alt="Qikpod" className="w-16 h-16 mx-auto mb-6" />
+              <h1 className="text-2xl font-bold text-foreground mb-2">Welcome Back</h1>
+              <p className="text-muted-foreground">Sign in with your registered mobile number</p>
             </div>
-          ) : (
-            <div className="space-y-6">
-              <div>
-                <label className="text-sm font-medium text-foreground mb-2 block">
-                  Verification Code
-                </label>
-                <div className="relative">
-                  <Shield className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                  <Input
-                    type="text"
-                    placeholder="Enter 6-digit OTP"
+
+            {/* Phone Input Form */}
+            <Card className="card-modern p-6 mb-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-2 block">
+                    Mobile Number
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground text-sm font-medium">
+                      +91
+                    </span>
+                    <Input
+                      type="tel"
+                      placeholder="Enter Your Mobile Number"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                      className="pl-12 h-12 text-base border-border/60 focus:border-primary"
+                      maxLength={10}
+                    />
+                  </div>
+                </div>
+                
+                <Button 
+                  onClick={handleSendOTP} 
+                  disabled={loading || phoneNumber.length !== 10}
+                  className="btn-primary w-full h-12 text-base font-semibold"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Sending OTP...
+                    </>
+                  ) : (
+                    'Continue with OTP'
+                  )}
+                </Button>
+              </div>
+            </Card>
+
+            {/* Footer Links */}
+            <div className="text-center space-y-3">
+              <div className="flex justify-center space-x-6 text-sm">
+                <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                  Terms of Service
+                </a>
+                <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                  Privacy Policy
+                </a>
+              </div>
+              <div className="space-y-2 text-sm">
+                <a href="#" className="block text-primary hover:text-primary/80 transition-colors">
+                  Don't have an account? Sign up
+                </a>
+                <a href="#" className="block text-muted-foreground hover:text-primary transition-colors">
+                  How it works?
+                </a>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* OTP Header */}
+            <div className="text-center mb-8">
+              <img src={qikpodLogo} alt="Qikpod" className="w-16 h-16 mx-auto mb-6" />
+              <h1 className="text-2xl font-bold text-foreground mb-2">Verification Code</h1>
+              <p className="text-muted-foreground mb-1">Enter 6-digit OTP</p>
+              <p className="text-sm text-muted-foreground">
+                OTP sent to +91 {phoneNumber.replace(/(\d{5})(\d{5})/, '$1-$2')}
+              </p>
+            </div>
+
+            {/* OTP Input Form */}
+            <Card className="card-modern p-6 mb-6">
+              <div className="space-y-6">
+                <div>
+                  <OTPInput
                     value={otp}
-                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                    className="pl-10 h-12 text-lg text-center"
-                    maxLength={6}
+                    onChange={setOtp}
+                    length={6}
+                    className="mb-4"
                   />
                 </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  OTP sent to +91 {phoneNumber}
-                </p>
-              </div>
-              
-              <Button 
-                onClick={handleVerifyOTP} 
-                disabled={loading || otp.length !== 6}
-                className="btn-qikpod w-full h-12 text-lg"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Verifying...
-                  </>
-                ) : (
-                  'Verify & Login'
-                )}
-              </Button>
+                
+                <Button 
+                  onClick={handleVerifyOTP} 
+                  disabled={loading || otp.length !== 6}
+                  className="btn-primary w-full h-12 text-base font-semibold"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Verifying...
+                    </>
+                  ) : (
+                    'Verify & Login'
+                  )}
+                </Button>
 
-              <div className="text-center space-y-2">
-                <button
+                <Button
                   onClick={handleResendOTP}
                   disabled={countdown > 0}
-                  className="text-sm text-primary disabled:text-muted-foreground"
+                  variant="outline"
+                  className="w-full h-12 text-base font-medium"
                 >
                   {countdown > 0 ? `Resend in ${countdown}s` : 'Resend OTP'}
-                </button>
-                <button
-                  onClick={() => {
-                    setStep('phone');
-                    setOtp('');
-                  }}
-                  className="block text-sm text-muted-foreground hover:text-foreground mx-auto"
-                >
-                  Change number
-                </button>
+                </Button>
               </div>
+            </Card>
+
+            {/* Change Number Link */}
+            <div className="text-center">
+              <button
+                onClick={() => {
+                  setStep('phone');
+                  setOtp('');
+                }}
+                className="text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
+                Change number
+              </button>
             </div>
-          )}
-        </Card>
+          </>
+        )}
       </div>
     </div>
   );

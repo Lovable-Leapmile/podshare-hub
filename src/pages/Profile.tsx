@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { User, Phone, Mail, MapPin, CreditCard, Home } from "lucide-react";
 import { Header } from "@/components/Header";
 import { getUserData, isLoggedIn } from "@/utils/storage";
@@ -60,20 +61,34 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header title="Profile" />
-      
-      <div className="mobile-container space-y-6">
+      {/* Header */}
+      <div className="bg-qikpod-light-bg px-4 py-4">
+        <div className="flex items-center max-w-md mx-auto">
+          <Button
+            variant="ghost" 
+            size="sm"
+            onClick={() => navigate(-1)}
+            className="mr-3 h-8 w-8 p-0"
+          >
+            ←
+          </Button>
+          <span className="font-semibold text-foreground">Profile</span>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="p-4 max-w-md mx-auto space-y-6">
         {/* Profile Header */}
-        <Card className="card-3d bg-gradient-primary p-6 text-qikpod-black animate-fade-in">
+        <Card className="card-modern bg-gradient-primary p-6 text-white">
           <div className="flex items-center space-x-4">
-            <div className="w-16 h-16 bg-qikpod-black/20 rounded-full flex items-center justify-center">
-              <span className="text-2xl font-bold text-qikpod-black">
-                {user.user_name.charAt(0)}
+            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+              <span className="text-2xl font-bold text-white">
+                {user.user_name?.charAt(0) || 'U'}
               </span>
             </div>
             <div>
               <h1 className="text-xl font-bold">{user.user_name}</h1>
-              <p className="opacity-80">{user.user_type}</p>
+              <p className="opacity-90">{user.user_type}</p>
               <div className="flex items-center space-x-2 mt-2">
                 <span className="text-sm font-medium">Available Credit:</span>
                 <span className="text-lg font-bold">₹{availableCredit}</span>
@@ -83,41 +98,42 @@ export default function Profile() {
         </Card>
 
         {/* User Codes */}
-        <div className="grid grid-cols-2 gap-4 animate-slide-up">
-          <Card className="card-3d bg-card/80 backdrop-blur-sm p-4 text-center">
+        <div className="grid grid-cols-2 gap-3">
+          <Card className="card-modern p-4 text-center">
             <h3 className="font-semibold text-foreground mb-2">Drop Code</h3>
             <p className="text-2xl font-bold text-primary">{user.user_dropcode}</p>
           </Card>
-          <Card className="card-3d bg-card/80 backdrop-blur-sm p-4 text-center">
+          <Card className="card-modern p-4 text-center">
             <h3 className="font-semibold text-foreground mb-2">Pickup Code</h3>
             <p className="text-2xl font-bold text-primary">{user.user_pickupcode}</p>
           </Card>
         </div>
 
         {/* Profile Details */}
-        <div className="space-y-3 animate-fade-in">
-          <h2 className="text-lg font-semibold text-foreground">Personal Information</h2>
-          {profileItems.map((item, index) => (
-            <Card 
-              key={item.label} 
-              className="card-3d bg-card/50 backdrop-blur-sm p-4"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <div className="flex items-center space-x-4">
-                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                  <item.icon className="w-5 h-5 text-primary" />
+        <div className="bg-secondary rounded-xl p-4">
+          <h2 className="text-lg font-semibold text-foreground mb-4">Personal Information</h2>
+          <div className="space-y-3">
+            {profileItems.map((item, index) => (
+              <Card 
+                key={item.label} 
+                className="card-modern p-4"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                    <item.icon className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-muted-foreground">{item.label}</p>
+                    <p className="font-medium text-foreground">{item.value}</p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm text-muted-foreground">{item.label}</p>
-                  <p className="font-medium text-foreground">{item.value}</p>
-                </div>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            ))}
+          </div>
         </div>
 
         {/* Credit Usage Progress */}
-        <Card className="card-3d bg-card/80 backdrop-blur-sm p-6 animate-fade-in">
+        <Card className="card-modern p-6">
           <h3 className="font-semibold text-foreground mb-4">Credit Usage</h3>
           <div className="space-y-3">
             <div className="flex justify-between text-sm">
