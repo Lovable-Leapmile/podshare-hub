@@ -69,11 +69,11 @@ export default function Profile() {
             <div className="flex items-center space-x-4">
               <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
                 <span className="text-2xl font-bold text-primary-foreground">
-                  {user.user_name.charAt(0)}
+                  {user.user_name?.charAt(0) || 'U'}
                 </span>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-foreground">{user.user_name}</h1>
+                <h1 className="text-xl font-bold text-foreground">{user.user_name || 'User'}</h1>
                 <p className="text-muted-foreground">{user.user_type}</p>
                 <div className="flex items-center space-x-2 mt-2">
                   <span className="text-sm font-medium text-muted-foreground">Available Credit:</span>
