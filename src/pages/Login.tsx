@@ -1,31 +1,24 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { apiService } from "@/services/api";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Loader2, ChevronLeft } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { apiService } from "@/services/api";
-import { saveUserData, extractPodFromUrl, isLoggedIn } from "@/utils/storage";
 
-export default function Login() {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-
-  const [phoneNumber, setPhoneNumber] = useState("6374719920");
-  const [otp, setOtp] = useState("");
-  const [step, setStep] = useState<'phone' | 'otp'>('otp'); // Start with OTP step for demo
-  const [loading, setLoading] = useState(false);
+const Login = () => {
+  const [step, setStep] = useState<'phone' | 'otp'>('phone');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [otp, setOtp] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const [countdown, setCountdown] = useState(0);
-
-  useEffect(() => {
-    if (isLoggedIn()) {
-      navigate('/dashboard');
-      return;
-    }
-    extractPodFromUrl();
-  }, [navigate]);
+  const { login } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -37,66 +30,73 @@ export default function Login() {
     return () => clearInterval(interval);
   }, [countdown]);
 
-  const handleSendOTP = async () => {
-    if (!phoneNumber || phoneNumber.length !== 10) {
-      toast({
-        title: "Invalid Phone Number",
-        description: "Please enter a valid 10-digit phone number.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setLoading(true);
+  const handlePhoneSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
     try {
-      await apiService.generateOTP(phoneNumber);
-      toast({
-        title: "OTP Sent",
-        description: "Please check your phone for the verification code.",
-      });
-      setStep('otp');
-      setCountdown(30);
+      const response = await apiService.generateOTP(phoneNumber);
+      console.log('OTP Generation Response:', response);
+
+      if (response.success === true || response.status === 'success') {
+        setStep('otp');
+        setCountdown(30);
+        toast({
+          title: "OTP Sent",
+          description: "Please check your phone for the verification code.",
+        });
+      } else {
+        setError(response.message || 'This phone number is not registered. Please register to continue.');
+      }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to send OTP. Please try again.",
-        variant: "destructive",
-      });
+      setError('Failed to generate OTP. Please try again.');
+      console.error('OTP generation error:', error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  const handleVerifyOTP = async () => {
-    if (!otp || otp.length !== 6) {
-      toast({
-        title: "Invalid OTP",
-        description: "Please enter the 6-digit verification code.",
-        variant: "destructive",
-      });
+  const handleOTPSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otp.length !== 6) {
+      setError('Please enter a 6-digit OTP');
       return;
     }
 
-    setLoading(true);
+    setIsLoading(true);
+    setError('');
     try {
       const response = await apiService.validateOTP(phoneNumber, otp);
-      saveUserData(response);
-      navigate('/dashboard');
+
+      if (response.success || response.status === 'success') {
+        login({
+          user_name: response.user_name,
+          user_type: response.user_type,
+          access_token: response.access_token,
+          user_phone: phoneNumber
+        });
+        navigate('/dashboard');
+      } else {
+        setError(response.message || 'Invalid OTP. Please try again.');
+      }
     } catch (error) {
-      toast({
-        title: "Invalid OTP",
-        description: "The verification code is incorrect. Please try again.",
-        variant: "destructive",
-      });
+      setError('Failed to validate OTP. Please try again.');
+      console.error('OTP validation error:', error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   const handleResendOTP = () => {
     if (countdown === 0) {
-      handleSendOTP();
+      handlePhoneSubmit({ preventDefault: () => {} } as React.FormEvent);
     }
+  };
+
+  const resetToPhoneStep = () => {
+    setStep('phone');
+    setOtp('');
+    setError('');
   };
 
   return (
@@ -104,7 +104,7 @@ export default function Login() {
       <div className="w-full max-w-md">
         {step === 'otp' && (
           <button
-            onClick={() => setStep('phone')}
+            onClick={resetToPhoneStep}
             className="flex items-center text-gray-600 mb-6"
           >
             <ChevronLeft className="w-5 h-5" />
@@ -125,7 +125,7 @@ export default function Login() {
 
         <div className="space-y-6">
           {step === 'phone' ? (
-            <>
+            <form onSubmit={handlePhoneSubmit} className="space-y-5">
               <div className="space-y-2">
                 <Input
                   type="tel"
@@ -137,12 +137,18 @@ export default function Login() {
                 />
               </div>
 
+              {error && (
+                <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
+              )}
+
               <Button
-                onClick={handleSendOTP}
-                disabled={loading || phoneNumber.length !== 10}
+                type="submit"
+                disabled={isLoading || phoneNumber.length !== 10}
                 className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
               >
-                {loading ? (
+                {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     Sending...
@@ -153,11 +159,11 @@ export default function Login() {
               </Button>
 
               <div className="text-center text-sm text-gray-600">
-                Don't have an account? <span className="text-blue-600">Sign up</span>
+                Don't have an account? <Link to="/register" className="text-blue-600">Sign up</Link>
               </div>
-            </>
+            </form>
           ) : (
-            <>
+            <form onSubmit={handleOTPSubmit} className="space-y-5">
               <div className="flex justify-center">
                 <InputOTP
                   maxLength={6}
@@ -177,12 +183,18 @@ export default function Login() {
                 </InputOTP>
               </div>
 
+              {error && (
+                <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
+              )}
+
               <Button
-                onClick={handleVerifyOTP}
-                disabled={loading || otp.length !== 6}
+                type="submit"
+                disabled={isLoading || otp.length !== 6}
                 className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
               >
-                {loading ? (
+                {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     Verifying...
@@ -194,6 +206,7 @@ export default function Login() {
 
               <div className="text-center space-y-4">
                 <button
+                  type="button"
                   onClick={handleResendOTP}
                   disabled={countdown > 0}
                   className={`text-sm ${countdown > 0 ? 'text-gray-400' : 'text-blue-600'}`}
@@ -201,22 +214,25 @@ export default function Login() {
                   {countdown > 0 ? `Resend in ${countdown}s` : 'Resend OTP'}
                 </button>
                 <button
-                  onClick={() => setStep('phone')}
+                  type="button"
+                  onClick={resetToPhoneStep}
                   className="block text-sm text-gray-600 mx-auto"
                 >
                   Change number
                 </button>
               </div>
-            </>
+            </form>
           )}
         </div>
 
         {step === 'phone' && (
           <div className="mt-8 text-center">
-            <button className="text-sm text-gray-600">How it works?</button>
+            <Link to="/how-it-works" className="text-sm text-gray-600">How it works?</Link>
           </div>
         )}
       </div>
     </div>
   );
-}
+};
+
+export default Login;
