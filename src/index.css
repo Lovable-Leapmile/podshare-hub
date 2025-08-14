@@ -48,11 +48,11 @@
     --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
     --glass-backdrop: blur(4px);
     
-    /* Subtle Card Effects */
-    --card-shadow-light: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-    --card-shadow-medium: 0 2px 8px -2px rgba(0, 0, 0, 0.1), 0 4px 12px -4px rgba(0, 0, 0, 0.05);
-    --card-shadow-large: 0 4px 12px -2px rgba(0, 0, 0, 0.12), 0 8px 16px -4px rgba(0, 0, 0, 0.06);
-    --card-shadow-glow: 0 0 20px hsla(var(--qikpod-yellow) / 0.15);
+    /* 3D Card Effects */
+    --card-shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --card-shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --card-shadow-large: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --card-shadow-glow: 0 0 40px hsla(var(--qikpod-yellow) / 0.3);
     
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(var(--qikpod-yellow)), hsl(51 98% 45%));
@@ -135,14 +135,14 @@
     @apply backdrop-blur-md bg-white/10 border border-white/20 shadow-lg;
   }
   
-  /* 3D Card Effects - Subtle */
+  /* 3D Card Effects */
   .card-3d {
-    @apply transform transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1;
-    box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.1), 0 4px 12px -4px rgba(0, 0, 0, 0.05);
+    @apply transform transition-all duration-300 hover:scale-105 hover:-translate-y-2;
+    box-shadow: var(--card-shadow-medium);
   }
   
   .card-3d:hover {
-    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.12), 0 8px 16px -4px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--card-shadow-large);
   }
   
   .card-glow {
@@ -177,23 +177,6 @@
   /* Mobile Optimized Spacing */
   .mobile-container {
     @apply max-w-md mx-auto px-4 py-6;
-  }
-  
-  /* Page Layout */
-  .page-container {
-    @apply min-h-screen bg-background;
-  }
-  
-  .top-section {
-    @apply bg-background px-4 pt-6 pb-4;
-  }
-  
-  .cards-section {
-    @apply bg-qikpod-light-grey px-4 pb-6;
-  }
-  
-  .white-card {
-    @apply bg-white;
   }
   
   /* Animated Elements */
