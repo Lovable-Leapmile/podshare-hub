@@ -63,7 +63,7 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				qikpod: {
-					blue: 'hsl(var(--qikpod-blue))',
+					yellow: 'hsl(var(--qikpod-yellow))',
 					gray: 'hsl(var(--qikpod-gray))',
 					'light-bg': 'hsl(var(--qikpod-light-bg))',
 					white: 'hsl(var(--qikpod-white))'
