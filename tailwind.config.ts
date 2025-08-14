@@ -61,7 +61,20 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				qikpod: {
+					yellow: 'hsl(var(--qikpod-yellow))',
+					black: 'hsl(var(--qikpod-black))',
+					'off-white': 'hsl(var(--qikpod-off-white))',
+					'light-grey': 'hsl(var(--qikpod-light-grey))'
 				}
+			},
+			backdropBlur: {
+				xs: '2px',
+				sm: '4px',
+				md: '8px',
+				lg: '12px',
+				xl: '16px'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
