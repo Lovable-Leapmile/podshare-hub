@@ -46,7 +46,7 @@ export function ReservationCard({ reservation }: ReservationCardProps) {
   };
 
   return (
-    <div className="card-3d bg-card rounded-2xl p-5 border border-border/50 backdrop-blur-sm animate-fade-in">
+    <div className="white-card card-3d rounded-2xl p-5 border border-border/30 animate-fade-in">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center space-x-2">
           <Package className="w-5 h-5 text-primary" />

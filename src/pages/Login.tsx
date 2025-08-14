@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Loader2, Phone, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiService } from "@/services/api";
@@ -111,27 +112,27 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="mobile-container max-w-sm w-full">
-        <div className="text-center mb-8 animate-fade-in">
-          <img src={qikpodLogo} alt="Qikpod" className="w-20 h-20 mx-auto mb-4 rounded-2xl card-glow" />
-          <h1 className="text-3xl font-bold text-foreground mb-2">Welcome to Qikpod</h1>
-          <p className="text-muted-foreground">Secure smart locker access</p>
+        <div className="text-center mb-10 animate-fade-in">
+          <img src={qikpodLogo} alt="Qikpod" className="w-24 h-24 mx-auto mb-6 rounded-3xl card-glow" />
+          <h1 className="text-4xl font-bold text-foreground mb-3 tracking-tight">Welcome to Qikpod</h1>
+          <p className="text-muted-foreground text-lg">Secure smart locker access</p>
         </div>
 
-        <Card className="card-3d bg-card/80 backdrop-blur-md border-border/50 p-6 animate-slide-up">
+        <Card className="white-card card-3d border-border/30 p-8 animate-slide-up">
           {step === 'phone' ? (
-            <div className="space-y-6">
-              <div>
-                <label className="text-sm font-medium text-foreground mb-2 block">
+            <div className="space-y-8">
+              <div className="space-y-3">
+                <label className="text-base font-semibold text-foreground block">
                   Mobile Number
                 </label>
                 <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                  <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
                   <Input
                     type="tel"
                     placeholder="Enter 10-digit mobile number"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                    className="pl-10 h-12 text-lg"
+                    className="pl-12 h-14 text-lg border-2 rounded-xl focus:ring-2 focus:ring-primary/20"
                     maxLength={10}
                   />
                 </div>
@@ -140,11 +141,11 @@ export default function Login() {
               <Button 
                 onClick={handleSendOTP} 
                 disabled={loading || phoneNumber.length !== 10}
-                className="btn-qikpod w-full h-12 text-lg"
+                className="btn-qikpod w-full h-14 text-lg font-semibold rounded-xl"
               >
                 {loading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     Sending OTP...
                   </>
                 ) : (
@@ -153,35 +154,45 @@ export default function Login() {
               </Button>
             </div>
           ) : (
-            <div className="space-y-6">
-              <div>
-                <label className="text-sm font-medium text-foreground mb-2 block">
-                  Verification Code
-                </label>
-                <div className="relative">
-                  <Shield className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                  <Input
-                    type="text"
-                    placeholder="Enter 6-digit OTP"
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                    className="pl-10 h-12 text-lg text-center"
-                    maxLength={6}
-                  />
+            <div className="space-y-8">
+              <div className="space-y-4">
+                <div className="text-center">
+                  <Shield className="w-8 h-8 text-primary mx-auto mb-3" />
+                  <label className="text-base font-semibold text-foreground block mb-2">
+                    Verification Code
+                  </label>
+                  <p className="text-sm text-muted-foreground">
+                    OTP sent to +91 {phoneNumber}
+                  </p>
                 </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  OTP sent to +91 {phoneNumber}
-                </p>
+                
+                <div className="flex justify-center">
+                  <InputOTP
+                    maxLength={6}
+                    value={otp}
+                    onChange={(value) => setOtp(value)}
+                    className="gap-3"
+                  >
+                    <InputOTPGroup className="gap-3">
+                      <InputOTPSlot index={0} className="w-12 h-12 text-xl font-semibold border-2 rounded-lg" />
+                      <InputOTPSlot index={1} className="w-12 h-12 text-xl font-semibold border-2 rounded-lg" />
+                      <InputOTPSlot index={2} className="w-12 h-12 text-xl font-semibold border-2 rounded-lg" />
+                      <InputOTPSlot index={3} className="w-12 h-12 text-xl font-semibold border-2 rounded-lg" />
+                      <InputOTPSlot index={4} className="w-12 h-12 text-xl font-semibold border-2 rounded-lg" />
+                      <InputOTPSlot index={5} className="w-12 h-12 text-xl font-semibold border-2 rounded-lg" />
+                    </InputOTPGroup>
+                  </InputOTP>
+                </div>
               </div>
               
               <Button 
                 onClick={handleVerifyOTP} 
                 disabled={loading || otp.length !== 6}
-                className="btn-qikpod w-full h-12 text-lg"
+                className="btn-qikpod w-full h-14 text-lg font-semibold rounded-xl"
               >
                 {loading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     Verifying...
                   </>
                 ) : (
@@ -189,11 +200,11 @@ export default function Login() {
                 )}
               </Button>
 
-              <div className="text-center space-y-2">
+              <div className="text-center space-y-3">
                 <button
                   onClick={handleResendOTP}
                   disabled={countdown > 0}
-                  className="text-sm text-primary disabled:text-muted-foreground"
+                  className="text-base font-medium text-primary disabled:text-muted-foreground transition-colors"
                 >
                   {countdown > 0 ? `Resend in ${countdown}s` : 'Resend OTP'}
                 </button>
@@ -202,7 +213,7 @@ export default function Login() {
                     setStep('phone');
                     setOtp('');
                   }}
-                  className="block text-sm text-muted-foreground hover:text-foreground mx-auto"
+                  className="block text-base text-muted-foreground hover:text-foreground mx-auto transition-colors"
                 >
                   Change number
                 </button>

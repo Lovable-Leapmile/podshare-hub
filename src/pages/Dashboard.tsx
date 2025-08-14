@@ -91,130 +91,136 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="page-container">
       <Header title="Customer Dashboard" />
       
-      <div className="mobile-container space-y-6">
-        {/* Current Pod Section */}
-        {currentPod && (
-          <Card className="card-3d bg-gradient-primary p-6 text-qikpod-black animate-fade-in">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-bold mb-1">Current Pod</h2>
-                <p className="text-2xl font-black">POD-{currentPod}</p>
-                <p className="text-sm opacity-80">Koramangala Block 5</p>
+      <div className="top-section">
+        <div className="max-w-md mx-auto space-y-6">
+          {/* Current Pod Section */}
+          {currentPod && (
+            <Card className="white-card card-3d border-border/30 p-6 animate-fade-in">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-bold mb-1 text-foreground">Current Pod</h2>
+                  <p className="text-2xl font-black text-primary">POD-{currentPod}</p>
+                  <p className="text-sm text-muted-foreground">Koramangala Block 5</p>
+                </div>
+                <Package className="w-12 h-12 text-primary" />
               </div>
-              <Package className="w-12 h-12 opacity-30" />
-            </div>
-            <Button 
-              onClick={() => navigate('/reservation')}
-              className="w-full mt-4 bg-qikpod-black text-primary hover:bg-qikpod-black/90"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Create Reservation
-            </Button>
-          </Card>
-        )}
+              <Button 
+                onClick={() => navigate('/reservation')}
+                className="btn-qikpod w-full mt-4"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Reservation
+              </Button>
+            </Card>
+          )}
 
-        {/* Welcome Message */}
-        <div className="animate-fade-in">
-          <h1 className="text-2xl font-bold text-foreground mb-2">
-            Welcome back, {user?.user_name || 'Customer'}!
-          </h1>
-          <p className="text-muted-foreground">
-            Manage your locker reservations and deliveries
-          </p>
+          {/* Welcome Message */}
+          <div className="animate-fade-in">
+            <h1 className="text-2xl font-bold text-foreground mb-2">
+              Welcome back, {user?.user_name || 'Customer'}!
+            </h1>
+            <p className="text-muted-foreground">
+              Manage your locker reservations and deliveries
+            </p>
+          </div>
         </div>
+      </div>
 
-        {/* Reservations Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full animate-slide-up">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 bg-card/50 backdrop-blur-sm">
-            <TabsTrigger value="drop-pending" className="flex items-center space-x-1 text-xs">
-              {getTabIcon('drop-pending')}
-              <span className="hidden sm:inline">Drop Pending</span>
-              <span className="sm:hidden">Drop</span>
-            </TabsTrigger>
-            <TabsTrigger value="pickup-pending" className="flex items-center space-x-1 text-xs">
-              {getTabIcon('pickup-pending')}
-              <span className="hidden sm:inline">Pickup Pending</span>
-              <span className="sm:hidden">Pickup</span>
-            </TabsTrigger>
-            <TabsTrigger value="pickup-completed" className="flex items-center space-x-1 text-xs">
-              {getTabIcon('pickup-completed')}
-              <span className="hidden sm:inline">Completed</span>
-              <span className="sm:hidden">Done</span>
-            </TabsTrigger>
-            <TabsTrigger value="drop-cancelled" className="flex items-center space-x-1 text-xs">
-              {getTabIcon('drop-cancelled')}
-              <span className="hidden sm:inline">Cancelled</span>
-              <span className="sm:hidden">Cancel</span>
-            </TabsTrigger>
-          </TabsList>
+      <div className="cards-section">
+        <div className="max-w-md mx-auto">
+          {/* Reservations Tabs */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full animate-slide-up">
+            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 mb-6">
+              <TabsTrigger value="drop-pending" className="flex items-center space-x-1 text-xs">
+                {getTabIcon('drop-pending')}
+                <span className="hidden sm:inline">Drop Pending</span>
+                <span className="sm:hidden">Drop</span>
+              </TabsTrigger>
+              <TabsTrigger value="pickup-pending" className="flex items-center space-x-1 text-xs">
+                {getTabIcon('pickup-pending')}
+                <span className="hidden sm:inline">Pickup Pending</span>
+                <span className="sm:hidden">Pickup</span>
+              </TabsTrigger>
+              <TabsTrigger value="pickup-completed" className="flex items-center space-x-1 text-xs">
+                {getTabIcon('pickup-completed')}
+                <span className="hidden sm:inline">Completed</span>
+                <span className="sm:hidden">Done</span>
+              </TabsTrigger>
+              <TabsTrigger value="drop-cancelled" className="flex items-center space-x-1 text-xs">
+                {getTabIcon('drop-cancelled')}
+                <span className="hidden sm:inline">Cancelled</span>
+                <span className="sm:hidden">Cancel</span>
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="drop-pending" className="space-y-4 mt-6">
-            {dropPending.length > 0 ? (
-              dropPending.map((reservation) => (
-                <ReservationCard key={reservation.id} reservation={reservation} />
-              ))
-            ) : (
-              <Card className="p-8 text-center bg-card/50 backdrop-blur-sm">
-                <Package className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                <h3 className="font-semibold text-foreground mb-2">No Pending Drops</h3>
-                <p className="text-muted-foreground text-sm">
-                  You don't have any pending drop-off reservations.
-                </p>
-              </Card>
-            )}
-          </TabsContent>
+            <TabsContent value="drop-pending" className="space-y-4">
+              {dropPending.length > 0 ? (
+                dropPending.map((reservation) => (
+                  <ReservationCard key={reservation.id} reservation={reservation} />
+                ))
+              ) : (
+                <Card className="white-card p-8 text-center">
+                  <Package className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                  <h3 className="font-semibold text-foreground mb-2">No Pending Drops</h3>
+                  <p className="text-muted-foreground text-sm">
+                    You don't have any pending drop-off reservations.
+                  </p>
+                </Card>
+              )}
+            </TabsContent>
 
-          <TabsContent value="pickup-pending" className="space-y-4 mt-6">
-            {pickupPending.length > 0 ? (
-              pickupPending.map((reservation) => (
-                <ReservationCard key={reservation.id} reservation={reservation} />
-              ))
-            ) : (
-              <Card className="p-8 text-center bg-card/50 backdrop-blur-sm">
-                <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                <h3 className="font-semibold text-foreground mb-2">No Pending Pickups</h3>
-                <p className="text-muted-foreground text-sm">
-                  You don't have any pending pickup reservations.
-                </p>
-              </Card>
-            )}
-          </TabsContent>
+            <TabsContent value="pickup-pending" className="space-y-4">
+              {pickupPending.length > 0 ? (
+                pickupPending.map((reservation) => (
+                  <ReservationCard key={reservation.id} reservation={reservation} />
+                ))
+              ) : (
+                <Card className="white-card p-8 text-center">
+                  <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                  <h3 className="font-semibold text-foreground mb-2">No Pending Pickups</h3>
+                  <p className="text-muted-foreground text-sm">
+                    You don't have any pending pickup reservations.
+                  </p>
+                </Card>
+              )}
+            </TabsContent>
 
-          <TabsContent value="pickup-completed" className="space-y-4 mt-6">
-            {pickupCompleted.length > 0 ? (
-              pickupCompleted.map((reservation) => (
-                <ReservationCard key={reservation.id} reservation={reservation} />
-              ))
-            ) : (
-              <Card className="p-8 text-center bg-card/50 backdrop-blur-sm">
-                <CheckCircle className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                <h3 className="font-semibold text-foreground mb-2">No Completed Pickups</h3>
-                <p className="text-muted-foreground text-sm">
-                  Your completed pickup history will appear here.
-                </p>
-              </Card>
-            )}
-          </TabsContent>
+            <TabsContent value="pickup-completed" className="space-y-4">
+              {pickupCompleted.length > 0 ? (
+                pickupCompleted.map((reservation) => (
+                  <ReservationCard key={reservation.id} reservation={reservation} />
+                ))
+              ) : (
+                <Card className="white-card p-8 text-center">
+                  <CheckCircle className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                  <h3 className="font-semibold text-foreground mb-2">No Completed Pickups</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Your completed pickup history will appear here.
+                  </p>
+                </Card>
+              )}
+            </TabsContent>
 
-          <TabsContent value="drop-cancelled" className="space-y-4 mt-6">
-            {dropCancelled.length > 0 ? (
-              dropCancelled.map((reservation) => (
-                <ReservationCard key={reservation.id} reservation={reservation} />
-              ))
-            ) : (
-              <Card className="p-8 text-center bg-card/50 backdrop-blur-sm">
-                <XCircle className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                <h3 className="font-semibold text-foreground mb-2">No Cancelled Drops</h3>
-                <p className="text-muted-foreground text-sm">
-                  Your cancelled reservations will appear here.
-                </p>
-              </Card>
-            )}
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="drop-cancelled" className="space-y-4">
+              {dropCancelled.length > 0 ? (
+                dropCancelled.map((reservation) => (
+                  <ReservationCard key={reservation.id} reservation={reservation} />
+                ))
+              ) : (
+                <Card className="white-card p-8 text-center">
+                  <XCircle className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                  <h3 className="font-semibold text-foreground mb-2">No Cancelled Drops</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Your cancelled reservations will appear here.
+                  </p>
+                </Card>
+              )}
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </div>
   );
