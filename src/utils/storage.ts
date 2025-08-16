@@ -1,6 +1,28 @@
 import { User } from "@/types";
 
-// QR Code POD extraction and storage
+// POD name extraction and storage from URL
+export const extractPodNameFromUrl = (): string | null => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const id = urlParams.get('id');
+  
+  if (id && id.startsWith('POD-')) {
+    const podName = id.substring(4); // Remove 'POD-' prefix
+    localStorage.setItem('qikpod_pod_name', podName);
+    return podName;
+  }
+  
+  return null;
+};
+
+export const getPodName = (): string | null => {
+  return localStorage.getItem('qikpod_pod_name');
+};
+
+export const clearPodName = (): void => {
+  localStorage.removeItem('qikpod_pod_name');
+};
+
+// Legacy POD extraction (keeping for compatibility)
 export const extractPodFromUrl = (): string | null => {
   const urlParams = new URLSearchParams(window.location.search);
   const id = urlParams.get('id');

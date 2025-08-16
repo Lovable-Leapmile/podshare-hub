@@ -21,7 +21,7 @@ export default function SiteSecurityDashboard() {
     }
     
     if (user?.user_type !== 'SiteSecurity') {
-      navigate('/dashboard'); // Fallback
+      navigate('/login'); // Fallback
       return;
     }
   }, [navigate, user]);

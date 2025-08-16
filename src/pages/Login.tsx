@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiService } from "@/services/api";
-import { saveUserData, extractPodFromUrl, isLoggedIn } from "@/utils/storage";
+import { saveUserData, extractPodFromUrl, extractPodNameFromUrl, isLoggedIn } from "@/utils/storage";
 import { OTPInput } from "@/components/OTPInput";
 const qikpodLogo = "https://leapmile-website.blr1.cdn.digitaloceanspaces.com/Qikpod/Images/q70.png";
 export default function Login() {
@@ -22,12 +22,25 @@ export default function Login() {
   useEffect(() => {
     // Check if user is already logged in
     if (isLoggedIn()) {
-      navigate('/dashboard');
+      const userData = JSON.parse(localStorage.getItem('qikpod_user') || '{}');
+      switch (userData.user_type) {
+        case 'SiteAdmin':
+          navigate('/site-admin-dashboard');
+          break;
+        case 'Customer':
+          navigate('/customer-dashboard');
+          break;
+        case 'SiteSecurity':
+          navigate('/site-security-dashboard');
+          break;
+        default:
+          navigate('/login');
+      }
       return;
     }
 
     // Extract POD value from URL if present
-    extractPodFromUrl();
+    extractPodNameFromUrl();
   }, [navigate]);
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -108,10 +121,9 @@ export default function Login() {
       // Get user locations
       const userLocations = await apiService.getUserLocations(userData.id);
 
-      // Get current pod name from localStorage (last 8 characters)
-      const podValue = localStorage.getItem('qikpod_pod_value');
-      if (podValue) {
-        const podName = podValue.substring(podValue.length - 8); // Last 8 characters
+      // Get current pod name from localStorage
+      const podName = localStorage.getItem('qikpod_pod_name');
+      if (podName) {
 
         // Get pod details
         const podInfo = await apiService.getPodInfo(podName);
@@ -149,7 +161,7 @@ export default function Login() {
           navigate('/site-security-dashboard');
           break;
         default:
-          navigate('/dashboard');
+          navigate('/login');
       }
     } catch (error) {
       console.error('Post-login flow error:', error);
@@ -165,7 +177,7 @@ export default function Login() {
           navigate('/site-security-dashboard');
           break;
         default:
-          navigate('/dashboard');
+          navigate('/login');
       }
     }
   };

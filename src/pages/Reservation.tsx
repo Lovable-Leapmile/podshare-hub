@@ -67,7 +67,7 @@ export default function Reservation() {
         description: `Your ${formData.type} reservation has been confirmed for POD-${podValue}.`,
       });
       
-      navigate('/dashboard');
+      navigate('/customer-dashboard');
     }, 2000);
   };
 
@@ -79,7 +79,7 @@ export default function Reservation() {
         {/* Back Button */}
         <Button 
           variant="ghost" 
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate('/customer-dashboard')}
           className="flex items-center space-x-2 text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="w-4 h-4" />

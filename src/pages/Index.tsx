@@ -1,27 +1,48 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { isLoggedIn } from "@/utils/storage";
+import { isLoggedIn, extractPodNameFromUrl } from "@/utils/storage";
+import { apiService } from "@/services/api";
+import Login from "./Login";
 
 const Index = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Extract pod name from URL on page load
+    const podName = extractPodNameFromUrl();
+    
+    if (podName) {
+      // Call API to get pod info and store location_id
+      apiService.getPodInfo(podName)
+        .then((podInfo) => {
+          localStorage.setItem('current_location_id', podInfo.location_id);
+        })
+        .catch((error) => {
+          console.error('Failed to fetch pod info:', error);
+        });
+    }
+
     // Check if user is logged in and redirect accordingly
     if (isLoggedIn()) {
-      navigate('/dashboard');
-    } else {
-      navigate('/login');
+      const userData = JSON.parse(localStorage.getItem('qikpod_user') || '{}');
+      switch (userData.user_type) {
+        case 'SiteAdmin':
+          navigate('/site-admin-dashboard');
+          break;
+        case 'Customer':
+          navigate('/customer-dashboard');
+          break;
+        case 'SiteSecurity':
+          navigate('/site-security-dashboard');
+          break;
+        default:
+          navigate('/login');
+      }
     }
   }, [navigate]);
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
-        <p className="text-muted-foreground mt-4">Loading...</p>
-      </div>
-    </div>
-  );
+  // Show login page directly instead of redirecting
+  return <Login />;
 };
 
 export default Index;

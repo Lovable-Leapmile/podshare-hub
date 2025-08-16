@@ -21,7 +21,7 @@ export default function SiteAdminDashboard() {
     }
     
     if (user?.user_type !== 'SiteAdmin') {
-      navigate('/dashboard'); // Fallback
+      navigate('/login'); // Fallback
       return;
     }
   }, [navigate, user]);
