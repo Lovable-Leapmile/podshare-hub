@@ -33,12 +33,12 @@ export default function CustomerDashboard() {
     }
     
     if (user?.user_type !== 'Customer') {
-      navigate('/dashboard'); // Fallback
+      navigate('/login');
       return;
     }
 
     loadReservations();
-  }, [navigate, user]);
+  }, [navigate]); // Removed user from dependencies to prevent infinite calls
 
   const loadReservations = async () => {
     if (!user) return;
