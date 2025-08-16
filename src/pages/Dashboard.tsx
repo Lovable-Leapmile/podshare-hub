@@ -92,7 +92,7 @@ export default function Dashboard() {
       <div className="bg-qikpod-light-bg px-4 py-4">
         <div className="flex items-center justify-between max-w-md mx-auto">
           <div className="flex items-center space-x-3">
-            <img src="/src/assets/qikpod-logo.png" alt="Qikpod" className="w-8 h-8" />
+            <img src={qikpodLogo}" alt="Qikpod" className="w-8 h-8" />
             <span className="font-semibold text-foreground">Customer Dashboard</span>
           </div>
           
