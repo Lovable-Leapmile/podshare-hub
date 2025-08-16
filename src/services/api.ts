@@ -19,6 +19,36 @@ export interface ValidateOTPResponse {
   user_credit_used: string;
 }
 
+export interface UserLocation {
+  id: string;
+  name: string;
+  address: string;
+  location_id: string;
+}
+
+export interface PodInfo {
+  id: string;
+  name: string;
+  location_id: string;
+  status: string;
+}
+
+export interface LocationInfo {
+  record_id: string;
+  name: string;
+  address: string;
+}
+
+export interface Reservation {
+  id: string;
+  reservation_status: string;
+  drop_code?: string;
+  pickup_code?: string;
+  package_description?: string;
+  created_at: string;
+  pod_name: string;
+}
+
 export const apiService = {
   async generateOTP(userPhone: string): Promise<OTPResponse> {
     const response = await fetch(`${API_BASE_URL}/otp/generate_otp/?user_phone=${userPhone}`, {
@@ -52,36 +82,86 @@ export const apiService = {
     return response.json();
   },
 
-  // Dummy API functions for Phase 1
-  async getPodInfo(podValue: string) {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    return {
-      id: podValue,
-      name: `POD-${podValue}`,
-      location_id: 'LOC-001',
-      status: 'available'
-    };
+  async getUserLocations(userId: number): Promise<UserLocation[]> {
+    const response = await fetch(`${API_BASE_URL}/users/locations/?user_id=${userId}`, {
+      method: 'GET',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': AUTH_TOKEN,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to get user locations');
+    }
+
+    return response.json();
   },
 
-  async getLocationInfo(locationId: string) {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    return {
-      id: locationId,
-      name: 'Koramangala Block 5',
-      address: 'BTM Layout, Bangalore'
-    };
+  async getPodInfo(podName: string): Promise<PodInfo> {
+    const response = await fetch(`${API_BASE_URL}/pods/?pod_name=${podName}`, {
+      method: 'GET',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': AUTH_TOKEN,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to get pod info');
+    }
+
+    return response.json();
   },
 
-  async getUserLocations(userId: number) {
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    return [
-      { id: 'LOC-001', name: 'Koramangala Block 5', address: 'BTM Layout, Bangalore' },
-      { id: 'LOC-002', name: 'Electronic City', address: 'Electronic City, Bangalore' },
-      { id: 'LOC-003', name: 'Whitefield', address: 'Whitefield, Bangalore' }
-    ];
+  async getLocationInfo(locationId: string): Promise<LocationInfo> {
+    const response = await fetch(`${API_BASE_URL}/locations/?record_id=${locationId}`, {
+      method: 'GET',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': AUTH_TOKEN,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to get location info');
+    }
+
+    return response.json();
+  },
+
+  async addUserLocation(userId: number, locationId: string): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/users/locations/`, {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': AUTH_TOKEN,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        location_id: locationId
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to add user location');
+    }
+  },
+
+  async getReservations(phoneNum: string, locationId: string, status: string): Promise<Reservation[]> {
+    const response = await fetch(`${API_BASE_URL}/reservations/?phone_num=${phoneNum}&location_id=${locationId}&reservation_status=${status}`, {
+      method: 'GET',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': AUTH_TOKEN,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to get reservations');
+    }
+
+    return response.json();
   }
 };

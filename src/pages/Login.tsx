@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiService } from "@/services/api";
 import { saveUserData, extractPodFromUrl, isLoggedIn } from "@/utils/storage";
 import { OTPInput } from "@/components/OTPInput";
-import qikpodLogo from "@/assets/qikpod-logo.png";
+const qikpodLogo = "https://leapmile-website.blr1.cdn.digitaloceanspaces.com/Qikpod/Images/q70.png";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -90,8 +90,10 @@ export default function Login() {
         title: "Login Successful",
         description: `Welcome back, ${response.user_name}!`,
       });
+
+      // Handle location checking and navigation based on user type
+      await handlePostLoginFlow(response);
       
-      navigate('/dashboard');
     } catch (error) {
       toast({
         title: "Invalid OTP",
@@ -100,6 +102,62 @@ export default function Login() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePostLoginFlow = async (userData: any) => {
+    try {
+      // Get user locations
+      const userLocations = await apiService.getUserLocations(userData.id);
+      
+      // Get current pod name from localStorage (last 8 characters)
+      const podValue = localStorage.getItem('qikpod_pod_value');
+      if (podValue) {
+        const podName = podValue.substring(podValue.length - 8); // Last 8 characters
+        
+        // Get pod details
+        const podInfo = await apiService.getPodInfo(podName);
+        
+        // Get location details
+        const locationInfo = await apiService.getLocationInfo(podInfo.location_id);
+        
+        // Check if user has this location
+        const hasLocation = userLocations.some(loc => loc.location_id === podInfo.location_id);
+        
+        if (!hasLocation) {
+          // Show confirmation dialog for adding new location
+          const confirmed = window.confirm(
+            "You're in a new location. Do you need to add this location to your locations list?"
+          );
+          
+          if (confirmed) {
+            await apiService.addUserLocation(userData.id, podInfo.location_id);
+            toast({
+              title: "Location Added",
+              description: "New location has been added to your list.",
+            });
+          }
+        }
+      }
+
+      // Navigate based on user type
+      switch (userData.user_type) {
+        case 'SiteAdmin':
+          navigate('/site-admin-dashboard');
+          break;
+        case 'Customer':
+          navigate('/customer-dashboard');
+          break;
+        case 'SiteSecurity':
+          navigate('/site-security-dashboard');
+          break;
+        default:
+          navigate('/dashboard');
+      }
+    } catch (error) {
+      console.error('Post-login flow error:', error);
+      // Fall back to default navigation
+      navigate('/dashboard');
     }
   };
 

@@ -7,6 +7,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import CustomerDashboard from "./pages/CustomerDashboard";
+import SiteAdminDashboard from "./pages/SiteAdminDashboard";
+import SiteSecurityDashboard from "./pages/SiteSecurityDashboard";
 import Locations from "./pages/Locations";
 import Profile from "./pages/Profile";
 import Support from "./pages/Support";
@@ -25,6 +28,9 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/customer-dashboard" element={<CustomerDashboard />} />
+          <Route path="/site-admin-dashboard" element={<SiteAdminDashboard />} />
+          <Route path="/site-security-dashboard" element={<SiteSecurityDashboard />} />
           <Route path="/locations" element={<Locations />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/support" element={<Support />} />

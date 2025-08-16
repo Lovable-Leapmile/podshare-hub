@@ -140,14 +140,10 @@
     @apply backdrop-blur-md bg-white/10 border border-white/20 shadow-lg;
   }
   
-  /* 3D Card Effects */
+  /* 3D Card Effects - Removed hover effects */
   .card-3d {
-    @apply transform transition-all duration-300 hover:scale-105 hover:-translate-y-2;
+    @apply transform transition-all duration-300;
     box-shadow: var(--card-shadow-medium);
-  }
-  
-  .card-3d:hover {
-    box-shadow: var(--card-shadow-large);
   }
   
   .card-glow {
@@ -185,16 +181,16 @@
     @apply transition-all duration-200 hover:bg-primary/5;
   }
   
-  /* Modern Card Effects */
+  /* Modern Card Effects - Removed hover effects */
   .card-modern {
     @apply bg-card border border-border/50 rounded-xl shadow-sm;
-    @apply transition-all duration-200 hover:shadow-md;
+    @apply transition-all duration-200;
   }
   
-  /* Activity Card */
+  /* Activity Card - Removed hover effects */
   .activity-card {
     @apply bg-card border border-border/30 rounded-lg p-4;
-    @apply transition-all duration-200 hover:shadow-sm hover:border-border/60;
+    @apply transition-all duration-200;
   }
   
   /* Mobile Optimized Spacing */
