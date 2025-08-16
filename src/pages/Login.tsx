@@ -9,17 +9,16 @@ import { apiService } from "@/services/api";
 import { saveUserData, extractPodFromUrl, isLoggedIn } from "@/utils/storage";
 import { OTPInput } from "@/components/OTPInput";
 const qikpodLogo = "https://leapmile-website.blr1.cdn.digitaloceanspaces.com/Qikpod/Images/q70.png";
-
 export default function Login() {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  
+  const {
+    toast
+  } = useToast();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [loading, setLoading] = useState(false);
   const [countdown, setCountdown] = useState(0);
-
   useEffect(() => {
     // Check if user is already logged in
     if (isLoggedIn()) {
@@ -30,7 +29,6 @@ export default function Login() {
     // Extract POD value from URL if present
     extractPodFromUrl();
   }, [navigate]);
-
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (countdown > 0) {
@@ -40,23 +38,21 @@ export default function Login() {
     }
     return () => clearInterval(interval);
   }, [countdown]);
-
   const handleSendOTP = async () => {
     if (!phoneNumber || phoneNumber.length !== 10) {
       toast({
         title: "Invalid Phone Number",
         description: "Please enter a valid 10-digit phone number.",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     setLoading(true);
     try {
       await apiService.generateOTP(phoneNumber);
       toast({
         title: "OTP Sent",
-        description: "Please check your phone for the verification code.",
+        description: "Please check your phone for the verification code."
       });
       setStep('otp');
       setCountdown(30);
@@ -64,77 +60,68 @@ export default function Login() {
       toast({
         title: "Error",
         description: "Failed to send OTP. Please try again.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
   };
-
   const handleVerifyOTP = async () => {
     if (!otp || otp.length !== 6) {
       toast({
         title: "Invalid OTP",
         description: "Please enter the 6-digit verification code.",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     setLoading(true);
     try {
       const response = await apiService.validateOTP(phoneNumber, otp);
       saveUserData(response);
-      
       toast({
         title: "Login Successful",
-        description: `Welcome back, ${response.user_name}!`,
+        description: `Welcome back, ${response.user_name}!`
       });
 
       // Handle location checking and navigation based on user type
       await handlePostLoginFlow(response);
-      
     } catch (error) {
       toast({
         title: "Invalid OTP",
         description: "The verification code is incorrect. Please try again.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
   };
-
   const handlePostLoginFlow = async (userData: any) => {
     try {
       // Get user locations
       const userLocations = await apiService.getUserLocations(userData.id);
-      
+
       // Get current pod name from localStorage (last 8 characters)
       const podValue = localStorage.getItem('qikpod_pod_value');
       if (podValue) {
         const podName = podValue.substring(podValue.length - 8); // Last 8 characters
-        
+
         // Get pod details
         const podInfo = await apiService.getPodInfo(podName);
-        
+
         // Get location details
         const locationInfo = await apiService.getLocationInfo(podInfo.location_id);
-        
+
         // Check if user has this location
         const hasLocation = userLocations.some(loc => loc.location_id === podInfo.location_id);
-        
         if (!hasLocation) {
           // Show confirmation dialog for adding new location
-          const confirmed = window.confirm(
-            "You're in a new location. Do you need to add this location to your locations list?"
-          );
-          
+          const confirmed = window.confirm("You're in a new location. Do you need to add this location to your locations list?");
           if (confirmed) {
             await apiService.addUserLocation(userData.id, podInfo.location_id);
             toast({
               title: "Location Added",
-              description: "New location has been added to your list.",
+              description: "New location has been added to your list."
             });
           }
         }
@@ -160,21 +147,17 @@ export default function Login() {
       navigate('/dashboard');
     }
   };
-
   const handleResendOTP = () => {
     if (countdown === 0) {
       handleSendOTP();
     }
   };
-
-  return (
-    <div className="min-h-screen bg-qikpod-light-bg flex items-center justify-center p-4">
+  return <div className="min-h-screen bg-qikpod-light-bg flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {step === 'phone' ? (
-          <>
+        {step === 'phone' ? <>
             {/* Header */}
             <div className="text-center mb-8">
-              <img src={qikpodLogo} alt="Qikpod" className="w-16 h-16 mx-auto mb-6" />
+              <img src={qikpodLogo} alt="Qikpod" className="w-auto h-10 mx-auto mb-6" />
               <h1 className="text-2xl font-bold text-foreground mb-2">Welcome Back</h1>
               <p className="text-muted-foreground">Sign in with your registered mobile number</p>
             </div>
@@ -190,30 +173,15 @@ export default function Login() {
                     <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground text-sm font-medium">
                       +91
                     </span>
-                    <Input
-                      type="tel"
-                      placeholder="Enter Your Mobile Number"
-                      value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                      className="pl-12 h-12 text-base border-border/60 focus:border-primary"
-                      maxLength={10}
-                    />
+                    <Input type="tel" placeholder="Enter Your Mobile Number" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))} className="pl-12 h-12 text-base border-border/60 focus:border-primary" maxLength={10} />
                   </div>
                 </div>
                 
-                <Button 
-                  onClick={handleSendOTP} 
-                  disabled={loading || phoneNumber.length !== 10}
-                  className="btn-primary w-full h-12 text-base font-semibold"
-                >
-                  {loading ? (
-                    <>
+                <Button onClick={handleSendOTP} disabled={loading || phoneNumber.length !== 10} className="btn-primary w-full h-12 text-base font-semibold">
+                  {loading ? <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Sending OTP...
-                    </>
-                  ) : (
-                    'Continue with OTP'
-                  )}
+                    </> : 'Continue with OTP'}
                 </Button>
               </div>
             </Card>
@@ -237,9 +205,7 @@ export default function Login() {
                 </a>
               </div>
             </div>
-          </>
-        ) : (
-          <>
+          </> : <>
             {/* OTP Header */}
             <div className="text-center mb-8">
               <img src={qikpodLogo} alt="Qikpod" className="w-16 h-16 mx-auto mb-6" />
@@ -254,35 +220,17 @@ export default function Login() {
             <Card className="card-modern p-6 mb-6">
               <div className="space-y-6">
                 <div>
-                  <OTPInput
-                    value={otp}
-                    onChange={setOtp}
-                    length={6}
-                    className="mb-4"
-                  />
+                  <OTPInput value={otp} onChange={setOtp} length={6} className="mb-4" />
                 </div>
                 
-                <Button 
-                  onClick={handleVerifyOTP} 
-                  disabled={loading || otp.length !== 6}
-                  className="btn-primary w-full h-12 text-base font-semibold"
-                >
-                  {loading ? (
-                    <>
+                <Button onClick={handleVerifyOTP} disabled={loading || otp.length !== 6} className="btn-primary w-full h-12 text-base font-semibold">
+                  {loading ? <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Verifying...
-                    </>
-                  ) : (
-                    'Verify & Login'
-                  )}
+                    </> : 'Verify & Login'}
                 </Button>
 
-                <Button
-                  onClick={handleResendOTP}
-                  disabled={countdown > 0}
-                  variant="outline"
-                  className="w-full h-12 text-base font-medium"
-                >
+                <Button onClick={handleResendOTP} disabled={countdown > 0} variant="outline" className="w-full h-12 text-base font-medium">
                   {countdown > 0 ? `Resend in ${countdown}s` : 'Resend OTP'}
                 </Button>
               </div>
@@ -290,19 +238,14 @@ export default function Login() {
 
             {/* Change Number Link */}
             <div className="text-center">
-              <button
-                onClick={() => {
-                  setStep('phone');
-                  setOtp('');
-                }}
-                className="text-sm text-muted-foreground hover:text-primary transition-colors"
-              >
+              <button onClick={() => {
+            setStep('phone');
+            setOtp('');
+          }} className="text-sm text-muted-foreground hover:text-primary transition-colors">
                 Change number
               </button>
             </div>
-          </>
-        )}
+          </>}
       </div>
-    </div>
-  );
+    </div>;
 }
