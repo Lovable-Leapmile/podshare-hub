@@ -8,6 +8,7 @@ import { getUserData, getPodValue, isLoggedIn } from "@/utils/storage";
 import { Reservation } from "@/types";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import qikpodLogo from "@/assets/qikpod-logo.png";
 
 // Dummy reservation data
 const dummyReservations: Reservation[] = [{
@@ -92,7 +93,7 @@ export default function Dashboard() {
       <div className="bg-qikpod-light-bg px-4 py-4">
         <div className="flex items-center justify-between max-w-md mx-auto">
           <div className="flex items-center space-x-3">
-            <img src={qikpodLogo}" alt="Qikpod" className="w-8 h-8" />
+            <img src={qikpodLogo} alt="Qikpod" className="w-8 h-8" />
             <span className="font-semibold text-foreground">Customer Dashboard</span>
           </div>
           
