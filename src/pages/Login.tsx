@@ -78,14 +78,18 @@ export default function Login() {
     setLoading(true);
     try {
       const response = await apiService.validateOTP(phoneNumber, otp);
-      saveUserData(response);
+      
+      // Extract user data from the records array
+      const userData = response.records[0];
+      
+      saveUserData(userData);
       toast({
         title: "Login Successful",
-        description: `Welcome back, ${response.user_name}!`
+        description: `Welcome back, ${userData.user_name}!`
       });
 
       // Handle location checking and navigation based on user type
-      await handlePostLoginFlow(response);
+      await handlePostLoginFlow(userData);
     } catch (error) {
       toast({
         title: "Invalid OTP",
@@ -98,6 +102,9 @@ export default function Login() {
   };
   const handlePostLoginFlow = async (userData: any) => {
     try {
+      // Store current location_id in localStorage for dashboard use
+      const authToken = localStorage.getItem('auth_token');
+      
       // Get user locations
       const userLocations = await apiService.getUserLocations(userData.id);
 
@@ -108,6 +115,9 @@ export default function Login() {
 
         // Get pod details
         const podInfo = await apiService.getPodInfo(podName);
+        
+        // Store the current location_id for use in dashboard
+        localStorage.setItem('current_location_id', podInfo.location_id);
 
         // Get location details
         const locationInfo = await apiService.getLocationInfo(podInfo.location_id);
@@ -143,8 +153,20 @@ export default function Login() {
       }
     } catch (error) {
       console.error('Post-login flow error:', error);
-      // Fall back to default navigation
-      navigate('/dashboard');
+      // Fall back to default navigation based on user type
+      switch (userData.user_type) {
+        case 'SiteAdmin':
+          navigate('/site-admin-dashboard');
+          break;
+        case 'Customer':
+          navigate('/customer-dashboard');
+          break;
+        case 'SiteSecurity':
+          navigate('/site-security-dashboard');
+          break;
+        default:
+          navigate('/dashboard');
+      }
     }
   };
   const handleResendOTP = () => {

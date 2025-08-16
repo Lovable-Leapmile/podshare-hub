@@ -10,6 +10,9 @@ export interface User {
   user_pickupcode: string;
   user_credit_limit: string;
   user_credit_used: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Location {
