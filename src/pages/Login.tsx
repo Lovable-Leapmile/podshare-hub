@@ -229,9 +229,12 @@ export default function Login() {
                 </a>
               </div>
               <div className="space-y-2 text-sm">
-                <a href="#" className="block text-black font-bold hover:text-gray-800 transition-colors">
+                <button 
+                  onClick={() => navigate('/registration')}
+                  className="block text-black font-bold hover:text-gray-800 transition-colors"
+                >
                   Not an Registered User? Need to Register
-                </a>
+                </button>
                 <a href="#" className="block text-muted-foreground hover:text-primary transition-colors">
                   How it works?
                 </a>

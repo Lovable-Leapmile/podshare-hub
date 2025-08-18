@@ -281,5 +281,35 @@ export const apiService = {
       console.error('Error fetching reservations:', error);
       throw error;
     }
+  },
+
+  async registerUser(userData: {
+    user_phone: string;
+    user_name: string;
+    user_email: string;
+    user_flatno: string;
+    user_address: string;
+  }): Promise<any> {
+    const authToken = localStorage.getItem('auth_token') || AUTH_TOKEN;
+    
+    const response = await fetch(`${API_BASE_URL}/users/`, {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': `Bearer ${authToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ...userData,
+        user_type: 'Customer'
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Failed to register user');
+    }
+
+    return response.json();
   }
 };
