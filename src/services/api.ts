@@ -290,13 +290,11 @@ export const apiService = {
     user_flatno: string;
     user_address: string;
   }): Promise<any> {
-    const authToken = localStorage.getItem('auth_token') || AUTH_TOKEN;
-    
     const response = await fetch(`${API_BASE_URL}/users/`, {
       method: 'POST',
       headers: {
         'accept': 'application/json',
-        'Authorization': `Bearer ${authToken}`,
+        'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2wiOiJhZG1pbiIsImV4cCI6MTkxMTYyMDE1OX0.RMEW55tHQ95GVap8ChrGdPRbuVxef4Shf0NRddNgGJo',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
