@@ -103,6 +103,13 @@ export default function Locations() {
                 </Card>
               ))}
             </div>
+          ) : locations.length === 0 ? (
+            <div className="bg-secondary rounded-xl p-4">
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">No locations found</p>
+                <p className="text-sm text-muted-foreground mt-1">Add a new location by scanning a QR code</p>
+              </div>
+            </div>
           ) : (
             <div className="bg-secondary rounded-xl p-4">
               <div className="space-y-3">
