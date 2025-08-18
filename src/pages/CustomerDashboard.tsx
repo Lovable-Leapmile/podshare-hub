@@ -67,7 +67,16 @@ export default function CustomerDashboard() {
     if (!user) return;
     setLoading(true);
     try {
-      const locationId = localStorage.getItem('current_location_id') || '';
+      const locationId = localStorage.getItem('current_location_id');
+
+      // Only proceed if we have a valid location_id
+      if (!locationId) {
+        console.log('No location_id found, skipping reservations load');
+        setDropPendingReservations([]);
+        setPickupPendingReservations([]);
+        setHistoryReservations([]);
+        return;
+      }
 
       // Load all reservation types
       const [dropPending, pickupPending, pickupCompleted, dropCancelled] = await Promise.all([
@@ -83,6 +92,7 @@ export default function CustomerDashboard() {
       // Set initial history based on current filter
       setHistoryReservations(historyFilter === 'PickupCompleted' ? pickupCompleted : dropCancelled);
     } catch (error) {
+      console.error('Error loading reservations:', error);
       toast({
         title: "Error",
         description: "Failed to load reservations",
@@ -96,10 +106,19 @@ export default function CustomerDashboard() {
     setHistoryFilter(filter);
     if (!user) return;
     try {
-      const locationId = localStorage.getItem('current_location_id') || '';
+      const locationId = localStorage.getItem('current_location_id');
+      
+      // Only proceed if we have a valid location_id
+      if (!locationId) {
+        console.log('No location_id found, skipping history load');
+        setHistoryReservations([]);
+        return;
+      }
+      
       const reservations = await apiService.getReservations(user.user_phone, locationId, filter);
       setHistoryReservations(reservations);
     } catch (error) {
+      console.error('Error loading history:', error);
       toast({
         title: "Error",
         description: "Failed to load history",
