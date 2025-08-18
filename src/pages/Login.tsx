@@ -91,10 +91,9 @@ export default function Login() {
     setLoading(true);
     try {
       const response = await apiService.validateOTP(phoneNumber, otp);
-      
+
       // Extract user data from the records array
       const userData = response.records[0];
-      
       saveUserData(userData);
       toast({
         title: "Login Successful",
@@ -117,17 +116,16 @@ export default function Login() {
     try {
       // Store current location_id in localStorage for dashboard use
       const authToken = localStorage.getItem('auth_token');
-      
+
       // Get user locations
       const userLocations = await apiService.getUserLocations(userData.id);
 
       // Get current pod name from localStorage
       const podName = localStorage.getItem('qikpod_pod_name');
       if (podName) {
-
         // Get pod details
         const podInfo = await apiService.getPodInfo(podName);
-        
+
         // Store the current location_id for use in dashboard
         localStorage.setItem('current_location_id', podInfo.location_id);
 
@@ -242,7 +240,7 @@ export default function Login() {
           </> : <>
             {/* OTP Header */}
             <div className="text-center mb-8">
-              <img src={qikpodLogo} alt="Qikpod" className="w-16 h-16 mx-auto mb-6" />
+              <img src={qikpodLogo} alt="Qikpod" className="w-auto h-12 mx-auto mb-6" />
               <h1 className="text-2xl font-bold text-foreground mb-2">Verification Code</h1>
               <p className="text-muted-foreground mb-1">Enter 6-digit OTP</p>
               <p className="text-sm text-muted-foreground">
