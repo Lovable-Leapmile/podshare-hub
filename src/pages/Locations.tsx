@@ -4,30 +4,14 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, ChevronRight, Plus } from "lucide-react";
 import { Header } from "@/components/Header";
-import { getUserData, isLoggedIn, saveLastLocation } from "@/utils/storage";
+import { getUserData, isLoggedIn, saveLastLocation, saveLocationId } from "@/utils/storage";
 import { Location } from "@/types";
-
-// Dummy locations data
-const dummyLocations: Location[] = [
-  {
-    id: 'LOC-001',
-    name: 'Koramangala Block 5',
-    address: 'BTM Layout, Bangalore'
-  },
-  {
-    id: 'LOC-002',
-    name: 'Electronic City',
-    address: 'Electronic City, Bangalore'
-  },
-  {
-    id: 'LOC-003',
-    name: 'Whitefield',
-    address: 'Whitefield, Bangalore'
-  }
-];
+import { apiService } from "@/services/api";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Locations() {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -37,15 +21,40 @@ export default function Locations() {
       return;
     }
 
-    // Simulate loading locations
-    setTimeout(() => {
-      setLocations(dummyLocations);
-      setLoading(false);
-    }, 800);
+    loadUserLocations();
   }, [navigate]);
+
+  const loadUserLocations = async () => {
+    const user = getUserData();
+    if (!user) return;
+
+    try {
+      setLoading(true);
+      const userLocations = await apiService.getUserLocations(user.id);
+      
+      // Transform API response to match Location interface
+      const transformedLocations = userLocations.map((location: any) => ({
+        id: location.location_id || location.id,
+        name: location.location_name || location.name,
+        address: location.location_address || location.address || 'Address not available'
+      }));
+      
+      setLocations(transformedLocations);
+    } catch (error) {
+      console.error('Error loading user locations:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load your locations",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLocationSelect = (location: Location) => {
     saveLastLocation(location.name);
+    saveLocationId(location.id);
     navigate('/customer-dashboard');
   };
 

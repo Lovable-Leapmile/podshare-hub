@@ -1,11 +1,13 @@
-import { Clock, Package, CheckCircle, XCircle } from "lucide-react";
+import { Clock, Package, CheckCircle, XCircle, Eye, MapPin, User } from "lucide-react";
 import { Reservation } from "@/types";
+import { Button } from "@/components/ui/button";
 
 interface ReservationCardProps {
   reservation: Reservation;
+  onShowMore?: (reservation: Reservation) => void;
 }
 
-export function ReservationCard({ reservation }: ReservationCardProps) {
+export function ReservationCard({ reservation, onShowMore }: ReservationCardProps) {
   const getStatusIcon = () => {
     switch (reservation.status) {
       case 'pending':
@@ -50,7 +52,7 @@ export function ReservationCard({ reservation }: ReservationCardProps) {
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center space-x-2">
           <Package className="w-5 h-5 text-primary" />
-          <span className="font-semibold text-foreground">{reservation.podName}</span>
+          <span className="font-semibold text-foreground">{reservation.podName || (reservation as any).pod_name}</span>
         </div>
         <div className={`flex items-center space-x-1 px-2 py-1 rounded-full border text-xs font-medium ${getStatusColor()}`}>
           {getStatusIcon()}
@@ -58,20 +60,76 @@ export function ReservationCard({ reservation }: ReservationCardProps) {
         </div>
       </div>
       
-      <p className="text-muted-foreground text-sm mb-3">{reservation.description}</p>
+      <div className="space-y-2 mb-4">
+        {(reservation.description || (reservation as any).package_description) && (
+          <p className="text-muted-foreground text-sm">{reservation.description || (reservation as any).package_description}</p>
+        )}
+        
+        {/* Additional Details */}
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          {(reservation as any).created_by && (
+            <div className="flex items-center space-x-1">
+              <User className="w-3 h-3 text-muted-foreground" />
+              <span className="text-muted-foreground">Created by: {(reservation as any).created_by}</span>
+            </div>
+          )}
+          
+          {(reservation as any).awb_number && (
+            <div className="flex items-center space-x-1">
+              <Package className="w-3 h-3 text-muted-foreground" />
+              <span className="text-muted-foreground">AWB: {(reservation as any).awb_number}</span>
+            </div>
+          )}
+          
+          {(reservation as any).location_name && (
+            <div className="flex items-center space-x-1 col-span-2">
+              <MapPin className="w-3 h-3 text-muted-foreground" />
+              <span className="text-muted-foreground">Location: {(reservation as any).location_name}</span>
+            </div>
+          )}
+          
+          {(reservation as any).dropped_at && (
+            <div className="flex items-center space-x-1">
+              <Clock className="w-3 h-3 text-muted-foreground" />
+              <span className="text-muted-foreground">Dropped: {new Date((reservation as any).dropped_at).toLocaleDateString()}</span>
+            </div>
+          )}
+          
+          {(reservation as any).picked_at && (
+            <div className="flex items-center space-x-1">
+              <Clock className="w-3 h-3 text-muted-foreground" />
+              <span className="text-muted-foreground">Picked: {new Date((reservation as any).picked_at).toLocaleDateString()}</span>
+            </div>
+          )}
+        </div>
+      </div>
       
       <div className="flex items-center justify-between">
-        <span className="text-xs text-muted-foreground font-medium">
-          {reservation.type.toUpperCase()}
-        </span>
-        <span className="text-xs text-muted-foreground">
-          {new Date(reservation.timestamp).toLocaleDateString('en-IN', {
-            day: '2-digit',
-            month: 'short',
-            hour: '2-digit',
-            minute: '2-digit'
-          })}
-        </span>
+        <div className="flex items-center space-x-2">
+          <span className="text-xs text-muted-foreground font-medium">
+            {reservation.type?.toUpperCase() || (reservation as any).reservation_type?.toUpperCase()}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {new Date(reservation.timestamp || (reservation as any).created_at).toLocaleDateString('en-IN', {
+              day: '2-digit',
+              month: 'short',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
+          </span>
+        </div>
+        
+        {onShowMore && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => onShowMore(reservation)}
+            className="text-primary hover:text-primary/80 h-6 px-2"
+          >
+            <Eye className="w-3 h-3 mr-1" />
+            Show More
+          </Button>
+        )}
       </div>
     </div>
   );

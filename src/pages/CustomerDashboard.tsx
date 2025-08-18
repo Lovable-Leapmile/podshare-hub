@@ -5,11 +5,12 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Package, Clock, Settings, User, MapPin, HelpCircle, LogOut, Home } from "lucide-react";
-import { apiService, Reservation } from "@/services/api";
+import { apiService, Reservation as APIReservation } from "@/services/api";
 import { getUserData, isLoggedIn, getPodName, getLocationId } from "@/utils/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { ReservationCard } from "@/components/ReservationCard";
 const qikpodLogo = "https://leapmile-website.blr1.cdn.digitaloceanspaces.com/Qikpod/Images/q70.png";
 export default function CustomerDashboard() {
   const navigate = useNavigate();
@@ -17,9 +18,9 @@ export default function CustomerDashboard() {
     toast
   } = useToast();
   const user = getUserData();
-  const [dropPendingReservations, setDropPendingReservations] = useState<Reservation[]>([]);
-  const [pickupPendingReservations, setPickupPendingReservations] = useState<Reservation[]>([]);
-  const [historyReservations, setHistoryReservations] = useState<Reservation[]>([]);
+  const [dropPendingReservations, setDropPendingReservations] = useState<APIReservation[]>([]);
+  const [pickupPendingReservations, setPickupPendingReservations] = useState<APIReservation[]>([]);
+  const [historyReservations, setHistoryReservations] = useState<APIReservation[]>([]);
   const [historyFilter, setHistoryFilter] = useState<'PickupCompleted' | 'DropCancelled'>('PickupCompleted');
   const [loading, setLoading] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
@@ -130,34 +131,32 @@ export default function CustomerDashboard() {
     localStorage.clear();
     navigate('/login');
   };
-  const renderReservationCard = (reservation: Reservation) => <Card key={reservation.id} className="p-4 space-y-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Package className="w-4 h-4 text-primary" />
-          <span className="font-medium text-sm">{reservation.pod_name}</span>
-        </div>
-        <Badge variant={getStatusVariant(reservation.reservation_status)}>
-          {reservation.reservation_status}
-        </Badge>
-      </div>
-      
-      {reservation.package_description && <p className="text-sm text-muted-foreground">{reservation.package_description}</p>}
-      
-      {reservation.drop_code && <div className="flex items-center space-x-2">
-          <span className="text-xs font-medium">Drop Code:</span>
-          <code className="text-xs bg-muted px-2 py-1 rounded">{reservation.drop_code}</code>
-        </div>}
-      
-      {reservation.pickup_code && <div className="flex items-center space-x-2">
-          <span className="text-xs font-medium">Pickup Code:</span>
-          <code className="text-xs bg-muted px-2 py-1 rounded">{reservation.pickup_code}</code>
-        </div>}
-      
-      <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-        <Clock className="w-3 h-3" />
-        <span>{new Date(reservation.created_at).toLocaleDateString()}</span>
-      </div>
-    </Card>;
+  const handleShowMoreReservation = (reservation: APIReservation) => {
+    // Navigate to reservation details page (to be implemented)
+    console.log('Show more for reservation:', reservation);
+    // navigate(`/reservation-details/${reservation.id}`);
+  };
+
+  const renderReservationCard = (reservation: APIReservation) => {
+    // Transform API reservation to ReservationCard format
+    const transformedReservation = {
+      id: reservation.id,
+      type: (reservation as any).reservation_type === 'drop' ? 'drop' as const : 'pickup' as const,
+      status: reservation.reservation_status === 'DropPending' || reservation.reservation_status === 'PickupPending' ? 'pending' as const :
+              reservation.reservation_status === 'PickupCompleted' ? 'completed' as const : 'cancelled' as const,
+      podName: reservation.pod_name,
+      timestamp: reservation.created_at,
+      description: reservation.package_description || ''
+    };
+    
+    return (
+      <ReservationCard 
+        key={reservation.id} 
+        reservation={transformedReservation} 
+        onShowMore={() => handleShowMoreReservation(reservation)}
+      />
+    );
+  };
   const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
     switch (status) {
       case 'DropPending':
