@@ -55,13 +55,17 @@ export function Header({ title, showSettings = true }: HeaderProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={() => navigate('/profile')}>
+                <DropdownMenuItem onClick={() => navigate('/customer-dashboard')}>
                   <User className="w-4 h-4 mr-2" />
-                  Profile
+                  Home
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/locations')}>
                   <MapPin className="w-4 h-4 mr-2" />
                   Locations
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/profile')}>
+                  <User className="w-4 h-4 mr-2" />
+                  Profile
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/support')}>
                   <HelpCircle className="w-4 h-4 mr-2" />

@@ -48,9 +48,12 @@ export interface PodInfo {
 }
 
 export interface LocationInfo {
-  record_id: string;
-  name: string;
+  id: string;
+  location_name: string;
   address: string;
+  city: string;
+  state: string;
+  pincode: string;
 }
 
 export interface Reservation {
@@ -122,41 +125,83 @@ export const apiService = {
   },
 
   async getPodInfo(podName: string): Promise<PodInfo> {
-    const authToken = localStorage.getItem('auth_token');
-    const authorization = authToken ? `Bearer ${authToken}` : AUTH_TOKEN;
-    
-    const response = await fetch(`${API_BASE_URL}/pods/?pod_name=${podName}`, {
-      method: 'GET',
-      headers: {
-        'accept': 'application/json',
-        'Authorization': authorization,
-      },
-    });
+    try {
+      const response = await fetch(
+        `https://stagingv3.leapmile.com/podcore/pods/?pod_name=${podName}`,
+        {
+          method: 'GET',
+          headers: {
+            'accept': 'application/json',
+            'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2wiOiJhZG1pbiIsImV4cCI6MTkxMTYyMDE1OX0.RMEW55tHQ95GVap8ChrGdPRbuVxef4Shf0NRddNgGJo'
+          }
+        }
+      );
 
-    if (!response.ok) {
-      throw new Error('Failed to get pod info');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch pod info: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.records && data.records.length > 0) {
+        const pod = data.records[0];
+        // Save location_id to local storage
+        localStorage.setItem('current_location_id', pod.location_id);
+        
+        return {
+          id: pod.id,
+          name: pod.pod_name,
+          location_id: pod.location_id,
+          status: pod.status || 'available'
+        };
+      }
+      
+      throw new Error('Pod not found');
+    } catch (error) {
+      console.error('Error fetching pod info:', error);
+      throw error;
     }
-
-    return response.json();
   },
 
   async getLocationInfo(locationId: string): Promise<LocationInfo> {
-    const authToken = localStorage.getItem('auth_token');
-    const authorization = authToken ? `Bearer ${authToken}` : AUTH_TOKEN;
-    
-    const response = await fetch(`${API_BASE_URL}/locations/?record_id=${locationId}`, {
-      method: 'GET',
-      headers: {
-        'accept': 'application/json',
-        'Authorization': authorization,
-      },
-    });
+    try {
+      const response = await fetch(
+        `https://stagingv3.leapmile.com/podcore/locations/?record_id=${locationId}`,
+        {
+          method: 'GET',
+          headers: {
+            'accept': 'application/json',
+            'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2wiOiJhZG1pbiIsImV4cCI6MTkxMTYyMDE1OX0.RMEW55tHQ95GVap8ChrGdPRbuVxef4Shf0NRddNgGJo'
+          }
+        }
+      );
 
-    if (!response.ok) {
-      throw new Error('Failed to get location info');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch location info: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.records && data.records.length > 0) {
+        const location = data.records[0];
+        // Save location name to local storage
+        localStorage.setItem('current_location_name', location.location_name);
+        
+        return {
+          id: location.id,
+          location_name: location.location_name,
+          address: location.location_address || '',
+          city: location.city || '',
+          state: location.state || '',
+          pincode: location.pincode || ''
+        };
+      }
+      
+      throw new Error('Location not found');
+    } catch (error) {
+      console.error('Error fetching location info:', error);
+      throw error;
     }
-
-    return response.json();
   },
 
   async addUserLocation(userId: number, locationId: string): Promise<void> {
@@ -182,21 +227,43 @@ export const apiService = {
   },
 
   async getReservations(phoneNum: string, locationId: string, status: string): Promise<Reservation[]> {
-    const authToken = localStorage.getItem('auth_token');
-    const authorization = authToken ? `Bearer ${authToken}` : AUTH_TOKEN;
-    
-    const response = await fetch(`${API_BASE_URL}/reservations/?phone_num=${phoneNum}&location_id=${locationId}&reservation_status=${status}`, {
-      method: 'GET',
-      headers: {
-        'accept': 'application/json',
-        'Authorization': authorization,
-      },
-    });
+    try {
+      const response = await fetch(
+        `https://stagingv3.leapmile.com/podcore/reservations/?phone_num=${phoneNum}&location_id=${locationId}&reservation_status=${status}`,
+        {
+          method: 'GET',
+          headers: {
+            'accept': 'application/json',
+            'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2wiOiJhZG1pbiIsImV4cCI6MTkxMTYyMDE1OX0.RMEW55tHQ95GVap8ChrGdPRbuVxef4Shf0NRddNgGJo'
+          }
+        }
+      );
 
-    if (!response.ok) {
-      throw new Error('Failed to get reservations');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch reservations: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.records) {
+        return data.records.map((record: any) => ({
+          id: record.id.toString(),
+          reservation_type: record.reservation_type,
+          reservation_status: record.reservation_status,
+          pod_name: record.pod_name,
+          created_at: record.created_at,
+          package_description: record.package_description,
+          drop_code: record.drop_code,
+          pickup_code: record.pickup_code,
+          customer_phone: record.customer_phone,
+          location_id: record.location_id
+        }));
+      }
+      
+      return [];
+    } catch (error) {
+      console.error('Error fetching reservations:', error);
+      throw error;
     }
-
-    return response.json();
   }
 };

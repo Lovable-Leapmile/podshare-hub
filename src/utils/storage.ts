@@ -70,3 +70,21 @@ export const saveLastLocation = (locationName: string): void => {
 export const getLastLocation = (): string | null => {
   return localStorage.getItem('qikpod_last_location');
 };
+
+// Location ID storage
+export const saveLocationId = (locationId: string): void => {
+  localStorage.setItem('current_location_id', locationId);
+};
+
+export const getLocationId = (): string | null => {
+  return localStorage.getItem('current_location_id');
+};
+
+// Location name storage
+export const saveLocationName = (locationName: string): void => {
+  localStorage.setItem('current_location_name', locationName);
+};
+
+export const getLocationName = (): string | null => {
+  return localStorage.getItem('current_location_name');
+};

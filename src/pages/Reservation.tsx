@@ -2,11 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Package, Clock, ArrowLeft } from "lucide-react";
 import { Header } from "@/components/Header";
-import { getUserData, getPodValue, isLoggedIn } from "@/utils/storage";
+import { getUserData, getPodValue, getLocationName, isLoggedIn } from "@/utils/storage";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Reservation() {
@@ -16,9 +15,8 @@ export default function Reservation() {
   const podValue = getPodValue();
   
   const [formData, setFormData] = useState({
-    type: '',
-    description: '',
-    estimatedTime: ''
+    awbNumber: '',
+    executivePhone: ''
   });
   const [loading, setLoading] = useState(false);
 
@@ -29,27 +27,12 @@ export default function Reservation() {
     }
   }, [navigate]);
 
-  const reservationTypes = [
-    { value: 'drop', label: 'Drop Off Package' },
-    { value: 'pickup', label: 'Pick Up Package' }
-  ];
-
-  const timeSlots = [
-    '9:00 AM - 10:00 AM',
-    '10:00 AM - 11:00 AM',
-    '11:00 AM - 12:00 PM',
-    '12:00 PM - 1:00 PM',
-    '1:00 PM - 2:00 PM',
-    '2:00 PM - 3:00 PM',
-    '3:00 PM - 4:00 PM',
-    '4:00 PM - 5:00 PM',
-    '5:00 PM - 6:00 PM'
-  ];
+  const locationName = getLocationName() || 'Unknown Location';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.type || !formData.description) {
+    if (!formData.awbNumber || !formData.executivePhone) {
       toast({
         title: "Incomplete Form",
         description: "Please fill in all required fields.",
@@ -64,7 +47,7 @@ export default function Reservation() {
     setTimeout(() => {
       toast({
         title: "Reservation Created",
-        description: `Your ${formData.type} reservation has been confirmed for POD-${podValue}.`,
+        description: `Your reservation has been created successfully.`,
       });
       
       navigate('/customer-dashboard');
@@ -86,77 +69,56 @@ export default function Reservation() {
           <span>Back to Dashboard</span>
         </Button>
 
-        {/* Pod Info */}
+        {/* User & Location Info */}
         <Card className="card-3d bg-gradient-primary p-6 text-qikpod-black animate-fade-in">
-          <div className="flex items-center space-x-4">
-            <Package className="w-12 h-12 opacity-30" />
-            <div>
-              <h2 className="text-lg font-bold">POD-{podValue}</h2>
-              <p className="text-sm opacity-80">Koramangala Block 5</p>
-              <p className="text-xs opacity-60">Available for reservations</p>
+          <div className="space-y-3">
+            <div className="flex items-center space-x-3">
+              <Package className="w-8 h-8 opacity-30" />
+              <div>
+                <h2 className="text-lg font-bold">{locationName}</h2>
+                <p className="text-sm opacity-80">Location</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 gap-2 mt-4">
+              <div>
+                <p className="text-sm font-medium">User Name</p>
+                <p className="text-base">{user?.user_name || 'N/A'}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Phone Number</p>
+                <p className="text-base">{user?.user_phone || 'N/A'}</p>
+              </div>
             </div>
           </div>
         </Card>
 
         {/* Reservation Form */}
         <Card className="card-3d bg-card/80 backdrop-blur-sm p-6 animate-slide-up">
-          <h2 className="text-lg font-semibold text-foreground mb-6">Reservation Details</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-6">Package Details</h2>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="text-sm font-medium text-foreground mb-3 block">
-                Reservation Type *
+              <label className="text-sm font-medium text-foreground mb-2 block">
+                Enter AWB No. / Product Details *
               </label>
-              <div className="grid grid-cols-1 gap-3">
-                {reservationTypes.map((type) => (
-                  <Card
-                    key={type.value}
-                    className={`p-4 cursor-pointer border-2 transition-all ${
-                      formData.type === type.value
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                    onClick={() => setFormData(prev => ({ ...prev, type: type.value }))}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-4 h-4 rounded-full border-2 ${
-                        formData.type === type.value ? 'bg-primary border-primary' : 'border-muted-foreground'
-                      }`} />
-                      <span className="font-medium text-foreground">{type.label}</span>
-                    </div>
-                  </Card>
-                ))}
-              </div>
+              <Input
+                value={formData.awbNumber}
+                onChange={(e) => setFormData(prev => ({ ...prev, awbNumber: e.target.value }))}
+                placeholder="Enter AWB number or product details"
+                className="h-12"
+              />
             </div>
 
             <div>
               <label className="text-sm font-medium text-foreground mb-2 block">
-                Preferred Time Slot
+                Enter the Delivery Executive Phone Number *
               </label>
-              <Select value={formData.estimatedTime} onValueChange={(value) => setFormData(prev => ({ ...prev, estimatedTime: value }))}>
-                <SelectTrigger className="h-12">
-                  <SelectValue placeholder="Select time slot (optional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  {timeSlots.map((slot) => (
-                    <SelectItem key={slot} value={slot}>
-                      {slot}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-foreground mb-2 block">
-                Description *
-              </label>
-              <Textarea
-                value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Describe your package or items (e.g., Amazon delivery, return shipment, documents)"
-                rows={4}
-                className="resize-none"
+              <Input
+                value={formData.executivePhone}
+                onChange={(e) => setFormData(prev => ({ ...prev, executivePhone: e.target.value }))}
+                placeholder="Enter delivery executive phone number"
+                type="tel"
+                className="h-12"
               />
             </div>
 
@@ -180,7 +142,7 @@ export default function Reservation() {
               disabled={loading}
               className="btn-qikpod w-full h-12"
             >
-              {loading ? 'Creating Reservation...' : 'Create Reservation'}
+              {loading ? 'Processing...' : 'Proceed'}
             </Button>
           </form>
         </Card>

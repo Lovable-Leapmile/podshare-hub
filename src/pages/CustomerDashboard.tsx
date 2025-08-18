@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Package, Clock, CheckCircle, XCircle, Menu, User, LogOut } from "lucide-react";
+import { Package, Clock, Settings, User, MapPin, HelpCircle, LogOut, Home } from "lucide-react";
 import { apiService, Reservation } from "@/services/api";
-import { getUserData, isLoggedIn } from "@/utils/storage";
+import { getUserData, isLoggedIn, getPodName, getLocationId } from "@/utils/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -37,8 +37,36 @@ export default function CustomerDashboard() {
       return;
     }
 
-    loadReservations();
+    initializeData();
   }, [navigate]); // Removed user from dependencies to prevent infinite calls
+
+  const initializeData = async () => {
+    const podName = getPodName();
+    if (podName) {
+      try {
+        // First get pod info to extract location_id
+        await apiService.getPodInfo(podName);
+        
+        // Then get location info to extract location name
+        const locationId = getLocationId();
+        if (locationId) {
+          await apiService.getLocationInfo(locationId);
+        }
+        
+        // Finally load reservations
+        loadReservations();
+      } catch (error) {
+        console.error('Error initializing data:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load initial data",
+          variant: "destructive",
+        });
+      }
+    } else {
+      loadReservations();
+    }
+  };
 
   const loadReservations = async () => {
     if (!user) return;
@@ -156,14 +184,30 @@ export default function CustomerDashboard() {
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <Menu className="h-4 w-4" />
+                <Settings className="h-4 w-4" />
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-full sm:w-80">
               <SheetHeader>
-                <SheetTitle>Menu</SheetTitle>
+                <SheetTitle>Settings</SheetTitle>
               </SheetHeader>
               <div className="py-6 space-y-2">
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start h-12 px-4"
+                  onClick={() => navigate('/customer-dashboard')}
+                >
+                  <Home className="mr-3 h-4 w-4" />
+                  Home
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start h-12 px-4"
+                  onClick={() => navigate('/locations')}
+                >
+                  <MapPin className="mr-3 h-4 w-4" />
+                  Locations
+                </Button>
                 <Button 
                   variant="ghost" 
                   className="w-full justify-start h-12 px-4"
@@ -171,6 +215,14 @@ export default function CustomerDashboard() {
                 >
                   <User className="mr-3 h-4 w-4" />
                   Profile
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start h-12 px-4"
+                  onClick={() => navigate('/support')}
+                >
+                  <HelpCircle className="mr-3 h-4 w-4" />
+                  Support
                 </Button>
                 <Button 
                   variant="ghost" 
