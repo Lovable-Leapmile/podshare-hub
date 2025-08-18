@@ -228,17 +228,17 @@ export default function Login() {
                   Privacy Policy
                 </a>
               </div>
-              <div className="space-y-2 text-sm">
-                <button 
-                  onClick={() => navigate('/registration')}
-                  className="block text-black font-bold hover:text-gray-800 transition-colors text-center"
-                >
-                  Not an Registered User? Need to Register
-                </button>
-                <a href="#" className="block text-muted-foreground hover:text-primary transition-colors">
-                  How it works?
-                </a>
-              </div>
+              <div className="space-y-2 text-sm text-center">
+                  <button
+                    onClick={() => navigate('/registration')}
+                    className="block text-black font-bold hover:text-gray-800 transition-colors mx-auto"
+                  >
+                    Not a Registered User? Need to Register
+                  </button>
+                  <a href="#" className="block text-muted-foreground hover:text-primary transition-colors">
+                    How it works?
+                  </a>
+                </div>
             </div>
           </> : <>
             {/* OTP Header */}
