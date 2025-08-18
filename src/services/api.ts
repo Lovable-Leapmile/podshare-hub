@@ -34,10 +34,25 @@ export interface ValidateOTPResponse {
 }
 
 export interface UserLocation {
-  id: string;
-  name: string;
-  address: string;
-  location_id: string;
+  location_id: number;
+  user_id: number;
+  id: number;
+  user_name: string;
+  user_flatno: string;
+  user_type: string;
+  user_email: string;
+  user_phone: string;
+  location_name: string;
+  location_address: string;
+  location_pincode: string;
+  location_state: string | null;
+  status: string;
+  user_dropcode: string;
+  user_pickupcode: string;
+  user_credit_limit: string;
+  user_credit_used: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface PodInfo {
@@ -109,7 +124,7 @@ export const apiService = {
     const authToken = localStorage.getItem('auth_token');
     const authorization = authToken ? `Bearer ${authToken}` : AUTH_TOKEN;
     
-    const response = await fetch(`${API_BASE_URL}/users/locations/?user_id=${userId}`, {
+    const response = await fetch(`${API_BASE_URL}/users/locations/?user_id=${userId}&order_by_field=updated_at&order_by_type=DESC`, {
       method: 'GET',
       headers: {
         'accept': 'application/json',
@@ -121,7 +136,8 @@ export const apiService = {
       throw new Error('Failed to get user locations');
     }
 
-    return response.json();
+    const data = await response.json();
+    return data.records || [];
   },
 
   async getPodInfo(podName: string): Promise<PodInfo> {

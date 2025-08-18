@@ -5,14 +5,14 @@ import { Button } from "@/components/ui/button";
 import { MapPin, ChevronRight, Plus } from "lucide-react";
 import { Header } from "@/components/Header";
 import { getUserData, isLoggedIn, saveLastLocation, saveLocationId } from "@/utils/storage";
-import { Location } from "@/types";
+import { UserLocation } from "@/services/api";
 import { apiService } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Locations() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [locations, setLocations] = useState<Location[]>([]);
+  const [locations, setLocations] = useState<UserLocation[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,15 +31,7 @@ export default function Locations() {
     try {
       setLoading(true);
       const userLocations = await apiService.getUserLocations(user.id);
-      
-      // Transform API response to match Location interface
-      const transformedLocations = userLocations.map((location: any) => ({
-        id: location.location_id || location.id,
-        name: location.location_name || location.name,
-        address: location.location_address || location.address || 'Address not available'
-      }));
-      
-      setLocations(transformedLocations);
+      setLocations(userLocations);
     } catch (error) {
       console.error('Error loading user locations:', error);
       toast({
@@ -52,9 +44,9 @@ export default function Locations() {
     }
   };
 
-  const handleLocationSelect = (location: Location) => {
-    saveLastLocation(location.name);
-    saveLocationId(location.id);
+  const handleLocationSelect = (location: UserLocation) => {
+    saveLastLocation(location.location_name);
+    saveLocationId(location.location_id.toString());
     navigate('/customer-dashboard');
   };
 
@@ -113,7 +105,7 @@ export default function Locations() {
           ) : (
             <div className="bg-secondary rounded-xl p-4">
               <div className="space-y-3">
-                {locations.map((location, index) => (
+                {locations.map((location) => (
                   <Card 
                     key={location.id} 
                     className="card-modern p-4 cursor-pointer hover:shadow-md transition-all"
@@ -124,9 +116,13 @@ export default function Locations() {
                         <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
                           <MapPin className="w-5 h-5 text-primary" />
                         </div>
-                        <div>
-                          <h3 className="font-medium text-foreground">{location.name}</h3>
-                          <p className="text-sm text-muted-foreground">{location.address}</p>
+                        <div className="flex-1">
+                          <h3 className="font-medium text-foreground">{location.location_name}</h3>
+                          <p className="text-sm text-muted-foreground line-clamp-2">{location.location_address}</p>
+                          <div className="flex items-center space-x-4 mt-1">
+                            <span className="text-xs text-muted-foreground">PIN: {location.location_pincode}</span>
+                            <span className="text-xs text-primary font-medium">{location.status.toUpperCase()}</span>
+                          </div>
                         </div>
                       </div>
                       <ChevronRight className="w-4 h-4 text-muted-foreground" />

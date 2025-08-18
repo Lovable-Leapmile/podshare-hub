@@ -133,7 +133,7 @@ export default function Login() {
         const locationInfo = await apiService.getLocationInfo(podInfo.location_id);
 
         // Check if user has this location
-        const hasLocation = userLocations.some(loc => loc.location_id === podInfo.location_id);
+        const hasLocation = userLocations.some(loc => loc.location_id.toString() === podInfo.location_id);
         if (!hasLocation) {
           // Show confirmation dialog for adding new location
           const confirmed = window.confirm("You're in a new location. Do you need to add this location to your locations list?");
