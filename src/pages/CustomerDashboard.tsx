@@ -70,9 +70,17 @@ export default function CustomerDashboard() {
       const locationId = localStorage.getItem('current_location_id') || '';
 
       // Load all reservation types
-      const [dropPending, pickupPending, pickupCompleted, dropCancelled] = await Promise.all([apiService.getReservations(user.user_phone, locationId, 'DropPending'), apiService.getReservations(user.user_phone, locationId, 'PickupPending'), apiService.getReservations(user.user_phone, locationId, 'PickupCompleted'), apiService.getReservations(user.user_phone, locationId, 'DropCancelled')]);
+      const [dropPending, pickupPending, pickupCompleted, dropCancelled] = await Promise.all([
+        apiService.getReservations(user.user_phone, locationId, 'DropPending'), 
+        apiService.getReservations(user.user_phone, locationId, 'PickupPending'), 
+        apiService.getReservations(user.user_phone, locationId, 'PickupCompleted'), 
+        apiService.getReservations(user.user_phone, locationId, 'DropCancelled')
+      ]);
+      
       setDropPendingReservations(dropPending);
       setPickupPendingReservations(pickupPending);
+      
+      // Set initial history based on current filter
       setHistoryReservations(historyFilter === 'PickupCompleted' ? pickupCompleted : dropCancelled);
     } catch (error) {
       toast({

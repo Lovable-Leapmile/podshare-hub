@@ -59,25 +59,25 @@ export default function Reservation() {
       <Header title="Create Reservation" />
       
       <div className="mobile-container space-y-6">
-        {/* Back Button */}
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate('/customer-dashboard')}
-          className="flex items-center space-x-2 text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to Dashboard</span>
-        </Button>
-
         {/* User & Location Info */}
         <Card className="card-3d bg-gradient-primary p-6 text-qikpod-black animate-fade-in">
           <div className="space-y-3">
-            <div className="flex items-center space-x-3">
-              <Package className="w-8 h-8 opacity-30" />
-              <div>
-                <h2 className="text-lg font-bold">{locationName}</h2>
-                <p className="text-sm opacity-80">Location</p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <Package className="w-8 h-8 opacity-30" />
+                <div>
+                  <h2 className="text-lg font-bold">{locationName}</h2>
+                  <p className="text-sm opacity-80">Location</p>
+                </div>
               </div>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => navigate('/customer-dashboard')}
+                className="h-8 w-8 p-0 text-qikpod-black hover:bg-black/10"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </Button>
             </div>
             <div className="grid grid-cols-1 gap-2 mt-4">
               <div>
