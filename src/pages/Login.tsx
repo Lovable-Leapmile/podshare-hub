@@ -229,9 +229,7 @@ export default function Login() {
                 </a>
               </div>
               <div className="space-y-2 text-sm">
-                <a href="#" className="block text-primary hover:text-primary/80 transition-colors">
-                  Don't have an account? Sign up
-                </a>
+                <a href="#" className="block text-primary hover:text-primary/80 transition-colors">Don't have an account? Register User</a>
                 <a href="#" className="block text-muted-foreground hover:text-primary transition-colors">
                   How it works?
                 </a>
