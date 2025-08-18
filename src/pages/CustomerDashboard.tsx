@@ -18,9 +18,7 @@ export default function CustomerDashboard() {
     toast
   } = useToast();
   const user = getUserData();
-  const [dropPendingReservations, setDropPendingReservations] = useState<APIReservation[]>([]);
-  const [pickupPendingReservations, setPickupPendingReservations] = useState<APIReservation[]>([]);
-  const [historyReservations, setHistoryReservations] = useState<APIReservation[]>([]);
+  const [reservations, setReservations] = useState<APIReservation[]>([]);
   const [historyFilter, setHistoryFilter] = useState<'PickupCompleted' | 'DropCancelled'>('PickupCompleted');
   const [loading, setLoading] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
@@ -73,9 +71,7 @@ export default function CustomerDashboard() {
       // Only proceed if we have a valid location_id
       if (!locationId) {
         console.log('No location_id found, skipping reservations load');
-        setDropPendingReservations([]);
-        setPickupPendingReservations([]);
-        setHistoryReservations([]);
+        setReservations([]);
         return;
       }
 
@@ -87,11 +83,9 @@ export default function CustomerDashboard() {
         apiService.getReservations(user.user_phone, locationId, 'DropCancelled')
       ]);
       
-      setDropPendingReservations(dropPending);
-      setPickupPendingReservations(pickupPending);
-      
-      // Set initial history based on current filter
-      setHistoryReservations(historyFilter === 'PickupCompleted' ? pickupCompleted : dropCancelled);
+      // Combine all reservations into a single array
+      const allReservations = [...dropPending, ...pickupPending, ...pickupCompleted, ...dropCancelled];
+      setReservations(allReservations);
     } catch (error) {
       console.error('Error loading reservations:', error);
       toast({
@@ -103,28 +97,20 @@ export default function CustomerDashboard() {
       setLoading(false);
     }
   };
-  const handleHistoryFilterChange = async (filter: 'PickupCompleted' | 'DropCancelled') => {
+  const handleHistoryFilterChange = (filter: 'PickupCompleted' | 'DropCancelled') => {
     setHistoryFilter(filter);
-    if (!user) return;
-    try {
-      const locationId = localStorage.getItem('current_location_id');
-      
-      // Only proceed if we have a valid location_id
-      if (!locationId) {
-        console.log('No location_id found, skipping history load');
-        setHistoryReservations([]);
-        return;
-      }
-      
-      const reservations = await apiService.getReservations(user.user_phone, locationId, filter);
-      setHistoryReservations(reservations);
-    } catch (error) {
-      console.error('Error loading history:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load history",
-        variant: "destructive"
-      });
+  };
+
+  const getFilteredReservations = () => {
+    switch (activeTab) {
+      case 'drop-pending':
+        return reservations.filter(r => r.reservation_status === 'DropPending');
+      case 'pickup-pending':
+        return reservations.filter(r => r.reservation_status === 'PickupPending');
+      case 'history':
+        return reservations.filter(r => r.reservation_status === historyFilter);
+      default:
+        return reservations;
     }
   };
   const handleLogout = () => {
@@ -233,15 +219,31 @@ export default function CustomerDashboard() {
           </TabsList>
 
           <TabsContent value="drop-pending" className="space-y-4 mt-6">
-            {loading ? <div className="text-center py-8">Loading...</div> : dropPendingReservations.length > 0 ? dropPendingReservations.map(renderReservationCard) : <div className="text-center py-8 text-muted-foreground">
-                No drop pending reservations
-              </div>}
+            {loading ? (
+              <div className="text-center py-8">Loading...</div>
+            ) : (
+              getFilteredReservations().length > 0 ? (
+                getFilteredReservations().map(renderReservationCard)
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  No drop pending reservations
+                </div>
+              )
+            )}
           </TabsContent>
 
           <TabsContent value="pickup-pending" className="space-y-4 mt-6">
-            {loading ? <div className="text-center py-8">Loading...</div> : pickupPendingReservations.length > 0 ? pickupPendingReservations.map(renderReservationCard) : <div className="text-center py-8 text-muted-foreground">
-                No pickup pending reservations
-              </div>}
+            {loading ? (
+              <div className="text-center py-8">Loading...</div>
+            ) : (
+              getFilteredReservations().length > 0 ? (
+                getFilteredReservations().map(renderReservationCard)
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  No pickup pending reservations
+                </div>
+              )
+            )}
           </TabsContent>
 
           <TabsContent value="history" className="space-y-4 mt-6">
@@ -254,9 +256,17 @@ export default function CustomerDashboard() {
               </Button>
             </div>
             
-            {loading ? <div className="text-center py-8">Loading...</div> : historyReservations.length > 0 ? historyReservations.map(renderReservationCard) : <div className="text-center py-8 text-muted-foreground">
-                No {historyFilter.replace(/([A-Z])/g, ' $1').toLowerCase()} reservations
-              </div>}
+            {loading ? (
+              <div className="text-center py-8">Loading...</div>
+            ) : (
+              getFilteredReservations().length > 0 ? (
+                getFilteredReservations().map(renderReservationCard)
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  No {historyFilter.replace(/([A-Z])/g, ' $1').toLowerCase()} reservations
+                </div>
+              )
+            )}
           </TabsContent>
         </Tabs>
       </div>
