@@ -46,7 +46,7 @@ export function Header({
               </SheetTrigger>
               <SheetContent side="right" className="p-0">
                 <div className="h-full w-[75%] flex flex-col px-0 mx-0">
-                  <div className="px-4 border-b py-[24px]">
+                  <div className="px-4 py-4 border-b">
                     <div className="flex items-center space-x-3">
                       <img src="https://leapmile-website.blr1.cdn.digitaloceanspaces.com/Qikpod/Images/q70.png" alt="Qikpod" className="w-auto h-8" />
                       <span className="font-semibold text-foreground text-sm">Menu</span>
