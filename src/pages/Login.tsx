@@ -184,14 +184,14 @@ export default function Login() {
       handleSendOTP();
     }
   };
-  return <div className="min-h-screen bg-qikpod-light-bg flex items-start justify-center p-4 py-[50px]">
+  return <div className="min-h-screen bg-qikpod-light-bg flex items-start justify-center p-4 py-[40px]">
       <div className="w-full max-w-md">
         {step === 'phone' ? <>
             {/* Header */}
             <div className="text-center mb-8">
               
-              <h1 className="font-bold text-foreground mb-2 text-left text-3xl">Login</h1>
-              <p className="text-muted-foreground text-left">Sign in with your registered mobile number</p>
+              <h1 className="font-bold text-foreground mb-2 text-4xl">Login</h1>
+              <p className="text-muted-foreground">Sign in with your registered mobile number</p>
             </div>
 
             {/* Phone Input Form */}
@@ -241,9 +241,9 @@ export default function Login() {
             {/* OTP Header */}
             <div className="text-center mb-8">
               
-              <h1 className="text-foreground mb-2 text-3xl text-left font-bold">Verification Code</h1>
-              <p className="text-muted-foreground mb-1 text-left">Enter 6-digit OTP</p>
-              <p className="text-sm text-muted-foreground text-left">
+              <h1 className="text-2xl font-bold text-foreground mb-2">Verification Code</h1>
+              <p className="text-muted-foreground mb-1">Enter 6-digit OTP</p>
+              <p className="text-sm text-muted-foreground">
                 OTP sent to +91 {phoneNumber.replace(/(\d{5})(\d{5})/, '$1-$2')}
               </p>
             </div>
