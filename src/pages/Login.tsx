@@ -184,12 +184,12 @@ export default function Login() {
       handleSendOTP();
     }
   };
-  return <div className="min-h-screen bg-qikpod-light-bg flex items-center justify-center p-4 py-[5px]">
+  return <div className="min-h-screen bg-qikpod-light-bg flex items-start justify-center p-4 py-[50px]">
       <div className="w-full max-w-md">
         {step === 'phone' ? <>
             {/* Header */}
             <div className="text-center mb-8">
-              <img src={qikpodLogo} alt="Qikpod" className="w-auto h-10 mx-auto mb-6" />
+              
               <h1 className="text-2xl font-bold text-foreground mb-2">Login</h1>
               <p className="text-muted-foreground">Sign in with your registered mobile number</p>
             </div>
