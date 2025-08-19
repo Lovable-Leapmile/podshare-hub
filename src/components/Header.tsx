@@ -32,7 +32,7 @@ export function Header({
   };
   return <>
       <header className="bg-gradient-primary sticky top-0 z-50">
-        <div className="mobile-container flex items-center justify-between ">
+        <div className="mobile-container flex items-center justify-center ">
           <div className="flex items-center space-x-3">
             <img src="https://leapmile-website.blr1.cdn.digitaloceanspaces.com/Qikpod/Images/q70.png" alt="Qikpod" className="h-8 w-auto" />
             <span className="text-qikpod-black font-semibold text-xs">{roleText}</span>
@@ -45,7 +45,7 @@ export function Header({
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="p-0">
-                <div className="h-full w-full flex flex-col">
+                <div className="h-full w-full md:w-[70%] flex flex-col">
                   <div className="px-4 py-4 border-b">
                     <div className="flex items-center space-x-3">
                       <img src="https://leapmile-website.blr1.cdn.digitaloceanspaces.com/Qikpod/Images/q70.png" alt="Qikpod" className="w-auto h-8" />
