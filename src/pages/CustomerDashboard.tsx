@@ -172,21 +172,10 @@ export default function CustomerDashboard() {
   };
 
   const renderReservationCard = (reservation: APIReservation) => {
-    // Transform API reservation to ReservationCard format
-    const transformedReservation = {
-      id: reservation.id,
-      type: (reservation as any).reservation_type === 'drop' ? 'drop' as const : 'pickup' as const,
-      status: reservation.reservation_status === 'DropPending' || reservation.reservation_status === 'PickupPending' ? 'pending' as const :
-              reservation.reservation_status === 'PickupCompleted' ? 'completed' as const : 'cancelled' as const,
-      podName: reservation.pod_name,
-      timestamp: reservation.created_at,
-      description: reservation.package_description || ''
-    };
-    
     return (
-      <ReservationCard 
-        key={reservation.id} 
-        reservation={transformedReservation} 
+      <ReservationCard
+        key={reservation.id}
+        reservation={reservation as any}
         onShowMore={() => handleShowMoreReservation(reservation)}
       />
     );

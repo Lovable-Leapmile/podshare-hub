@@ -74,11 +74,15 @@ export interface LocationInfo {
 export interface Reservation {
   id: string;
   reservation_status: string;
+  reservation_type?: string;
   drop_code?: string;
   pickup_code?: string;
   package_description?: string;
   created_at: string;
   pod_name: string;
+  created_by_name?: string;
+  reservation_awbno?: string;
+  location_name?: string;
 }
 
 export const apiService = {
@@ -262,8 +266,9 @@ export const apiService = {
       const data = await response.json();
       
       if (data.records) {
+        const currentLocationName = localStorage.getItem('current_location_name') || undefined
         return data.records.map((record: any) => ({
-          id: record.id.toString(),
+          id: String(record.id),
           reservation_type: record.reservation_type,
           reservation_status: record.reservation_status,
           pod_name: record.pod_name,
@@ -271,8 +276,10 @@ export const apiService = {
           package_description: record.package_description,
           drop_code: record.drop_code,
           pickup_code: record.pickup_code,
-          customer_phone: record.customer_phone,
-          location_id: record.location_id
+          // Additional fields requested for card content
+          created_by_name: record.created_by_name ?? record.created_by ?? undefined,
+          reservation_awbno: record.reservation_awbno ?? record.awb_number ?? undefined,
+          location_name: record.location_name ?? currentLocationName,
         }));
       }
       

@@ -1,19 +1,31 @@
 import { Clock, Package, CheckCircle, XCircle, Eye, MapPin, User } from "lucide-react";
-import { Reservation } from "@/types";
+import { Reservation as UIReservation } from "@/types";
 import { Button } from "@/components/ui/button";
 
 interface ReservationCardProps {
-  reservation: Reservation;
-  onShowMore?: (reservation: Reservation) => void;
+  // Accept either UI shape or API shape to keep compatibility
+  reservation: UIReservation | (UIReservation & any);
+  onShowMore?: (reservation: any) => void;
 }
 
 export function ReservationCard({ reservation, onShowMore }: ReservationCardProps) {
+  const raw: any = reservation as any
+  const reservationStatus: string = raw.reservation_status || reservation.status || 'Unknown'
+  const podName: string = raw.pod_name || (reservation as any).podName
+  const createdByName: string | undefined = raw.created_by_name
+  const reservationAwbNo: string | undefined = raw.reservation_awbno
+  const locationName: string | undefined = raw.location_name
   const getStatusIcon = () => {
-    switch (reservation.status) {
+    const normalized = reservationStatus
+    switch (normalized) {
+      case 'DropPending':
+      case 'PickupPending':
       case 'pending':
         return <Clock className="w-5 h-5 text-yellow-500" />;
+      case 'PickupCompleted':
       case 'completed':
         return <CheckCircle className="w-5 h-5 text-green-500" />;
+      case 'DropCancelled':
       case 'cancelled':
         return <XCircle className="w-5 h-5 text-red-500" />;
       default:
@@ -22,28 +34,29 @@ export function ReservationCard({ reservation, onShowMore }: ReservationCardProp
   };
 
   const getStatusText = () => {
+    if (raw.reservation_status) return raw.reservation_status
     switch (reservation.status) {
-      case 'pending':
-        return 'Pending';
-      case 'completed':
-        return 'Completed';
-      case 'cancelled':
-        return 'Cancelled';
-      default:
-        return 'Unknown';
+      case 'pending': return 'Pending'
+      case 'completed': return 'Completed'
+      case 'cancelled': return 'Cancelled'
+      default: return 'Unknown'
     }
   };
 
   const getStatusColor = () => {
-    switch (reservation.status) {
+    switch (reservationStatus) {
+      case 'DropPending':
+      case 'PickupPending':
       case 'pending':
-        return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+        return 'text-yellow-700 bg-yellow-100 border-yellow-200';
+      case 'PickupCompleted':
       case 'completed':
-        return 'text-green-600 bg-green-50 border-green-200';
+        return 'text-green-700 bg-green-100 border-green-200';
+      case 'DropCancelled':
       case 'cancelled':
-        return 'text-red-600 bg-red-50 border-red-200';
+        return 'text-red-700 bg-red-100 border-red-200';
       default:
-        return 'text-gray-600 bg-gray-50 border-gray-200';
+        return 'text-gray-700 bg-gray-100 border-gray-200';
     }
   };
 
@@ -52,7 +65,7 @@ export function ReservationCard({ reservation, onShowMore }: ReservationCardProp
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center space-x-2">
           <Package className="w-5 h-5 text-primary" />
-          <span className="font-semibold text-foreground">{reservation.podName || (reservation as any).pod_name}</span>
+          <span className="font-semibold text-foreground">{podName}</span>
         </div>
         <div className={`flex items-center space-x-1 px-2 py-1 rounded-full border text-xs font-medium ${getStatusColor()}`}>
           {getStatusIcon()}
@@ -61,30 +74,30 @@ export function ReservationCard({ reservation, onShowMore }: ReservationCardProp
       </div>
       
       <div className="space-y-2 mb-4">
-        {(reservation.description || (reservation as any).package_description) && (
-          <p className="text-muted-foreground text-sm">{reservation.description || (reservation as any).package_description}</p>
+        {(reservation.description || raw.package_description) && (
+          <p className="text-muted-foreground text-sm">{reservation.description || raw.package_description}</p>
         )}
         
         {/* Additional Details */}
         <div className="grid grid-cols-2 gap-2 text-xs">
-          {(reservation as any).created_by && (
+          {createdByName && (
             <div className="flex items-center space-x-1">
               <User className="w-3 h-3 text-muted-foreground" />
-              <span className="text-muted-foreground">Created by: {(reservation as any).created_by}</span>
+              <span className="text-muted-foreground">Created by: {createdByName}</span>
             </div>
           )}
           
-          {(reservation as any).awb_number && (
+          {reservationAwbNo && (
             <div className="flex items-center space-x-1">
               <Package className="w-3 h-3 text-muted-foreground" />
-              <span className="text-muted-foreground">AWB: {(reservation as any).awb_number}</span>
+              <span className="text-muted-foreground">AWB: {reservationAwbNo}</span>
             </div>
           )}
           
-          {(reservation as any).location_name && (
+          {locationName && (
             <div className="flex items-center space-x-1 col-span-2">
               <MapPin className="w-3 h-3 text-muted-foreground" />
-              <span className="text-muted-foreground">Location: {(reservation as any).location_name}</span>
+              <span className="text-muted-foreground">Location: {locationName}</span>
             </div>
           )}
           
@@ -121,10 +134,10 @@ export function ReservationCard({ reservation, onShowMore }: ReservationCardProp
         
         {onShowMore && (
           <Button 
-            variant="ghost" 
+            variant="secondary" 
             size="sm" 
             onClick={() => onShowMore(reservation)}
-            className="text-primary hover:text-primary/80 h-6 px-2"
+            className="h-6 px-2 bg-yellow-200 text-black hover:bg-yellow-300 hover:text-black"
           >
             <Eye className="w-3 h-3 mr-1" />
             Show More
