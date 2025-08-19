@@ -86,12 +86,12 @@ export default function ReservationDetails() {
   const getOTPDisplay = (otpType: 'drop' | 'pickup') => {
     if (!reservationDetails) return '*****';
     
-    const status = reservationDetails.reservation_status?.toLowerCase();
+    const status = reservationDetails.reservation_status;
     
     if (otpType === 'drop') {
-      return status === 'drop pending' ? (reservationDetails.drop_otp || '*****') : '*****';
+      return status === 'DropPending' ? (reservationDetails.drop_otp || '*****') : '*****';
     } else {
-      return status === 'pickup pending' ? (reservationDetails.pickup_otp || '*****') : '*****';
+      return status === 'PickupPending' ? (reservationDetails.pickup_otp || '*****') : '*****';
     }
   };
 
@@ -167,18 +167,25 @@ export default function ReservationDetails() {
               <p className="text-sm font-medium text-muted-foreground">Location</p>
               <p className="text-base text-foreground">{reservationDetails.location_name || 'N/A'}</p>
             </div>
+            {/* OTP Section - Enhanced Styling */}
+            <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 p-4 mb-4">
+              <div className="text-center mb-3">
+                <h4 className="text-sm font-semibold text-primary mb-1">🔐 Access Codes</h4>
+                <p className="text-xs text-muted-foreground">Use these OTPs when prompted</p>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center p-3 rounded-lg bg-background/50 border">
+                  <p className="text-xs font-medium text-muted-foreground mb-1">Drop OTP</p>
+                  <p className="text-lg font-mono font-bold text-primary tracking-wider">{getOTPDisplay('drop')}</p>
+                </div>
+                <div className="text-center p-3 rounded-lg bg-background/50 border">
+                  <p className="text-xs font-medium text-muted-foreground mb-1">Pickup OTP</p>
+                  <p className="text-lg font-mono font-bold text-primary tracking-wider">{getOTPDisplay('pickup')}</p>
+                </div>
+              </div>
+            </Card>
             
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Drop OTP</p>
-                <p className="text-base font-mono text-primary font-bold">{getOTPDisplay('drop')}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Pickup OTP</p>
-                <p className="text-base font-mono text-primary font-bold">{getOTPDisplay('pickup')}</p>
-              </div>
-            </div>
-
             <div>
               <p className="text-sm font-medium text-muted-foreground">AWB Number</p>
               <p className="text-base text-foreground">{reservationDetails.reservation_awbno || 'N/A'}</p>
