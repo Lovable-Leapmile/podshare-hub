@@ -242,7 +242,7 @@ export default function Login() {
             <div className="text-center mb-8">
               
               <h1 className="text-foreground mb-2 text-3xl text-left font-bold">Verification Code</h1>
-              <p className="text-muted-foreground mb-1">Enter 6-digit OTP</p>
+              <p className="text-muted-foreground mb-1 text-left">Enter 6-digit OTP</p>
               <p className="text-sm text-muted-foreground text-left">
                 OTP sent to +91 {phoneNumber.replace(/(\d{5})(\d{5})/, '$1-$2')}
               </p>
