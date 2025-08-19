@@ -13,8 +13,9 @@ interface ReservationDetail {
   pod_name: string;
   pod_status: string;
   location_name: string;
-  drop_code: string;
-  pickup_code: string;
+  drop_otp: string;
+  pickup_otp: string;
+  reservation_status: string;
   reservation_awbno: string;
   user_flatno: string;
   drop_by_phone: string;
@@ -79,6 +80,18 @@ export default function ReservationDetails() {
       return new Date(dateString).toLocaleString();
     } catch {
       return dateString;
+    }
+  };
+
+  const getOTPDisplay = (otpType: 'drop' | 'pickup') => {
+    if (!reservationDetails) return '*****';
+    
+    const status = reservationDetails.reservation_status?.toLowerCase();
+    
+    if (otpType === 'drop') {
+      return status === 'drop pending' ? (reservationDetails.drop_otp || '*****') : '*****';
+    } else {
+      return status === 'pickup pending' ? (reservationDetails.pickup_otp || '*****') : '*****';
     }
   };
 
@@ -157,12 +170,12 @@ export default function ReservationDetails() {
             
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Drop Code</p>
-                <p className="text-base font-mono text-primary font-bold">{reservationDetails.drop_code || user?.user_dropcode || 'N/A'}</p>
+                <p className="text-sm font-medium text-muted-foreground">Drop OTP</p>
+                <p className="text-base font-mono text-primary font-bold">{getOTPDisplay('drop')}</p>
               </div>
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Pickup Code</p>
-                <p className="text-base font-mono text-primary font-bold">{reservationDetails.pickup_code || user?.user_pickupcode || 'N/A'}</p>
+                <p className="text-sm font-medium text-muted-foreground">Pickup OTP</p>
+                <p className="text-base font-mono text-primary font-bold">{getOTPDisplay('pickup')}</p>
               </div>
             </div>
 
