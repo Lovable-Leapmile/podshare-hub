@@ -240,7 +240,7 @@ export default function Login() {
           </> : <>
             {/* OTP Header */}
             <div className="text-center mb-8">
-              <img src={qikpodLogo} alt="Qikpod" className="w-auto h-12 mx-auto mb-6" />
+              
               <h1 className="text-2xl font-bold text-foreground mb-2">Verification Code</h1>
               <p className="text-muted-foreground mb-1">Enter 6-digit OTP</p>
               <p className="text-sm text-muted-foreground">
