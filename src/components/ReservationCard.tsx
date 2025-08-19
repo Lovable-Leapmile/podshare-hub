@@ -19,9 +19,10 @@ export function ReservationCard({ reservation, onShowMore }: ReservationCardProp
     const normalized = reservationStatus
     switch (normalized) {
       case 'DropPending':
-      case 'PickupPending':
       case 'pending':
         return <Clock className="w-5 h-5 text-yellow-500" />;
+      case 'PickupPending':
+        return <Clock className="w-5 h-5 text-blue-500" />;
       case 'PickupCompleted':
       case 'completed':
         return <CheckCircle className="w-5 h-5 text-green-500" />;
@@ -46,9 +47,10 @@ export function ReservationCard({ reservation, onShowMore }: ReservationCardProp
   const getStatusColor = () => {
     switch (reservationStatus) {
       case 'DropPending':
-      case 'PickupPending':
       case 'pending':
         return 'text-yellow-700 bg-yellow-100 border-yellow-200';
+      case 'PickupPending':
+        return 'text-blue-700 bg-blue-100 border-blue-200';
       case 'PickupCompleted':
       case 'completed':
         return 'text-green-700 bg-green-100 border-green-200';
