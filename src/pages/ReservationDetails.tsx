@@ -3,11 +3,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Package, Clock, ArrowLeft, MapPin, Phone, Calendar, User } from "lucide-react";
- 
 import { getUserData, isLoggedIn } from "@/utils/storage";
 import { useToast } from "@/hooks/use-toast";
 import { apiService } from "@/services/api";
-
 interface ReservationDetail {
   id: string;
   pod_name: string;
@@ -25,38 +23,35 @@ interface ReservationDetail {
   created_at: string;
   pickup_duration: string;
 }
-
 export default function ReservationDetails() {
   const navigate = useNavigate();
-  const { reservationId } = useParams();
-  const { toast } = useToast();
+  const {
+    reservationId
+  } = useParams();
+  const {
+    toast
+  } = useToast();
   const user = getUserData();
-  
   const [reservationDetails, setReservationDetails] = useState<ReservationDetail | null>(null);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     if (!isLoggedIn()) {
       navigate('/login');
       return;
     }
-
     if (!reservationId) {
       toast({
         title: "Error",
         description: "Reservation ID not found.",
-        variant: "destructive",
+        variant: "destructive"
       });
       navigate('/customer-dashboard');
       return;
     }
-
     loadReservationDetails();
   }, [navigate, reservationId]);
-
   const loadReservationDetails = async () => {
     if (!reservationId) return;
-
     try {
       setLoading(true);
       const details = await apiService.getReservationDetails(reservationId);
@@ -66,14 +61,13 @@ export default function ReservationDetails() {
       toast({
         title: "Error",
         description: "Failed to load reservation details.",
-        variant: "destructive",
+        variant: "destructive"
       });
       navigate('/customer-dashboard');
     } finally {
       setLoading(false);
     }
   };
-
   const formatDateTime = (dateString: string) => {
     if (!dateString) return 'N/A';
     try {
@@ -82,22 +76,17 @@ export default function ReservationDetails() {
       return dateString;
     }
   };
-
   const getOTPDisplay = (otpType: 'drop' | 'pickup') => {
     if (!reservationDetails) return '*****';
-    
     const status = reservationDetails.reservation_status;
-    
     if (otpType === 'drop') {
-      return status === 'DropPending' ? (reservationDetails.drop_otp || '*****') : '*****';
+      return status === 'DropPending' ? reservationDetails.drop_otp || '*****' : '*****';
     } else {
-      return status === 'PickupPending' ? (reservationDetails.pickup_otp || '*****') : '*****';
+      return status === 'PickupPending' ? reservationDetails.pickup_otp || '*****' : '*****';
     }
   };
-
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
+    return <div className="min-h-screen bg-background">
         <div className="mobile-container">
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
@@ -106,30 +95,21 @@ export default function ReservationDetails() {
             </div>
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
   if (!reservationDetails) {
-    return (
-      <div className="min-h-screen bg-background">
+    return <div className="min-h-screen bg-background">
         <div className="mobile-container">
           <div className="text-center py-20">
             <p className="text-muted-foreground">Reservation details not found.</p>
-            <Button 
-              onClick={() => navigate('/customer-dashboard')}
-              className="mt-4"
-            >
+            <Button onClick={() => navigate('/customer-dashboard')} className="mt-4">
               Back to Dashboard
             </Button>
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       
       <div className="mobile-container space-y-6">
         {/* Header Card */}
@@ -140,15 +120,10 @@ export default function ReservationDetails() {
                 <Package className="w-8 h-8 opacity-30" />
                 <div>
                   <h2 className="text-lg font-bold">{reservationDetails.pod_name}</h2>
-                  <p className="text-sm opacity-80">Status: {reservationDetails.pod_status}</p>
+                  
                 </div>
               </div>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => navigate('/customer-dashboard')}
-                className="h-8 w-8 p-0 text-qikpod-black hover:bg-black/10"
-              >
+              <Button variant="ghost" size="sm" onClick={() => navigate('/customer-dashboard')} className="h-8 w-8 p-0 text-qikpod-black hover:bg-black/10">
                 <ArrowLeft className="w-4 h-4" />
               </Button>
             </div>
@@ -250,14 +225,10 @@ export default function ReservationDetails() {
 
         {/* Action Buttons */}
         <div className="space-y-3 pb-6">
-          <Button 
-            onClick={() => navigate('/customer-dashboard')}
-            className="btn-qikpod w-full h-12"
-          >
+          <Button onClick={() => navigate('/customer-dashboard')} className="btn-qikpod w-full h-12">
             Back to Dashboard
           </Button>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 }
