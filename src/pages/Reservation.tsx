@@ -3,8 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Package, Clock, ArrowLeft } from "lucide-react";
-import { Header } from "@/components/Header";
+import { Package, Clock } from "lucide-react";
 import { getUserData, getPodValue, getLocationName, isLoggedIn } from "@/utils/storage";
 import { useToast } from "@/hooks/use-toast";
 import { apiService } from "@/services/api";
@@ -84,8 +83,6 @@ export default function Reservation() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header title="Create Reservation" />
-      
       <div className="mobile-container space-y-6">
         {/* User & Location Info */}
         <Card className="card-3d bg-gradient-primary p-6 text-qikpod-black animate-fade-in">
@@ -98,14 +95,7 @@ export default function Reservation() {
                   <p className="text-sm opacity-80">Location</p>
                 </div>
               </div>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => navigate('/customer-dashboard')}
-                className="h-8 w-8 p-0 text-qikpod-black hover:bg-black/10"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </Button>
+              
             </div>
             <div className="grid grid-cols-1 gap-2 mt-4">
               <div>

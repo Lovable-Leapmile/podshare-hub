@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { User, Phone, Mail, MapPin, CreditCard, Home } from "lucide-react";
-import { Header } from "@/components/Header";
+ 
 import { getUserData, isLoggedIn } from "@/utils/storage";
 
 export default function Profile() {
@@ -61,21 +61,7 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-qikpod-light-bg px-4 py-4">
-        <div className="flex items-center max-w-md mx-auto">
-          <Button
-            variant="ghost" 
-            size="sm"
-            onClick={() => navigate(-1)}
-            className="mr-3 h-8 w-8 p-0"
-          >
-            ←
-          </Button>
-          <span className="font-semibold text-foreground">Profile</span>
-        </div>
-      </div>
-
+      
       {/* Main Content */}
       <div className="p-4 max-w-md mx-auto space-y-6">
         {/* Profile Header */}

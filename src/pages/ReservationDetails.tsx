@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Package, Clock, ArrowLeft, MapPin, Phone, Calendar, User } from "lucide-react";
-import { Header } from "@/components/Header";
+ 
 import { getUserData, isLoggedIn } from "@/utils/storage";
 import { useToast } from "@/hooks/use-toast";
 import { apiService } from "@/services/api";
@@ -85,7 +85,6 @@ export default function ReservationDetails() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header title="Reservation Details" />
         <div className="mobile-container">
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
@@ -101,7 +100,6 @@ export default function ReservationDetails() {
   if (!reservationDetails) {
     return (
       <div className="min-h-screen bg-background">
-        <Header title="Reservation Details" />
         <div className="mobile-container">
           <div className="text-center py-20">
             <p className="text-muted-foreground">Reservation details not found.</p>
@@ -119,7 +117,6 @@ export default function ReservationDetails() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header title="Reservation Details" />
       
       <div className="mobile-container space-y-6">
         {/* Header Card */}

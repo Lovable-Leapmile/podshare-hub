@@ -1,12 +1,7 @@
-import { useState } from "react";
-import { Settings, User, MapPin, HelpCircle, LogOut } from "lucide-react";
+import { useMemo, useState } from "react";
+import { User, MapPin, HelpCircle, LogOut, Menu } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+ 
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,17 +13,27 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { clearUserData, clearPodValue } from "@/utils/storage";
-import qikpodLogo from "@/assets/qikpod-logo.png";
+import { getUserData } from "@/utils/storage";
 
 interface HeaderProps {
-  title: string;
+  title: string; // kept for compatibility; not displayed per new design
   showSettings?: boolean;
 }
 
 export function Header({ title, showSettings = true }: HeaderProps) {
   const navigate = useNavigate();
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const user = getUserData();
+  const roleText = useMemo(() => {
+    const userType = user?.user_type;
+    if (!userType) return "";
+    if (userType === 'Customer') return 'Customer';
+    if (userType === 'SiteSecurity') return 'Site Security';
+    if (userType === 'SiteAdmin') return 'Site Admin';
+    return userType;
+  }, [user]);
 
   const handleLogout = () => {
     clearUserData();
@@ -38,45 +43,65 @@ export function Header({ title, showSettings = true }: HeaderProps) {
 
   return (
     <>
-      <header className="bg-gradient-primary shadow-md sticky top-0 z-50">
-        <div className="mobile-container flex items-center justify-between py-4">
-          {/* Logo */}
+      <header className="bg-gradient-primary sticky top-0 z-50">
+        <div className="mobile-container flex items-center justify-between py-3">
           <div className="flex items-center space-x-3">
-            <img src={qikpodLogo} alt="Qikpod" className="w-10 h-10 rounded-lg" />
-            <span className="text-qikpod-black font-bold text-lg">{title}</span>
+            <img src="https://leapmile-website.blr1.cdn.digitaloceanspaces.com/Qikpod/Images/q70.png" alt="Qikpod" className="h-8 w-auto" />
+            <span className="text-qikpod-black font-semibold text-sm">{roleText}</span>
           </div>
 
-          {/* Settings Menu */}
           {showSettings && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="text-qikpod-black hover:bg-black/10">
-                  <Settings className="w-6 h-6" />
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="sm" className="text-qikpod-black hover:bg-black/10 h-8 w-8 p-0">
+                  <Menu className="w-5 h-5" />
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={() => navigate('/customer-dashboard')}>
-                  <User className="w-4 h-4 mr-2" />
-                  Home
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/locations')}>
-                  <MapPin className="w-4 h-4 mr-2" />
-                  Locations
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/profile')}>
-                  <User className="w-4 h-4 mr-2" />
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/support')}>
-                  <HelpCircle className="w-4 h-4 mr-2" />
-                  Support
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setShowLogoutDialog(true)}>
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </SheetTrigger>
+              <SheetContent side="right" className="p-0">
+                <div className="h-full w-full flex flex-col">
+                  <div className="px-4 py-4 border-b">
+                    <div className="flex items-center space-x-3">
+                      <img src="https://leapmile-website.blr1.cdn.digitaloceanspaces.com/Qikpod/Images/q70.png" alt="Qikpod" className="w-8 h-8" />
+                      <span className="font-semibold text-foreground">Menu</span>
+                    </div>
+                  </div>
+                  <div className="flex-1 overflow-auto">
+                    <div className="py-2">
+                      <SheetClose asChild>
+                        <Button variant="ghost" className="w-full justify-start h-12 px-4 rounded-none" onClick={() => navigate('/customer-dashboard')}>
+                          <User className="mr-3 h-4 w-4" />
+                          Home
+                        </Button>
+                      </SheetClose>
+                      <SheetClose asChild>
+                        <Button variant="ghost" className="w-full justify-start h-12 px-4 rounded-none" onClick={() => navigate('/locations')}>
+                          <MapPin className="mr-3 h-4 w-4" />
+                          Locations
+                        </Button>
+                      </SheetClose>
+                      <SheetClose asChild>
+                        <Button variant="ghost" className="w-full justify-start h-12 px-4 rounded-none" onClick={() => navigate('/profile')}>
+                          <User className="mr-3 h-4 w-4" />
+                          Profile
+                        </Button>
+                      </SheetClose>
+                      <SheetClose asChild>
+                        <Button variant="ghost" className="w-full justify-start h-12 px-4 rounded-none" onClick={() => navigate('/support')}>
+                          <HelpCircle className="mr-3 h-4 w-4" />
+                          Support
+                        </Button>
+                      </SheetClose>
+                    </div>
+                  </div>
+                  <div className="border-t">
+                    <Button variant="ghost" className="w-full justify-start h-12 px-4 rounded-none text-red-600" onClick={() => setShowLogoutDialog(true)}>
+                      <LogOut className="mr-3 h-4 w-4" />
+                      Logout
+                    </Button>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           )}
         </div>
       </header>

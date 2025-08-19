@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { PageLayout } from "@/components/PageLayout";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Registration from "./pages/Registration";
@@ -26,19 +27,19 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/registration" element={<Registration />} />
-          <Route path="/customer-dashboard" element={<CustomerDashboard />} />
-          <Route path="/site-admin-dashboard" element={<SiteAdminDashboard />} />
-          <Route path="/site-security-dashboard" element={<SiteSecurityDashboard />} />
-          <Route path="/locations" element={<Locations />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/support" element={<Support />} />
-          <Route path="/reservation" element={<Reservation />} />
-          <Route path="/reservation-details/:reservationId" element={<ReservationDetails />} />
+          <Route path="/" element={<PageLayout pageTitle="Login" showBack={false} showSettings={false}><Index /></PageLayout>} />
+          <Route path="/login" element={<PageLayout pageTitle="Login" showBack={false} showSettings={false}><Login /></PageLayout>} />
+          <Route path="/registration" element={<PageLayout pageTitle="Registration" showBack={true} showSettings={false}><Registration /></PageLayout>} />
+          <Route path="/customer-dashboard" element={<PageLayout pageTitle="Customer Dashboard" showBack={false}><CustomerDashboard /></PageLayout>} />
+          <Route path="/site-admin-dashboard" element={<PageLayout pageTitle="Site Admin" showBack={true}><SiteAdminDashboard /></PageLayout>} />
+          <Route path="/site-security-dashboard" element={<PageLayout pageTitle="Site Security" showBack={true}><SiteSecurityDashboard /></PageLayout>} />
+          <Route path="/locations" element={<PageLayout pageTitle="Your Locations" showBack={true}><Locations /></PageLayout>} />
+          <Route path="/profile" element={<PageLayout pageTitle="Profile" showBack={true}><Profile /></PageLayout>} />
+          <Route path="/support" element={<PageLayout pageTitle="Support" showBack={true}><Support /></PageLayout>} />
+          <Route path="/reservation" element={<PageLayout pageTitle="Create Reservation" showBack={true}><Reservation /></PageLayout>} />
+          <Route path="/reservation-details/:reservationId" element={<PageLayout pageTitle="Reservation Details" showBack={true}><ReservationDetails /></PageLayout>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
+          <Route path="*" element={<PageLayout pageTitle="Not Found" showBack={true}><NotFound /></PageLayout>} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

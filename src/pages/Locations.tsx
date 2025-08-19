@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, ChevronRight, Plus } from "lucide-react";
-import { Header } from "@/components/Header";
+ 
 import { getUserData, isLoggedIn, saveLastLocation, saveLocationId } from "@/utils/storage";
 import { UserLocation } from "@/services/api";
 import { apiService } from "@/services/api";
@@ -54,21 +54,6 @@ export default function Locations() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-qikpod-light-bg px-4 py-4">
-        <div className="flex items-center max-w-md mx-auto">
-          <Button
-            variant="ghost" 
-            size="sm"
-            onClick={() => navigate(-1)}
-            className="mr-3 h-8 w-8 p-0"
-          >
-            ←
-          </Button>
-          <span className="font-semibold text-foreground">Your Locations</span>
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className="p-4 max-w-md mx-auto">
         <div className="space-y-6">

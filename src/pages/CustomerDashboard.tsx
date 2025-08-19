@@ -205,50 +205,6 @@ export default function CustomerDashboard() {
     }
   };
   return <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-[#FAE55A] px-4 py-4">
-        <div className="flex items-center justify-between max-w-md mx-auto">
-          <div className="flex items-center space-x-3">
-            <img src={qikpodLogo} alt="Qikpod" className="w-auto h-6" />
-            <span className="font-semibold text-foreground">Customer</span>
-          </div>
-          
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <Settings className="h-4 w-4" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-full sm:w-80">
-              <SheetHeader>
-                <SheetTitle>Settings</SheetTitle>
-              </SheetHeader>
-              <div className="py-6 space-y-2">
-                <Button variant="ghost" className="w-full justify-start h-12 px-4" onClick={() => navigate('/customer-dashboard')}>
-                  <Home className="mr-3 h-4 w-4" />
-                  Home
-                </Button>
-                <Button variant="ghost" className="w-full justify-start h-12 px-4" onClick={() => navigate('/locations')}>
-                  <MapPin className="mr-3 h-4 w-4" />
-                  Locations
-                </Button>
-                <Button variant="ghost" className="w-full justify-start h-12 px-4" onClick={() => navigate('/profile')}>
-                  <User className="mr-3 h-4 w-4" />
-                  Profile
-                </Button>
-                <Button variant="ghost" className="w-full justify-start h-12 px-4" onClick={() => navigate('/support')}>
-                  <HelpCircle className="mr-3 h-4 w-4" />
-                  Support
-                </Button>
-                <Button variant="ghost" className="w-full justify-start h-12 px-4" onClick={() => setShowLogoutDialog(true)}>
-                  <LogOut className="mr-3 h-4 w-4" />
-                  Logout
-                </Button>
-              </div>
-            </SheetContent>
-          </Sheet>
-        </div>
-      </div>
 
       {/* Create Reservation Button */}
       <div className="px-4 py-4 max-w-md mx-auto">
@@ -279,11 +235,11 @@ export default function CustomerDashboard() {
           </TabsContent>
 
           <TabsContent value="history" className="space-y-4 mt-6">
-            <div className="flex space-x-2 mb-4">
-              <Button variant={historyFilter === 'PickupCompleted' ? 'default' : 'outline'} size="sm" onClick={() => handleHistoryFilterChange('PickupCompleted')}>
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              <Button variant={historyFilter === 'PickupCompleted' ? 'default' : 'outline'} className="h-12 text-sm" onClick={() => handleHistoryFilterChange('PickupCompleted')}>
                 Pickup Completed
               </Button>
-              <Button variant={historyFilter === 'DropCancelled' ? 'default' : 'outline'} size="sm" onClick={() => handleHistoryFilterChange('DropCancelled')}>
+              <Button variant={historyFilter === 'DropCancelled' ? 'default' : 'outline'} className="h-12 text-sm" onClick={() => handleHistoryFilterChange('DropCancelled')}>
                 Drop Cancelled
               </Button>
             </div>

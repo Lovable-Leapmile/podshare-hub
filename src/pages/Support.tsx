@@ -6,7 +6,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { HelpCircle, Phone, Mail, MessageSquare } from "lucide-react";
-import { Header } from "@/components/Header";
 import { getUserData, isLoggedIn } from "@/utils/storage";
 import { useToast } from "@/hooks/use-toast";
 
@@ -75,8 +74,6 @@ export default function Support() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header title="Support" />
-      
       <div className="mobile-container space-y-6">
         <div className="animate-fade-in">
           <h1 className="text-2xl font-bold text-foreground mb-2">
