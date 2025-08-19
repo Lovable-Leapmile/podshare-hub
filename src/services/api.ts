@@ -309,5 +309,77 @@ export const apiService = {
     }
 
     return response.json();
+  },
+
+  // Check for available doors at a location
+  checkFreeDoor: async (locationId: string): Promise<boolean> => {
+    const authToken = localStorage.getItem('auth_token');
+    const authorization = authToken ? `Bearer ${authToken}` : AUTH_TOKEN;
+
+    const response = await fetch(`${API_BASE_URL}/doors/free_door/?location_id=${locationId}`, {
+      method: 'GET',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': authorization,
+      },
+    });
+
+    if (!response.ok) {
+      return false;
+    }
+
+    const data = await response.json();
+    return data.statusbool || false;
+  },
+
+  // Create a new reservation
+  createReservation: async (reservationData: {
+    created_by_phone: string;
+    drop_by_phone: string;
+    pickup_by_phone: string;
+    pod_id: string;
+    reservation_awbno: string;
+  }): Promise<{ reservation_id: string }> => {
+    const authToken = localStorage.getItem('auth_token');
+    const authorization = authToken ? `Bearer ${authToken}` : AUTH_TOKEN;
+
+    const response = await fetch(`${API_BASE_URL}/reservations/create`, {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': authorization,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(reservationData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to create reservation');
+    }
+
+    const data = await response.json();
+    return { reservation_id: data.reservation_id || data.id };
+  },
+
+  // Get reservation details by ID
+  getReservationDetails: async (reservationId: string): Promise<any> => {
+    const authToken = localStorage.getItem('auth_token');
+    const authorization = authToken ? `Bearer ${authToken}` : AUTH_TOKEN;
+
+    const response = await fetch(`${API_BASE_URL}/reservations/?record_id=${reservationId}`, {
+      method: 'GET',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': authorization,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch reservation details');
+    }
+
+    const data = await response.json();
+    return data.records?.[0] || data;
   }
 };

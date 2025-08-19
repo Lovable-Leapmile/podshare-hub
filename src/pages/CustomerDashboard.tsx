@@ -131,10 +131,44 @@ export default function CustomerDashboard() {
     localStorage.clear();
     navigate('/login');
   };
+  const handleCreateReservation = async () => {
+    const locationId = getLocationId();
+    if (!locationId) {
+      toast({
+        title: "Error",
+        description: "No location selected. Please select a location first.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const hasFreeDoor = await apiService.checkFreeDoor(locationId);
+      
+      if (hasFreeDoor) {
+        navigate('/reservation');
+      } else {
+        toast({
+          title: "No doors available",
+          description: "No doors available at this location.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error checking door availability:', error);
+      toast({
+        title: "No doors available",
+        description: "No doors available.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleShowMoreReservation = (reservation: APIReservation) => {
-    // Navigate to reservation details page (to be implemented)
-    console.log('Show more for reservation:', reservation);
-    // navigate(`/reservation-details/${reservation.id}`);
+    navigate(`/reservation-details/${reservation.id}`);
   };
 
   const renderReservationCard = (reservation: APIReservation) => {
@@ -218,7 +252,7 @@ export default function CustomerDashboard() {
 
       {/* Create Reservation Button */}
       <div className="px-4 py-4 max-w-md mx-auto">
-        <Button onClick={() => navigate('/reservation')} className="btn-primary w-full h-12 text-base font-semibold">
+        <Button onClick={handleCreateReservation} className="btn-primary w-full h-12 text-base font-semibold">
           Create Reservation
         </Button>
       </div>

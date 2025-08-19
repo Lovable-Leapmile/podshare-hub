@@ -7,6 +7,7 @@ import { Package, Clock, ArrowLeft } from "lucide-react";
 import { Header } from "@/components/Header";
 import { getUserData, getPodValue, getLocationName, isLoggedIn } from "@/utils/storage";
 import { useToast } from "@/hooks/use-toast";
+import { apiService } from "@/services/api";
 
 export default function Reservation() {
   const navigate = useNavigate();
@@ -41,17 +42,44 @@ export default function Reservation() {
       return;
     }
 
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "User information not found.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     
-    // Simulate reservation creation
-    setTimeout(() => {
+    try {
+      const reservationData = {
+        created_by_phone: user.user_phone,
+        drop_by_phone: formData.executivePhone,
+        pickup_by_phone: user.user_phone,
+        pod_id: "1001763",
+        reservation_awbno: formData.awbNumber
+      };
+
+      const response = await apiService.createReservation(reservationData);
+      
       toast({
         title: "Reservation Created",
-        description: `Your reservation has been created successfully.`,
+        description: "Your reservation has been created successfully.",
       });
       
-      navigate('/customer-dashboard');
-    }, 2000);
+      navigate(`/reservation-details/${response.reservation_id}`);
+    } catch (error: any) {
+      console.error('Error creating reservation:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create reservation.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
