@@ -190,8 +190,8 @@ export default function Login() {
             {/* Header */}
             <div className="text-center mb-8">
               
-              <h1 className="font-bold text-foreground mb-2 text-4xl">Login</h1>
-              <p className="text-muted-foreground">Sign in with your registered mobile number</p>
+              <h1 className="font-bold text-foreground mb-2 text-4xl text-left">Login</h1>
+              <p className="text-muted-foreground text-left">Sign in with your registered mobile number</p>
             </div>
 
             {/* Phone Input Form */}
