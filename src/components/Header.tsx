@@ -1,28 +1,19 @@
 import { useMemo, useState } from "react";
 import { User, MapPin, HelpCircle, LogOut, Menu } from "lucide-react";
 import { useNavigate } from "react-router-dom";
- 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { clearUserData, clearPodValue } from "@/utils/storage";
 import { getUserData } from "@/utils/storage";
-
 interface HeaderProps {
   title: string; // kept for compatibility; not displayed per new design
   showSettings?: boolean;
 }
-
-export function Header({ title, showSettings = true }: HeaderProps) {
+export function Header({
+  title,
+  showSettings = true
+}: HeaderProps) {
   const navigate = useNavigate();
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const user = getUserData();
@@ -34,24 +25,20 @@ export function Header({ title, showSettings = true }: HeaderProps) {
     if (userType === 'SiteAdmin') return 'Site Admin';
     return userType;
   }, [user]);
-
   const handleLogout = () => {
     clearUserData();
     clearPodValue();
     navigate('/login');
   };
-
-  return (
-    <>
+  return <>
       <header className="bg-gradient-primary sticky top-0 z-50">
         <div className="mobile-container flex items-center justify-between py-3">
           <div className="flex items-center space-x-3">
             <img src="https://leapmile-website.blr1.cdn.digitaloceanspaces.com/Qikpod/Images/q70.png" alt="Qikpod" className="h-8 w-auto" />
-            <span className="text-qikpod-black font-semibold text-sm">{roleText}</span>
+            <span className="text-qikpod-black font-semibold text-xs">{roleText}</span>
           </div>
 
-          {showSettings && (
-            <Sheet>
+          {showSettings && <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="sm" className="text-qikpod-black hover:bg-black/10 h-8 w-8 p-0">
                   <Menu className="w-5 h-5" />
@@ -61,8 +48,8 @@ export function Header({ title, showSettings = true }: HeaderProps) {
                 <div className="h-full w-full flex flex-col">
                   <div className="px-4 py-4 border-b">
                     <div className="flex items-center space-x-3">
-                      <img src="https://leapmile-website.blr1.cdn.digitaloceanspaces.com/Qikpod/Images/q70.png" alt="Qikpod" className="w-8 h-8" />
-                      <span className="font-semibold text-foreground">Menu</span>
+                      <img src="https://leapmile-website.blr1.cdn.digitaloceanspaces.com/Qikpod/Images/q70.png" alt="Qikpod" className="w-auto h-8" />
+                      <span className="font-semibold text-foreground text-sm">Menu</span>
                     </div>
                   </div>
                   <div className="flex-1 overflow-auto">
@@ -101,8 +88,7 @@ export function Header({ title, showSettings = true }: HeaderProps) {
                   </div>
                 </div>
               </SheetContent>
-            </Sheet>
-          )}
+            </Sheet>}
         </div>
       </header>
 
@@ -122,6 +108,5 @@ export function Header({ title, showSettings = true }: HeaderProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
-  );
+    </>;
 }
