@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ReservationCard } from "@/components/ReservationCard";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 const qikpodLogo = "https://leapmile-website.blr1.cdn.digitaloceanspaces.com/Qikpod/Images/q70.png";
 export default function CustomerDashboard() {
   const navigate = useNavigate();
@@ -25,6 +26,12 @@ export default function CustomerDashboard() {
   const [loading, setLoading] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [activeTab, setActiveTab] = useState('drop-pending');
+  
+  // Pagination states
+  const [dropPendingPage, setDropPendingPage] = useState(1);
+  const [pickupPendingPage, setPickupPendingPage] = useState(1);
+  const [historyPage, setHistoryPage] = useState(1);
+  const itemsPerPage = 5;
   useEffect(() => {
     if (!isLoggedIn()) {
       navigate('/login');
@@ -180,6 +187,53 @@ export default function CustomerDashboard() {
       />
     );
   };
+
+  // Pagination helpers
+  const paginateReservations = (reservations: APIReservation[], page: number) => {
+    const startIndex = (page - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return reservations.slice(startIndex, endIndex);
+  };
+
+  const getTotalPages = (reservations: APIReservation[]) => {
+    return Math.ceil(reservations.length / itemsPerPage);
+  };
+
+  const renderPagination = (currentPage: number, totalPages: number, onPageChange: (page: number) => void) => {
+    if (totalPages <= 1) return null;
+
+    return (
+      <Pagination className="mt-4">
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious 
+              onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+              className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+            />
+          </PaginationItem>
+          
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <PaginationItem key={page}>
+              <PaginationLink
+                onClick={() => onPageChange(page)}
+                isActive={page === currentPage}
+                className="cursor-pointer"
+              >
+                {page}
+              </PaginationLink>
+            </PaginationItem>
+          ))}
+          
+          <PaginationItem>
+            <PaginationNext 
+              onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+              className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
+    );
+  };
   const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
     switch (status) {
       case 'DropPending':
@@ -212,15 +266,37 @@ export default function CustomerDashboard() {
           </TabsList>
 
           <TabsContent value="drop-pending" className="space-y-4 mt-6">
-            {loading ? <div className="text-center py-8">Loading...</div> : dropPendingReservations.length > 0 ? dropPendingReservations.map(renderReservationCard) : <div className="text-center py-8 text-muted-foreground">
+            {loading ? (
+              <div className="text-center py-8">Loading...</div>
+            ) : dropPendingReservations.length > 0 ? (
+              <>
+                <div className="space-y-4">
+                  {paginateReservations(dropPendingReservations, dropPendingPage).map(renderReservationCard)}
+                </div>
+                {renderPagination(dropPendingPage, getTotalPages(dropPendingReservations), setDropPendingPage)}
+              </>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
                 No drop pending reservations
-              </div>}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="pickup-pending" className="space-y-4 mt-6">
-            {loading ? <div className="text-center py-8">Loading...</div> : pickupPendingReservations.length > 0 ? pickupPendingReservations.map(renderReservationCard) : <div className="text-center py-8 text-muted-foreground">
+            {loading ? (
+              <div className="text-center py-8">Loading...</div>
+            ) : pickupPendingReservations.length > 0 ? (
+              <>
+                <div className="space-y-4">
+                  {paginateReservations(pickupPendingReservations, pickupPendingPage).map(renderReservationCard)}
+                </div>
+                {renderPagination(pickupPendingPage, getTotalPages(pickupPendingReservations), setPickupPendingPage)}
+              </>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
                 No pickup pending reservations
-              </div>}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="history" className="space-y-4 mt-6">
@@ -233,9 +309,20 @@ export default function CustomerDashboard() {
               </Button>
             </div>
             
-            {loading ? <div className="text-center py-8">Loading...</div> : historyReservations.length > 0 ? historyReservations.map(renderReservationCard) : <div className="text-center py-8 text-muted-foreground">
+            {loading ? (
+              <div className="text-center py-8">Loading...</div>
+            ) : historyReservations.length > 0 ? (
+              <>
+                <div className="space-y-4">
+                  {paginateReservations(historyReservations, historyPage).map(renderReservationCard)}
+                </div>
+                {renderPagination(historyPage, getTotalPages(historyReservations), setHistoryPage)}
+              </>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
                 No {historyFilter.replace(/([A-Z])/g, ' $1').toLowerCase()} reservations
-              </div>}
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </div>

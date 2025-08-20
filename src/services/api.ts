@@ -388,5 +388,45 @@ export const apiService = {
 
     const data = await response.json();
     return data.records?.[0] || data;
+  },
+
+  // Re-send Drop OTP
+  resendDropOTP: async (reservationId: string): Promise<any> => {
+    const authToken = localStorage.getItem('auth_token');
+    const authorization = authToken ? `Bearer ${authToken}` : AUTH_TOKEN;
+
+    const response = await fetch(`${API_BASE_URL}/reservations/resend_otp/?reservation_id=${reservationId}&otp_type=drop_otp`, {
+      method: 'GET',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': authorization,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to resend drop OTP');
+    }
+
+    return response.json();
+  },
+
+  // Cancel Reservation
+  cancelReservation: async (reservationId: string): Promise<any> => {
+    const authToken = localStorage.getItem('auth_token');
+    const authorization = authToken ? `Bearer ${authToken}` : AUTH_TOKEN;
+
+    const response = await fetch(`${API_BASE_URL}/reservations/cancel/${reservationId}`, {
+      method: 'PATCH',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': authorization,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to cancel reservation');
+    }
+
+    return response.json();
   }
 };

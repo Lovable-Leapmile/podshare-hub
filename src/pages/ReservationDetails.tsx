@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Package, Clock, ArrowLeft, MapPin, Phone, Calendar, User } from "lucide-react";
+import { Package, Clock, ArrowLeft, MapPin, Phone, Calendar, User, RotateCcw, X } from "lucide-react";
 import { getUserData, isLoggedIn } from "@/utils/storage";
 import { useToast } from "@/hooks/use-toast";
 import { apiService } from "@/services/api";
@@ -34,6 +34,7 @@ export default function ReservationDetails() {
   const user = getUserData();
   const [reservationDetails, setReservationDetails] = useState<ReservationDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
   useEffect(() => {
     if (!isLoggedIn()) {
       navigate('/login');
@@ -85,6 +86,59 @@ export default function ReservationDetails() {
       return status === 'PickupPending' ? reservationDetails.pickup_otp || '*****' : '*****';
     }
   };
+
+  const handleResendDropOTP = async () => {
+    if (!reservationId || !reservationDetails) return;
+    
+    setActionLoading(true);
+    try {
+      await apiService.resendDropOTP(reservationId);
+      toast({
+        title: "Success",
+        description: "Drop OTP has been resent successfully.",
+        variant: "default"
+      });
+    } catch (error: any) {
+      console.error('Error resending drop OTP:', error);
+      toast({
+        title: "Error",
+        description: "Failed to resend drop OTP. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleCancelReservation = async () => {
+    if (!reservationId || !reservationDetails) return;
+    
+    setActionLoading(true);
+    try {
+      await apiService.cancelReservation(reservationId);
+      toast({
+        title: "Success",
+        description: "Reservation has been cancelled successfully.",
+        variant: "default"
+      });
+      // Refresh reservation details or navigate back
+      setTimeout(() => {
+        navigate('/customer-dashboard');
+      }, 1500);
+    } catch (error: any) {
+      console.error('Error cancelling reservation:', error);
+      toast({
+        title: "Error",
+        description: "Failed to cancel reservation. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const canResendDropOTP = reservationDetails?.reservation_status === 'DropPending';
+  const canCancelReservation = reservationDetails?.reservation_status === 'DropPending' || reservationDetails?.reservation_status === 'PickupPending';
   if (loading) {
     return <div className="min-h-screen bg-background">
         <div className="mobile-container">
@@ -225,6 +279,28 @@ export default function ReservationDetails() {
 
         {/* Action Buttons */}
         <div className="space-y-3 pb-6">
+          {/* Re-send Drop OTP Button */}
+          <Button 
+            onClick={handleResendDropOTP}
+            disabled={!canResendDropOTP || actionLoading}
+            variant="outline"
+            className="w-full h-12 flex items-center justify-center space-x-2"
+          >
+            <RotateCcw className={`w-4 h-4 ${actionLoading ? 'animate-spin' : ''}`} />
+            <span>Re-send Drop OTP</span>
+          </Button>
+
+          {/* Cancel Reservation Button */}
+          <Button 
+            onClick={handleCancelReservation}
+            disabled={!canCancelReservation || actionLoading}
+            variant="destructive"
+            className="w-full h-12 flex items-center justify-center space-x-2"
+          >
+            <X className="w-4 h-4" />
+            <span>Cancel Reservation</span>
+          </Button>
+
           <Button onClick={() => navigate('/customer-dashboard')} className="btn-qikpod w-full h-12">
             Back to Dashboard
           </Button>
