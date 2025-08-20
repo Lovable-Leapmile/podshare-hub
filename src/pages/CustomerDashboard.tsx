@@ -108,11 +108,7 @@ export default function CustomerDashboard() {
       setHistoryReservations(historyFilter === 'PickupCompleted' ? pickupCompleted : dropCancelled);
     } catch (error) {
       console.error('Error loading reservations:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load reservations",
-        variant: "destructive"
-      });
+      // Don't show toast for API errors - let the empty state handle it
     } finally {
       setLoading(false);
     }
@@ -297,8 +293,10 @@ export default function CustomerDashboard() {
                 {renderPagination(dropPendingPage, getTotalPages(dropPendingReservations), setDropPendingPage)}
               </>
             ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                No drop pending reservations
+              <div className="text-center py-12 text-muted-foreground">
+                <Package className="mx-auto h-12 w-12 mb-4 opacity-50" />
+                <p className="text-lg font-medium mb-2">No Reservations</p>
+                <p className="text-sm">There is No Reservation, Please Create Reservation</p>
               </div>
             )}
           </TabsContent>
@@ -314,8 +312,10 @@ export default function CustomerDashboard() {
                 {renderPagination(pickupPendingPage, getTotalPages(pickupPendingReservations), setPickupPendingPage)}
               </>
             ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                No pickup pending reservations
+              <div className="text-center py-12 text-muted-foreground">
+                <Clock className="mx-auto h-12 w-12 mb-4 opacity-50" />
+                <p className="text-lg font-medium mb-2">No Reservations</p>
+                <p className="text-sm">There is No Reservation, Please Create Reservation</p>
               </div>
             )}
           </TabsContent>
@@ -340,8 +340,10 @@ export default function CustomerDashboard() {
                 {renderPagination(historyPage, getTotalPages(historyReservations), setHistoryPage)}
               </>
             ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                No {historyFilter.replace(/([A-Z])/g, ' $1').toLowerCase()} reservations
+              <div className="text-center py-12 text-muted-foreground">
+                <Package className="mx-auto h-12 w-12 mb-4 opacity-50" />
+                <p className="text-lg font-medium mb-2">No Reservations</p>
+                <p className="text-sm">There is No Reservation, Please Create Reservation</p>
               </div>
             )}
           </TabsContent>

@@ -259,11 +259,16 @@ export const apiService = {
         }
       );
 
+      const data = await response.json();
+      
+      // Handle 404 "Records not found" gracefully
+      if (response.status === 404 || (data.status === 'failure' && data.message === 'Records not found.')) {
+        return [];
+      }
+
       if (!response.ok) {
         throw new Error(`Failed to fetch reservations: ${response.statusText}`);
       }
-
-      const data = await response.json();
       
       if (data.records) {
         const currentLocationName = localStorage.getItem('current_location_name') || undefined

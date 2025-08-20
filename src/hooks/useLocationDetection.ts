@@ -8,6 +8,12 @@ export function useLocationDetection(userId: number | undefined, locationId: str
     const checkLocation = async () => {
       if (!userId || !locationId) return;
 
+      // Check if we've already shown the popup for this user-location combination
+      const popupKey = `location_popup_shown_${userId}_${locationId}`;
+      const alreadyShown = localStorage.getItem(popupKey);
+      
+      if (alreadyShown) return;
+
       try {
         const userExistsAtLocation = await apiService.checkUserAtLocation(userId, locationId);
         if (!userExistsAtLocation) {
@@ -23,6 +29,11 @@ export function useLocationDetection(userId: number | undefined, locationId: str
 
   const closeLocationPopup = () => {
     setShowLocationPopup(false);
+    // Mark this popup as shown for this user-location combination
+    if (userId && locationId) {
+      const popupKey = `location_popup_shown_${userId}_${locationId}`;
+      localStorage.setItem(popupKey, 'true');
+    }
   };
 
   return {
