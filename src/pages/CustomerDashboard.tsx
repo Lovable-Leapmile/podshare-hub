@@ -12,6 +12,9 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ReservationCard } from "@/components/ReservationCard";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { LocationDetectionPopup } from "@/components/LocationDetectionPopup";
+import { PaginationFilter } from "@/components/PaginationFilter";
+import { useLocationDetection } from "@/hooks/useLocationDetection";
 const qikpodLogo = "https://leapmile-website.blr1.cdn.digitaloceanspaces.com/Qikpod/Images/q70.png";
 export default function CustomerDashboard() {
   const navigate = useNavigate();
@@ -31,7 +34,11 @@ export default function CustomerDashboard() {
   const [dropPendingPage, setDropPendingPage] = useState(1);
   const [pickupPendingPage, setPickupPendingPage] = useState(1);
   const [historyPage, setHistoryPage] = useState(1);
-  const itemsPerPage = 5;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  // Location detection
+  const currentLocationId = localStorage.getItem('current_location_id');
+  const { showLocationPopup, closeLocationPopup } = useLocationDetection(user?.id, currentLocationId);
   useEffect(() => {
     if (!isLoggedIn()) {
       navigate('/login');
@@ -258,6 +265,20 @@ export default function CustomerDashboard() {
 
       {/* Tabs */}
       <div className="px-4 max-w-md mx-auto">
+        {/* Pagination Filter */}
+        <div className="flex justify-end mb-4">
+          <PaginationFilter 
+            itemsPerPage={itemsPerPage} 
+            onItemsPerPageChange={(value) => {
+              setItemsPerPage(value);
+              // Reset all pages to 1 when changing items per page
+              setDropPendingPage(1);
+              setPickupPendingPage(1);
+              setHistoryPage(1);
+            }} 
+          />
+        </div>
+
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="drop-pending">Drop Pending</TabsTrigger>
@@ -346,5 +367,13 @@ export default function CustomerDashboard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Location Detection Popup */}
+      <LocationDetectionPopup
+        isOpen={showLocationPopup}
+        onClose={closeLocationPopup}
+        userId={user?.id || 0}
+        locationId={currentLocationId || ""}
+      />
     </div>;
 }

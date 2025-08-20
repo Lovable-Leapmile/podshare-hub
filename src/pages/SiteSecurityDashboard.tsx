@@ -4,8 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Menu, User, LogOut, Shield, AlertCircle } from "lucide-react";
 import { getUserData, isLoggedIn } from "@/utils/storage";
+import { LocationDetectionPopup } from "@/components/LocationDetectionPopup";
+import { PaginationFilter } from "@/components/PaginationFilter";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { useLocationDetection } from "@/hooks/useLocationDetection";
 
 const qikpodLogo = "https://leapmile-website.blr1.cdn.digitaloceanspaces.com/Qikpod/Images/q70.png";
 
@@ -13,6 +16,11 @@ export default function SiteSecurityDashboard() {
   const navigate = useNavigate();
   const user = getUserData();
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  // Location detection
+  const currentLocationId = localStorage.getItem('current_location_id');
+  const { showLocationPopup, closeLocationPopup } = useLocationDetection(user?.id, currentLocationId);
 
   useEffect(() => {
     if (!isLoggedIn()) {
@@ -41,6 +49,14 @@ export default function SiteSecurityDashboard() {
             Welcome, {user?.user_name}!
           </h1>
           <p className="text-muted-foreground">Site Security Dashboard</p>
+        </div>
+
+        {/* Pagination Filter */}
+        <div className="flex justify-end">
+          <PaginationFilter 
+            itemsPerPage={itemsPerPage} 
+            onItemsPerPageChange={setItemsPerPage} 
+          />
         </div>
 
         {/* Security Cards */}
@@ -106,6 +122,14 @@ export default function SiteSecurityDashboard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Location Detection Popup */}
+      <LocationDetectionPopup
+        isOpen={showLocationPopup}
+        onClose={closeLocationPopup}
+        userId={user?.id || 0}
+        locationId={currentLocationId || ""}
+      />
     </div>
   );
 }

@@ -428,5 +428,26 @@ export const apiService = {
     }
 
     return response.json();
+  },
+
+  // Check if user exists at location
+  checkUserAtLocation: async (userId: number, locationId: string): Promise<boolean> => {
+    const authToken = localStorage.getItem('auth_token');
+    const authorization = authToken ? `Bearer ${authToken}` : AUTH_TOKEN;
+
+    const response = await fetch(`${API_BASE_URL}/users/locations/?user_id=${userId}&location_id=${locationId}`, {
+      method: 'GET',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': authorization,
+      },
+    });
+
+    if (!response.ok) {
+      return false;
+    }
+
+    const data = await response.json();
+    return data.records && data.records.length > 0;
   }
 };
