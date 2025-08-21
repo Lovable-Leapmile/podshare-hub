@@ -3,64 +3,48 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { User, Phone, Mail, MapPin, CreditCard, Home } from "lucide-react";
- 
 import { getUserData, isLoggedIn } from "@/utils/storage";
-
 export default function Profile() {
   const navigate = useNavigate();
   const user = getUserData();
-
   useEffect(() => {
     if (!isLoggedIn()) {
       navigate('/login');
       return;
     }
   }, [navigate]);
-
   if (!user) return null;
-
-  const profileItems = [
-    {
-      icon: User,
-      label: "Name",
-      value: user.user_name
-    },
-    {
-      icon: Phone,
-      label: "Phone Number",
-      value: user.user_phone
-    },
-    {
-      icon: Mail,
-      label: "Email",
-      value: user.user_email || "Not provided"
-    },
-    {
-      icon: Home,
-      label: "Flat Number",
-      value: user.user_flatno || "Not specified"
-    },
-    {
-      icon: MapPin,
-      label: "Address",
-      value: user.user_address || "Not provided"
-    },
-    {
-      icon: CreditCard,
-      label: "Credit Limit",
-      value: `₹${user.user_credit_limit}`
-    },
-    {
-      icon: CreditCard,
-      label: "Credit Used",
-      value: `₹${user.user_credit_used}`
-    }
-  ];
-
+  const profileItems = [{
+    icon: User,
+    label: "Name",
+    value: user.user_name
+  }, {
+    icon: Phone,
+    label: "Phone Number",
+    value: user.user_phone
+  }, {
+    icon: Mail,
+    label: "Email",
+    value: user.user_email || "Not provided"
+  }, {
+    icon: Home,
+    label: "Flat Number",
+    value: user.user_flatno || "Not specified"
+  }, {
+    icon: MapPin,
+    label: "Address",
+    value: user.user_address || "Not provided"
+  }, {
+    icon: CreditCard,
+    label: "Credit Limit",
+    value: `₹${user.user_credit_limit}`
+  }, {
+    icon: CreditCard,
+    label: "Credit Used",
+    value: `₹${user.user_credit_used}`
+  }];
   const availableCredit = parseInt(user.user_credit_limit) - parseInt(user.user_credit_used);
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       
       {/* Main Content */}
       <div className="p-4 max-w-md mx-auto space-y-6">
@@ -84,26 +68,13 @@ export default function Profile() {
         </Card>
 
         {/* User Codes */}
-        <div className="grid grid-cols-2 gap-3">
-          <Card className="card-modern p-4 text-center">
-            <h3 className="font-semibold text-foreground mb-2">Drop Code</h3>
-            <p className="text-2xl font-bold text-primary">{user.user_dropcode}</p>
-          </Card>
-          <Card className="card-modern p-4 text-center">
-            <h3 className="font-semibold text-foreground mb-2">Pickup Code</h3>
-            <p className="text-2xl font-bold text-primary">{user.user_pickupcode}</p>
-          </Card>
-        </div>
+        
 
         {/* Profile Details */}
         <div className="bg-secondary rounded-xl p-4">
           <h2 className="text-lg font-semibold text-foreground mb-4">Personal Information</h2>
           <div className="space-y-3">
-            {profileItems.map((item, index) => (
-              <Card 
-                key={item.label} 
-                className="card-modern p-4"
-              >
+            {profileItems.map((item, index) => <Card key={item.label} className="card-modern p-4">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
                     <item.icon className="w-5 h-5 text-primary" />
@@ -113,34 +84,12 @@ export default function Profile() {
                     <p className="font-medium text-foreground">{item.value}</p>
                   </div>
                 </div>
-              </Card>
-            ))}
+              </Card>)}
           </div>
         </div>
 
         {/* Credit Usage Progress */}
-        <Card className="card-modern p-6">
-          <h3 className="font-semibold text-foreground mb-4">Credit Usage</h3>
-          <div className="space-y-3">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Used</span>
-              <span className="text-foreground">₹{user.user_credit_used} / ₹{user.user_credit_limit}</span>
-            </div>
-            <div className="w-full bg-muted rounded-full h-2">
-              <div 
-                className="bg-primary h-2 rounded-full transition-all duration-500"
-                style={{ 
-                  width: `${(parseInt(user.user_credit_used) / parseInt(user.user_credit_limit)) * 100}%` 
-                }}
-              ></div>
-            </div>
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Available: ₹{availableCredit}</span>
-              <span>{Math.round(((parseInt(user.user_credit_limit) - parseInt(user.user_credit_used)) / parseInt(user.user_credit_limit)) * 100)}% remaining</span>
-            </div>
-          </div>
-        </Card>
+        
       </div>
-    </div>
-  );
+    </div>;
 }
