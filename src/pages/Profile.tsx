@@ -192,7 +192,7 @@ export default function Profile() {
                     {isEditing && item.editable ? (
                       item.field === "user_address" ? (
                         <Textarea
-                          value={formData[item.field as keyof typeof formData]}
+                          value={formData[item.field as keyof typeof formData] || ""}
                           onChange={(e) => handleInputChange(item.field, e.target.value)}
                           className="mt-1 min-h-[60px]"
                           placeholder={`Enter ${item.label.toLowerCase()}`}
@@ -200,7 +200,7 @@ export default function Profile() {
                       ) : (
                         <Input
                           type={item.field === "user_email" ? "email" : "text"}
-                          value={formData[item.field as keyof typeof formData]}
+                          value={formData[item.field as keyof typeof formData] || ""}
                           onChange={(e) => handleInputChange(item.field, e.target.value)}
                           className="mt-1"
                           placeholder={`Enter ${item.label.toLowerCase()}`}
