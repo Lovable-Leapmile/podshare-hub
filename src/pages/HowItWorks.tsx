@@ -62,30 +62,30 @@ export default function HowItWorks() {
         </div>
 
         {/* Toggle Switch */}
-        <Card className="card-modern p-0 mb-6 overflow-hidden">
+        <Card className="card-modern p-0 mb-6 overflow-hidden w-3/4 mx-auto">
           <div className="flex items-center justify-center">
             <div
-              className={`flex-1 text-center py-4 cursor-pointer transition-colors ${
+              className={`flex-1 text-center py-3 cursor-pointer transition-colors ${
                 isDropFlow
                   ? 'bg-primary text-primary-foreground font-semibold'
                   : 'bg-muted hover:bg-muted/80'
               }`}
               onClick={() => setIsDropFlow(true)}
             >
-              <Label className="text-base font-medium cursor-pointer">
-                How to Drop the Parcel
+              <Label className="text-sm font-medium cursor-pointer">
+                Drop Process
               </Label>
             </div>
             <div
-              className={`flex-1 text-center py-4 cursor-pointer transition-colors ${
+              className={`flex-1 text-center py-3 cursor-pointer transition-colors ${
                 !isDropFlow
                   ? 'bg-primary text-primary-foreground font-semibold'
                   : 'bg-muted hover:bg-muted/80'
               }`}
               onClick={() => setIsDropFlow(false)}
             >
-              <Label className="text-base font-medium cursor-pointer">
-                How to Pick up the Parcel
+              <Label className="text-sm font-medium cursor-pointer">
+                Pickup Process
               </Label>
             </div>
           </div>
@@ -113,7 +113,7 @@ export default function HowItWorks() {
         <div className="text-center">
           <Button
             onClick={() => navigate('/login')}
-            className="btn-primary h-12 px-8 text-base font-semibold"
+            className="btn-primary h-11 px-7 text-sm font-semibold"
           >
             Let's Start
           </Button>
