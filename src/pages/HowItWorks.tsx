@@ -59,7 +59,7 @@ export default function HowItWorks() {
         <div className="space-y-4 mb-8">
           {currentSteps.map((step, index) => <Card key={index} className="card-modern">
               <CardHeader className="pb-3">
-                <CardTitle className="text-lg font-semibold text-primary">
+                <CardTitle className="text-lg font-semibold text-gray-700">
                   {step.title}
                 </CardTitle>
               </CardHeader>
