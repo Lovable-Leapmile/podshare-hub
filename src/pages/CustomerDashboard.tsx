@@ -29,7 +29,7 @@ export default function CustomerDashboard() {
   const [loading, setLoading] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [activeTab, setActiveTab] = useState('drop-pending');
-  
+
   // Pagination states
   const [dropPendingPage, setDropPendingPage] = useState(1);
   const [pickupPendingPage, setPickupPendingPage] = useState(1);
@@ -38,7 +38,10 @@ export default function CustomerDashboard() {
 
   // Location detection
   const currentLocationId = localStorage.getItem('current_location_id');
-  const { showLocationPopup, closeLocationPopup } = useLocationDetection(user?.id, currentLocationId);
+  const {
+    showLocationPopup,
+    closeLocationPopup
+  } = useLocationDetection(user?.id, currentLocationId);
   useEffect(() => {
     if (!isLoggedIn()) {
       navigate('/login');
@@ -94,16 +97,10 @@ export default function CustomerDashboard() {
       }
 
       // Load all reservation types
-      const [dropPending, pickupPending, pickupCompleted, dropCancelled] = await Promise.all([
-        apiService.getReservations(user.user_phone, locationId, 'DropPending'), 
-        apiService.getReservations(user.user_phone, locationId, 'PickupPending'), 
-        apiService.getReservations(user.user_phone, locationId, 'PickupCompleted'), 
-        apiService.getReservations(user.user_phone, locationId, 'DropCancelled')
-      ]);
-      
+      const [dropPending, pickupPending, pickupCompleted, dropCancelled] = await Promise.all([apiService.getReservations(user.user_phone, locationId, 'DropPending'), apiService.getReservations(user.user_phone, locationId, 'PickupPending'), apiService.getReservations(user.user_phone, locationId, 'PickupCompleted'), apiService.getReservations(user.user_phone, locationId, 'DropCancelled')]);
       setDropPendingReservations(dropPending);
       setPickupPendingReservations(pickupPending);
-      
+
       // Set initial history based on current filter
       setHistoryReservations(historyFilter === 'PickupCompleted' ? pickupCompleted : dropCancelled);
     } catch (error) {
@@ -118,14 +115,13 @@ export default function CustomerDashboard() {
     if (!user) return;
     try {
       const locationId = localStorage.getItem('current_location_id');
-      
+
       // Only proceed if we have a valid location_id
       if (!locationId) {
         console.log('No location_id found, skipping history load');
         setHistoryReservations([]);
         return;
       }
-      
       const reservations = await apiService.getReservations(user.user_phone, locationId, filter);
       setHistoryReservations(reservations);
     } catch (error) {
@@ -151,11 +147,9 @@ export default function CustomerDashboard() {
       });
       return;
     }
-
     try {
       setLoading(true);
       const hasFreeDoor = await apiService.checkFreeDoor(locationId);
-      
       if (hasFreeDoor) {
         navigate('/reservation');
       } else {
@@ -176,19 +170,11 @@ export default function CustomerDashboard() {
       setLoading(false);
     }
   };
-
   const handleShowMoreReservation = (reservation: APIReservation) => {
     navigate(`/reservation-details/${reservation.id}`);
   };
-
   const renderReservationCard = (reservation: APIReservation) => {
-    return (
-      <ReservationCard
-        key={reservation.id}
-        reservation={reservation as any}
-        onShowMore={() => handleShowMoreReservation(reservation)}
-      />
-    );
+    return <ReservationCard key={reservation.id} reservation={reservation as any} onShowMore={() => handleShowMoreReservation(reservation)} />;
   };
 
   // Pagination helpers
@@ -197,45 +183,30 @@ export default function CustomerDashboard() {
     const endIndex = startIndex + itemsPerPage;
     return reservations.slice(startIndex, endIndex);
   };
-
   const getTotalPages = (reservations: APIReservation[]) => {
     return Math.ceil(reservations.length / itemsPerPage);
   };
-
   const renderPagination = (currentPage: number, totalPages: number, onPageChange: (page: number) => void) => {
     if (totalPages <= 1) return null;
-
-    return (
-      <Pagination className="mt-4">
+    return <Pagination className="mt-4">
         <PaginationContent>
           <PaginationItem>
-            <PaginationPrevious 
-              onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-              className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-            />
+            <PaginationPrevious onClick={() => onPageChange(Math.max(1, currentPage - 1))} className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"} />
           </PaginationItem>
           
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <PaginationItem key={page}>
-              <PaginationLink
-                onClick={() => onPageChange(page)}
-                isActive={page === currentPage}
-                className="cursor-pointer"
-              >
+          {Array.from({
+          length: totalPages
+        }, (_, i) => i + 1).map(page => <PaginationItem key={page}>
+              <PaginationLink onClick={() => onPageChange(page)} isActive={page === currentPage} className="cursor-pointer">
                 {page}
               </PaginationLink>
-            </PaginationItem>
-          ))}
+            </PaginationItem>)}
           
           <PaginationItem>
-            <PaginationNext 
-              onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-              className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-            />
+            <PaginationNext onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))} className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"} />
           </PaginationItem>
         </PaginationContent>
-      </Pagination>
-    );
+      </Pagination>;
   };
   const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
     switch (status) {
@@ -253,26 +224,23 @@ export default function CustomerDashboard() {
   return <div className="min-h-screen bg-background">
 
       {/* Create Reservation Button */}
-      <div className="px-4 py-4 max-w-md mx-auto">
+      <div className="py-4 max-w-md mx-auto px-[14px]">
         <Button onClick={handleCreateReservation} className="btn-primary w-full h-12 text-base font-semibold">
           Create Reservation
         </Button>
       </div>
 
       {/* Tabs */}
-      <div className="px-4 max-w-md mx-auto">
+      <div className="max-w-md mx-auto px-[14px]">
         {/* Pagination Filter */}
         <div className="flex justify-end mb-4">
-          <PaginationFilter 
-            itemsPerPage={itemsPerPage} 
-            onItemsPerPageChange={(value) => {
-              setItemsPerPage(value);
-              // Reset all pages to 1 when changing items per page
-              setDropPendingPage(1);
-              setPickupPendingPage(1);
-              setHistoryPage(1);
-            }} 
-          />
+          <PaginationFilter itemsPerPage={itemsPerPage} onItemsPerPageChange={value => {
+          setItemsPerPage(value);
+          // Reset all pages to 1 when changing items per page
+          setDropPendingPage(1);
+          setPickupPendingPage(1);
+          setHistoryPage(1);
+        }} />
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -283,41 +251,29 @@ export default function CustomerDashboard() {
           </TabsList>
 
           <TabsContent value="drop-pending" className="space-y-4 mt-6">
-            {loading ? (
-              <div className="text-center py-8">Loading...</div>
-            ) : dropPendingReservations.length > 0 ? (
-              <>
+            {loading ? <div className="text-center py-8">Loading...</div> : dropPendingReservations.length > 0 ? <>
                 <div className="space-y-4">
                   {paginateReservations(dropPendingReservations, dropPendingPage).map(renderReservationCard)}
                 </div>
                 {renderPagination(dropPendingPage, getTotalPages(dropPendingReservations), setDropPendingPage)}
-              </>
-            ) : (
-              <div className="text-center py-12 text-muted-foreground">
+              </> : <div className="text-center py-12 text-muted-foreground">
                 <Package className="mx-auto h-12 w-12 mb-4 opacity-50" />
                 <p className="text-lg font-medium mb-2">No Reservations</p>
                 <p className="text-sm">There is No Reservation, Please Create Reservation</p>
-              </div>
-            )}
+              </div>}
           </TabsContent>
 
           <TabsContent value="pickup-pending" className="space-y-4 mt-6">
-            {loading ? (
-              <div className="text-center py-8">Loading...</div>
-            ) : pickupPendingReservations.length > 0 ? (
-              <>
+            {loading ? <div className="text-center py-8">Loading...</div> : pickupPendingReservations.length > 0 ? <>
                 <div className="space-y-4">
                   {paginateReservations(pickupPendingReservations, pickupPendingPage).map(renderReservationCard)}
                 </div>
                 {renderPagination(pickupPendingPage, getTotalPages(pickupPendingReservations), setPickupPendingPage)}
-              </>
-            ) : (
-              <div className="text-center py-12 text-muted-foreground">
+              </> : <div className="text-center py-12 text-muted-foreground">
                 <Clock className="mx-auto h-12 w-12 mb-4 opacity-50" />
                 <p className="text-lg font-medium mb-2">No Reservations</p>
                 <p className="text-sm">There is No Reservation, Please Create Reservation</p>
-              </div>
-            )}
+              </div>}
           </TabsContent>
 
           <TabsContent value="history" className="space-y-4 mt-6">
@@ -330,22 +286,16 @@ export default function CustomerDashboard() {
               </Button>
             </div>
             
-            {loading ? (
-              <div className="text-center py-8">Loading...</div>
-            ) : historyReservations.length > 0 ? (
-              <>
+            {loading ? <div className="text-center py-8">Loading...</div> : historyReservations.length > 0 ? <>
                 <div className="space-y-4">
                   {paginateReservations(historyReservations, historyPage).map(renderReservationCard)}
                 </div>
                 {renderPagination(historyPage, getTotalPages(historyReservations), setHistoryPage)}
-              </>
-            ) : (
-              <div className="text-center py-12 text-muted-foreground">
+              </> : <div className="text-center py-12 text-muted-foreground">
                 <Package className="mx-auto h-12 w-12 mb-4 opacity-50" />
                 <p className="text-lg font-medium mb-2">No Reservations</p>
                 <p className="text-sm">There is No Reservation, Please Create Reservation</p>
-              </div>
-            )}
+              </div>}
           </TabsContent>
         </Tabs>
       </div>
@@ -371,11 +321,6 @@ export default function CustomerDashboard() {
       </Dialog>
 
       {/* Location Detection Popup */}
-      <LocationDetectionPopup
-        isOpen={showLocationPopup}
-        onClose={closeLocationPopup}
-        userId={user?.id || 0}
-        locationId={currentLocationId || ""}
-      />
+      <LocationDetectionPopup isOpen={showLocationPopup} onClose={closeLocationPopup} userId={user?.id || 0} locationId={currentLocationId || ""} />
     </div>;
 }
