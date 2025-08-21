@@ -123,9 +123,6 @@ export default function Login() {
   };
   const handlePostLoginFlow = async (userData: any) => {
       try {
-        // Get user locations
-        const userLocations = await apiService.getUserLocations(userData.id);
-
         // Get current pod name from localStorage
         const podName = localStorage.getItem('qikpod_pod_name');
 
@@ -136,18 +133,18 @@ export default function Login() {
           // Store the current location_id for use in dashboard
           localStorage.setItem('current_location_id', podInfo.location_id);
 
-          // Check if user has this location
-          const hasLocation = userLocations.some(loc => loc.location_id.toString() === podInfo.location_id);
+          // Check if user exists at this location using the specific API
+          const userExistsAtLocation = await apiService.checkUserAtLocation(userData.id, podInfo.location_id);
 
-          if (!hasLocation) {
-            // Show the location popup immediately
+          if (!userExistsAtLocation) {
+            // User is new to this location - show popup
             setUserData(userData);
             setCurrentLocationId(podInfo.location_id);
             return; // Exit early to prevent navigation
           }
         }
 
-        // If no popup needed, navigate immediately
+        // If user exists at location or no pod name, navigate immediately
         navigateToUserDashboard(userData);
       } catch (error) {
         console.error('Post-login flow error:', error);
