@@ -17,6 +17,7 @@ export default function SiteSecurityDashboard() {
   const user = getUserData();
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Location detection
   const currentLocationId = localStorage.getItem('current_location_id');
@@ -54,7 +55,9 @@ export default function SiteSecurityDashboard() {
         {/* Pagination Filter */}
         <div className="flex justify-end">
           <PaginationFilter 
-            itemsPerPage={itemsPerPage} 
+            itemsPerPage={itemsPerPage}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
             onItemsPerPageChange={setItemsPerPage} 
           />
         </div>
