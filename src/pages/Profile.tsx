@@ -16,10 +16,10 @@ export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    user_name: user?.user_name || "",
-    user_email: user?.user_email || "",
-    user_flatno: user?.user_flatno || "",
-    user_address: user?.user_address || ""
+    user_name: "",
+    user_email: "",
+    user_flatno: "",
+    user_address: ""
   });
 
   useEffect(() => {
@@ -79,7 +79,7 @@ export default function Profile() {
     icon: User,
     label: "Name",
     field: "user_name",
-    value: isEditing ? formData.user_name : user.user_name,
+    value: user.user_name,
     editable: true
   }, {
     icon: Phone,
@@ -91,19 +91,19 @@ export default function Profile() {
     icon: Mail,
     label: "Email",
     field: "user_email",
-    value: isEditing ? formData.user_email : (user.user_email || "Not provided"),
+    value: user.user_email || "Not provided",
     editable: true
   }, {
     icon: Home,
     label: "Flat Number",
     field: "user_flatno",
-    value: isEditing ? formData.user_flatno : (user.user_flatno || "Not specified"),
+    value: user.user_flatno || "Not specified",
     editable: true
   }, {
     icon: MapPin,
     label: "Address",
     field: "user_address",
-    value: isEditing ? formData.user_address : (user.user_address || "Not provided"),
+    value: user.user_address || "Not provided",
     editable: true
   }];
 
@@ -131,50 +131,16 @@ export default function Profile() {
                 </div>
               </div>
             </div>
-            {!isEditing && (
-              <Button
-                variant="secondary"
-                size="icon"
-                onClick={() => setIsEditing(true)}
-                className="bg-white/20 hover:bg-white/30 text-white border-0"
-              >
-                <Edit2 className="w-4 h-4" />
-              </Button>
-            )}
+            <Button
+              variant="secondary"
+              size="icon"
+              onClick={() => setIsEditing(true)}
+              className="bg-white/20 hover:bg-white/30 text-white border-0"
+            >
+              <Edit2 className="w-4 h-4" />
+            </Button>
           </div>
         </Card>
-
-        {/* Edit Actions */}
-        {isEditing && (
-          <div className="flex gap-3">
-            <Button
-              onClick={handleSave}
-              disabled={isLoading}
-              className="flex-1 bg-primary hover:bg-primary/90"
-            >
-              {isLoading ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                  Saving...
-                </div>
-              ) : (
-                <>
-                  <Check className="w-4 h-4 mr-2" />
-                  Save Changes
-                </>
-              )}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleCancel}
-              disabled={isLoading}
-              className="flex-1"
-            >
-              <X className="w-4 h-4 mr-2" />
-              Cancel
-            </Button>
-          </div>
-        )}
 
         {/* Profile Details */}
         <div className="bg-secondary rounded-xl p-4">
@@ -188,32 +154,104 @@ export default function Profile() {
                   </div>
                   <div className="flex-1">
                     <Label className="text-sm text-muted-foreground">{item.label}</Label>
-                    {isEditing && item.editable ? (
-                      item.field === "user_address" ? (
-                        <Textarea
-                          value={formData[item.field as keyof typeof formData] || ""}
-                          onChange={(e) => handleInputChange(item.field, e.target.value)}
-                          className="mt-1 min-h-[60px]"
-                          placeholder={`Enter ${item.label.toLowerCase()}`}
-                        />
-                      ) : (
-                        <Input
-                          type={item.field === "user_email" ? "email" : "text"}
-                          value={formData[item.field as keyof typeof formData] || ""}
-                          onChange={(e) => handleInputChange(item.field, e.target.value)}
-                          className="mt-1"
-                          placeholder={`Enter ${item.label.toLowerCase()}`}
-                        />
-                      )
-                    ) : (
-                      <p className="font-medium text-foreground mt-1">{item.value}</p>
-                    )}
+                    <p className="font-medium text-foreground mt-1">{item.value}</p>
                   </div>
                 </div>
               </Card>
             ))}
           </div>
         </div>
+
+        {/* Edit Dialog */}
+        {isEditing && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <Card className="w-full max-w-md p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold">Edit Profile</h2>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleCancel}
+                  className="h-8 w-8"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="name" className="mb-2">Name</Label>
+                  <Input
+                    id="name"
+                    value={formData.user_name}
+                    onChange={(e) => handleInputChange("user_name", e.target.value)}
+                    placeholder="Enter your name"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="email" className="mb-2">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.user_email}
+                    onChange={(e) => handleInputChange("user_email", e.target.value)}
+                    placeholder="Enter your email"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="flatno" className="mb-2">Flat Number</Label>
+                  <Input
+                    id="flatno"
+                    value={formData.user_flatno}
+                    onChange={(e) => handleInputChange("user_flatno", e.target.value)}
+                    placeholder="Enter your flat number"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="address" className="mb-2">Address</Label>
+                  <Textarea
+                    id="address"
+                    value={formData.user_address}
+                    onChange={(e) => handleInputChange("user_address", e.target.value)}
+                    placeholder="Enter your address"
+                    rows={3}
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <Button
+                  onClick={handleSave}
+                  disabled={isLoading}
+                  className="flex-1 bg-primary hover:bg-primary/90"
+                >
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                      Saving...
+                    </div>
+                  ) : (
+                    <>
+                      <Check className="w-4 h-4 mr-2" />
+                      Save Changes
+                    </>
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleCancel}
+                  disabled={isLoading}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   );
