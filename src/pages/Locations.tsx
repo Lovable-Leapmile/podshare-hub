@@ -48,7 +48,7 @@ export default function Locations() {
   return <div className="min-h-screen bg-background text-xs">
       {/* Main Content */}
       <div className="p-4 max-w-md mx-auto py-0">
-        <div className="space-y-3">
+        <div className="space-y-3 py-[10px]">
           <div>
             <h1 className="text-2xl font-bold text-foreground mb-2">
               Select Location
