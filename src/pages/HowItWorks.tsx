@@ -48,7 +48,7 @@ export default function HowItWorks() {
             <Label htmlFor="flow-toggle" className={`text-base font-medium cursor-pointer transition-colors ${isDropFlow ? 'text-primary' : 'text-muted-foreground'}`}>
               How to Drop the Parcel
             </Label>
-            <Switch id="flow-toggle" checked={!isDropFlow} onCheckedChange={checked => setIsDropFlow(!checked)} className="scale-125 text-transparent mx-[4px] my-[4px] bg-yellow-300 hover:bg-yellow-200" />
+            <Switch id="flow-toggle" checked={!isDropFlow} onCheckedChange={checked => setIsDropFlow(!checked)} className="scale-125 mx-[4px] my-[4px] bg-yellow-300 hover:bg-yellow-200 text-slate-100" />
             <Label htmlFor="flow-toggle" className={`text-base font-medium cursor-pointer transition-colors ${!isDropFlow ? 'text-primary' : 'text-muted-foreground'}`}>
               How to Pick up the Parcel
             </Label>
