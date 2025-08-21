@@ -9,6 +9,7 @@ import { User, Phone, Mail, MapPin, Home, Edit2, X, Check } from "lucide-react";
 import { getUserData, isLoggedIn, setUserData } from "@/utils/storage";
 import { apiService } from "@/services/api";
 import { toast } from "sonner";
+
 export default function Profile() {
   const navigate = useNavigate();
   const user = getUserData();
@@ -49,11 +50,11 @@ export default function Profile() {
     setIsLoading(true);
     try {
       await apiService.updateUser(user.id, formData);
-      
+
       // Update local storage with new data
       const updatedUser = { ...user, ...formData };
       setUserData(updatedUser);
-      
+
       setIsEditing(false);
       toast.success("Profile updated successfully!");
     } catch (error) {
@@ -78,7 +79,7 @@ export default function Profile() {
     icon: User,
     label: "Name",
     field: "user_name",
-    value: user.user_name,
+    value: isEditing ? formData.user_name : user.user_name,
     editable: true
   }, {
     icon: Phone,
@@ -90,25 +91,26 @@ export default function Profile() {
     icon: Mail,
     label: "Email",
     field: "user_email",
-    value: user.user_email || "Not provided",
+    value: isEditing ? formData.user_email : (user.user_email || "Not provided"),
     editable: true
   }, {
     icon: Home,
     label: "Flat Number",
     field: "user_flatno",
-    value: user.user_flatno || "Not specified",
+    value: isEditing ? formData.user_flatno : (user.user_flatno || "Not specified"),
     editable: true
   }, {
     icon: MapPin,
     label: "Address",
     field: "user_address",
-    value: user.user_address || "Not provided",
+    value: isEditing ? formData.user_address : (user.user_address || "Not provided"),
     editable: true
   }];
 
   const availableCredit = parseInt(user.user_credit_limit) - parseInt(user.user_credit_used);
-  return <div className="min-h-screen bg-background">
-      
+
+  return (
+    <div className="min-h-screen bg-background">
       {/* Main Content */}
       <div className="p-4 max-w-md mx-auto space-y-6">
         {/* Profile Header */}
@@ -141,9 +143,6 @@ export default function Profile() {
             )}
           </div>
         </Card>
-
-        {/* User Codes */}
-        
 
         {/* Edit Actions */}
         {isEditing && (
@@ -215,9 +214,7 @@ export default function Profile() {
             ))}
           </div>
         </div>
-
-        {/* Credit Usage Progress */}
-        
       </div>
-    </div>;
+    </div>
+  );
 }
