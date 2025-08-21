@@ -8,6 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import { apiService } from "@/services/api";
 import { saveUserData, extractPodFromUrl, extractPodNameFromUrl, isLoggedIn } from "@/utils/storage";
 import { OTPInput } from "@/components/OTPInput";
+import { LocationDetectionPopup } from "@/components/LocationDetectionPopup";
+import { useLocationDetection } from "@/hooks/useLocationDetection";
 const qikpodLogo = "https://leapmile-website.blr1.cdn.digitaloceanspaces.com/Qikpod/Images/q70.png";
 export default function Login() {
   const navigate = useNavigate();
@@ -19,6 +21,13 @@ export default function Login() {
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [loading, setLoading] = useState(false);
   const [countdown, setCountdown] = useState(0);
+  const [userData, setUserData] = useState<any>(null);
+  const [currentLocationId, setCurrentLocationId] = useState<string | null>(null);
+  
+  const { showLocationPopup, closeLocationPopup } = useLocationDetection(
+    userData?.id,
+    currentLocationId
+  );
   useEffect(() => {
     // Check if user is already logged in
     if (isLoggedIn()) {
@@ -135,15 +144,10 @@ export default function Login() {
         // Check if user has this location
         const hasLocation = userLocations.some(loc => loc.location_id.toString() === podInfo.location_id);
         if (!hasLocation) {
-          // Show confirmation dialog for adding new location
-          const confirmed = window.confirm("You're in a new location. Do you need to add this location to your locations list?");
-          if (confirmed) {
-            await apiService.addUserLocation(userData.id, podInfo.location_id);
-            toast({
-              title: "Location Added",
-              description: "New location has been added to your list."
-            });
-          }
+          // Set userData and currentLocationId to trigger the custom popup
+          setUserData(userData);
+          setCurrentLocationId(podInfo.location_id);
+          return; // Don't navigate yet, let the popup handle it
         }
       }
 
@@ -184,6 +188,27 @@ export default function Login() {
       handleSendOTP();
     }
   };
+  const handleLocationPopupClose = () => {
+    closeLocationPopup();
+    
+    // Navigate based on user type after closing popup
+    if (userData) {
+      switch (userData.user_type) {
+        case 'SiteAdmin':
+          navigate('/site-admin-dashboard');
+          break;
+        case 'Customer':
+          navigate('/customer-dashboard');
+          break;
+        case 'SiteSecurity':
+          navigate('/site-security-dashboard');
+          break;
+        default:
+          navigate('/login');
+      }
+    }
+  };
+
   return <div className="min-h-screen bg-qikpod-light-bg flex items-start justify-center p-4 py-[40px]">
       <div className="w-full max-w-md">
         {step === 'phone' ? <>
@@ -282,5 +307,15 @@ export default function Login() {
             </div>
           </>}
       </div>
+      
+      {/* Location Detection Popup */}
+      {userData && currentLocationId && (
+        <LocationDetectionPopup
+          isOpen={showLocationPopup}
+          onClose={handleLocationPopupClose}
+          userId={userData.id}
+          locationId={currentLocationId}
+        />
+      )}
     </div>;
 }
