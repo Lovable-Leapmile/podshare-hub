@@ -28,11 +28,11 @@ export default function HowItWorks() {
     description: "Upon receiving the SMS, locate the designated pod with the provided ID, enter the OTP, and take out the parcel from the opened door, then close it."
   }];
   const currentSteps = isDropFlow ? dropSteps : pickupSteps;
-  return <div className="min-h-screen bg-qikpod-light-bg flex flex-col items-center p-4 py-[40px]">
+  return <div className="min-h-screen bg-qikpod-light-bg flex flex-col items-center p-4 py-[20px]">
       <div className="w-full max-w-4xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="font-bold text-foreground mb-2 text-4xl">How to use the app</h1>
+          <h1 className="font-bold text-foreground mb-2 text-lg">How to use the app</h1>
         </div>
 
         {/* YouTube Video */}
