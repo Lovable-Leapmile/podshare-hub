@@ -88,7 +88,7 @@ export default function Locations() {
                 <p className="text-muted-foreground">No locations found</p>
                 <p className="text-sm text-muted-foreground mt-1">Add a new location by scanning a QR code</p>
               </div>
-            </div> : <div className="bg-secondary rounded-xl p-4">
+            </div> : <div className="bg-secondary rounded-xl p-4 my-[10px]">
               <div className="space-y-3">
                 {locations.map(location => <Card key={location.id} className="card-modern p-4 cursor-pointer hover:shadow-md transition-all" onClick={() => handleLocationSelect(location)}>
                     <div className="flex items-center justify-between">
@@ -110,17 +110,7 @@ export default function Locations() {
                   </Card>)}
                 
                 {/* Add New Location Card */}
-                <Card className="card-modern p-4 border-dashed border-2 border-primary/30 cursor-pointer hover:border-primary/50 transition-all">
-                  <div className="flex items-center justify-center space-x-3 text-primary">
-                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                      <Plus className="w-5 h-5" />
-                    </div>
-                    <div className="text-center">
-                      <h3 className="font-medium">Add New Location</h3>
-                      <p className="text-sm opacity-80">Scan QR code at a new site</p>
-                    </div>
-                  </div>
-                </Card>
+                
               </div>
             </div>}
 
