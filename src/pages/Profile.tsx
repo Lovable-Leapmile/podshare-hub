@@ -10,18 +10,6 @@ import { getUserData, isLoggedIn, setUserData } from "@/utils/storage";
 import { apiService } from "@/services/api";
 import { toast } from "sonner";
 
-/**
- * Full, fixed Profile component
- * - Inputs are fully editable (controlled by formData)
- * - PATCH update via apiService.updateUser(id, payload)
- * - Local storage + on-screen data sync immediately after save
- * - Basic validation (email format)
- * - Save disabled if no changes or while loading
- * - Cancel restores original values
- * - Unsaved change guard on dialog close
- */
-
-// Types kept flexible to match your backend shape
 interface UserShape {
   id: number | string;
   user_name?: string;
@@ -32,7 +20,6 @@ interface UserShape {
   user_type?: string;
   user_credit_limit?: string | number;
   user_credit_used?: string | number;
-  // ...any other fields you store
   [key: string]: any;
 }
 
@@ -45,10 +32,7 @@ interface ProfileForm {
 
 export default function Profile() {
   const navigate = useNavigate();
-
-  // Keep user in component state so UI updates immediately after saving
   const [user, setUser] = useState<UserShape | null>(() => getUserData());
-
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<ProfileForm>({
@@ -61,7 +45,6 @@ export default function Profile() {
 
   const firstInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Redirect if not logged in
   useEffect(() => {
     if (!isLoggedIn()) {
       navigate("/login");
@@ -69,7 +52,6 @@ export default function Profile() {
     }
   }, [navigate]);
 
-  // Initialize form from user
   useEffect(() => {
     if (user) {
       setFormData({
@@ -78,15 +60,12 @@ export default function Profile() {
         user_flatno: user.user_flatno || "",
         user_address: user.user_address || "",
       });
-      // Clear any previous errors when the source of truth changes
       setErrors({});
     }
   }, [user]);
 
-  // Autofocus first field when dialog opens
   useEffect(() => {
     if (isEditing) {
-      // Delay focus slightly to ensure element is mounted
       const t = setTimeout(() => firstInputRef.current?.focus(), 50);
       return () => clearTimeout(t);
     }
@@ -94,7 +73,6 @@ export default function Profile() {
 
   if (!user) return null;
 
-  // ------- Derived values & helpers
   const availableCredit = useMemo(() => {
     const limitNum = Number(user.user_credit_limit ?? 0);
     const usedNum = Number(user.user_credit_used ?? 0);
@@ -136,11 +114,9 @@ export default function Profile() {
     const nextErrors: Partial<Record<keyof ProfileForm, string>> = {};
     if (!clean(draft.user_name)) nextErrors.user_name = "Name is required";
     if (!isValidEmail(clean(draft.user_email))) nextErrors.user_email = "Enter a valid email";
-    // Flat No & Address optional – add rules if your product needs them
     return nextErrors;
   };
 
-  // ------- Actions
   const handleSave = async () => {
     const payload: ProfileForm = {
       user_name: clean(formData.user_name),
@@ -163,14 +139,10 @@ export default function Profile() {
 
     setIsLoading(true);
     try {
-      // PATCH update; your apiService should inject auth token
       await apiService.updateUser(user.id, payload);
-
-      // Merge into current user and persist
       const updatedUser: UserShape = { ...user, ...payload };
       setUser(updatedUser);
       setUserData(updatedUser);
-
       setIsEditing(false);
       toast.success("Profile updated successfully!");
     } catch (error: any) {
@@ -186,7 +158,6 @@ export default function Profile() {
       const confirmClose = window.confirm("Discard your unsaved changes?");
       if (!confirmClose) return;
     }
-    // Reset to original & close
     setFormData(original);
     setErrors({});
     setIsEditing(false);
@@ -197,7 +168,6 @@ export default function Profile() {
     setErrors({});
   };
 
-  // Warn if user tries to close tab with unsaved changes while dialog is open
   useEffect(() => {
     const beforeUnload = (e: BeforeUnloadEvent) => {
       if (isEditing && hasChanges) {
@@ -211,7 +181,6 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Main Content */}
       <div className="p-4 max-w-md mx-auto space-y-6">
         {/* Profile Header */}
         <Card className="card-modern bg-gradient-primary p-6 text-white">
@@ -263,10 +232,9 @@ export default function Profile() {
         </div>
 
         {/* Edit Dialog */}
-        {/* Edit Dialog */}
         {isEditing && (
           <div className="fixed inset-0 flex items-center justify-center p-4 z-50">
-            <Card className="w-full max-w-md p-6">
+            <Card className="w-full max-w-md p-6 mx-4">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold">Edit Profile</h2>
                 <Button
@@ -337,21 +305,21 @@ export default function Profile() {
                   />
                 </div>
 
-                {/* Readonly phone (display only inside dialog if you want) */}
                 <div>
                   <Label htmlFor="phone" className="mb-2">Phone Number</Label>
                   <Input id="phone" value={user.user_phone || "—"} readOnly disabled />
                 </div>
               </div>
 
-              <div className="flex gap-3 mt-6">
+              {/* Responsive button container */}
+              <div className="flex flex-col sm:flex-row gap-3 mt-6">
                 <Button
                   onClick={handleSave}
                   disabled={isLoading || !hasChanges}
                   className="flex-1 bg-primary hover:bg-primary/90"
                 >
                   {isLoading ? (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-center gap-2">
                       <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
                       Saving...
                     </div>
@@ -387,29 +355,3 @@ export default function Profile() {
     </div>
   );
 }
-
-/*
-OPTIONAL: If you don't already have apiService.updateUser implemented,
-you can use this minimal helper instead. Ensure you provide a valid token.
-
-// services/api.ts
-export const apiService = {
-  async updateUser(id: number | string, payload: ProfileForm) {
-    const token = localStorage.getItem("auth_token"); // adapt to your storage
-    const res = await fetch(`https://stagingv3.leapmile.com/podcore/users/${id}`, {
-      method: "PATCH",
-      headers: {
-        "accept": "application/json",
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(text || `HTTP ${res.status}`);
-    }
-    return res.json();
-  },
-};
-*/
