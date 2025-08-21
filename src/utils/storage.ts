@@ -49,6 +49,8 @@ export const saveUserData = (user: User): void => {
   localStorage.setItem('qikpod_user', JSON.stringify(user));
 };
 
+export const setUserData = saveUserData; // Alias for consistency
+
 export const getUserData = (): User | null => {
   const userData = localStorage.getItem('qikpod_user');
   return userData ? JSON.parse(userData) : null;

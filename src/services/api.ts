@@ -454,5 +454,32 @@ export const apiService = {
 
     const data = await response.json();
     return data.records && data.records.length > 0;
+  },
+
+  // Update user profile
+  updateUser: async (userId: number, userData: {
+    user_email?: string;
+    user_name?: string;
+    user_address?: string;
+    user_flatno?: string;
+  }): Promise<any> => {
+    const authToken = localStorage.getItem('auth_token');
+    const authorization = authToken ? `Bearer ${authToken}` : AUTH_TOKEN;
+
+    const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+      method: 'PATCH',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': authorization,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userData),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
   }
 };
