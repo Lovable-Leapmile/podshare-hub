@@ -47,8 +47,8 @@ export default function Locations() {
   const user = getUserData();
   return <div className="min-h-screen bg-background text-xs">
       {/* Main Content */}
-      <div className="p-4 max-w-md mx-auto">
-        <div className="space-y-6">
+      <div className="p-4 max-w-md mx-auto py-0">
+        <div className="space-y-3">
           <div>
             <h1 className="text-2xl font-bold text-foreground mb-2">
               Select Location
@@ -59,16 +59,16 @@ export default function Locations() {
           </div>
 
           {/* User Info */}
-          <Card className="card-modern p-4 rounded-3xl px-[10px] py-[10px]">
+          <Card className="card-modern p-4 px-[10px] py-[10px] rounded-xl">
             <div className="flex items-center px-0 py-0 mx-0 my-0">
-              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mx-0">
                 <span className="text-primary font-bold text-sm">
                   {user?.user_name?.charAt(0) || 'U'}
                 </span>
               </div>
               <div>
-                <p className="font-medium text-foreground">{user?.user_name}</p>
-                <p className="text-sm text-muted-foreground">{user?.user_phone}</p>
+                <p className="font-medium text-foreground mx-[10px]">{user?.user_name}</p>
+                <p className="text-sm text-muted-foreground mx-[10px]">{user?.user_phone}</p>
               </div>
             </div>
           </Card>
