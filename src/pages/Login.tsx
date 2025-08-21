@@ -122,44 +122,39 @@ export default function Login() {
     }
   };
   const handlePostLoginFlow = async (userData: any) => {
-    try {
-      // Get user locations
-      const userLocations = await apiService.getUserLocations(userData.id);
+      try {
+        // Get user locations
+        const userLocations = await apiService.getUserLocations(userData.id);
 
-      // Get current pod name from localStorage
-      const podName = localStorage.getItem('qikpod_pod_name');
-      let shouldShowPopup = false;
-      
-      if (podName) {
-        // Get pod details
-        const podInfo = await apiService.getPodInfo(podName);
+        // Get current pod name from localStorage
+        const podName = localStorage.getItem('qikpod_pod_name');
 
-        // Store the current location_id for use in dashboard
-        localStorage.setItem('current_location_id', podInfo.location_id);
+        if (podName) {
+          // Get pod details
+          const podInfo = await apiService.getPodInfo(podName);
 
-        // Check if user has this location
-        const hasLocation = userLocations.some(loc => loc.location_id.toString() === podInfo.location_id);
-        if (!hasLocation) {
-          // Set userData and currentLocationId to trigger the custom popup
-          setUserData(userData);
-          setCurrentLocationId(podInfo.location_id);
-          shouldShowPopup = true;
+          // Store the current location_id for use in dashboard
+          localStorage.setItem('current_location_id', podInfo.location_id);
+
+          // Check if user has this location
+          const hasLocation = userLocations.some(loc => loc.location_id.toString() === podInfo.location_id);
+
+          if (!hasLocation) {
+            // Show the location popup immediately
+            setUserData(userData);
+            setCurrentLocationId(podInfo.location_id);
+            return; // Exit early to prevent navigation
+          }
         }
-      }
 
-      // If popup should be shown, don't navigate yet
-      if (shouldShowPopup) {
-        return;
+        // If no popup needed, navigate immediately
+        navigateToUserDashboard(userData);
+      } catch (error) {
+        console.error('Post-login flow error:', error);
+        // Always navigate on error to prevent getting stuck
+        navigateToUserDashboard(userData);
       }
-
-      // Navigate immediately based on user type
-      navigateToUserDashboard(userData);
-    } catch (error) {
-      console.error('Post-login flow error:', error);
-      // Always navigate on error to prevent getting stuck
-      navigateToUserDashboard(userData);
-    }
-  };
+    };
 
   const navigateToUserDashboard = (userData: any) => {
     switch (userData.user_type) {
