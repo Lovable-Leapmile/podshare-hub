@@ -111,7 +111,7 @@ export default function Locations() {
 
           {/* User Info */}
           <Card className="card-modern p-4 py-0 px-0 rounded-3xl">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 px-px py-[10px]">
               <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
                 <span className="text-primary font-bold text-sm">
                   {user?.user_name?.charAt(0) || 'U'}
