@@ -35,6 +35,7 @@ export default function CustomerDashboard() {
   const [pickupPendingPage, setPickupPendingPage] = useState(1);
   const [historyPage, setHistoryPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Location detection
   const currentLocationId = localStorage.getItem('current_location_id');
@@ -232,23 +233,28 @@ export default function CustomerDashboard() {
 
       {/* Tabs */}
       <div className="max-w-md mx-auto px-[14px]">
-        {/* Pagination Filter */}
-        <div className="flex justify-end mb-4">
-          <PaginationFilter itemsPerPage={itemsPerPage} onItemsPerPageChange={value => {
-          setItemsPerPage(value);
-          // Reset all pages to 1 when changing items per page
-          setDropPendingPage(1);
-          setPickupPendingPage(1);
-          setHistoryPage(1);
-        }} />
-        </div>
-
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="drop-pending">Drop Pending</TabsTrigger>
             <TabsTrigger value="pickup-pending">Pickup Pending</TabsTrigger>
             <TabsTrigger value="history">History</TabsTrigger>
           </TabsList>
+          
+          {/* Search and Filter Bar */}
+          <div className="mt-4 mb-6">
+            <PaginationFilter 
+              itemsPerPage={itemsPerPage} 
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onItemsPerPageChange={value => {
+                setItemsPerPage(value);
+                // Reset all pages to 1 when changing items per page
+                setDropPendingPage(1);
+                setPickupPendingPage(1);
+                setHistoryPage(1);
+              }} 
+            />
+          </div>
 
           <TabsContent value="drop-pending" className="space-y-4 mt-6">
             {loading ? <div className="text-center py-8">Loading...</div> : dropPendingReservations.length > 0 ? <>
