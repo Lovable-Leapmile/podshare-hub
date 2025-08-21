@@ -110,7 +110,7 @@ export default function Locations() {
             </div>}
 
           {/* User Info */}
-          <Card className="card-modern p-4">
+          <Card className="card-modern p-4 py-0 px-0 rounded-3xl">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
                 <span className="text-primary font-bold text-sm">
