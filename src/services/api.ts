@@ -481,5 +481,62 @@ export const apiService = {
     }
 
     return await response.json();
+  },
+
+  // Get users for a location (Site Admin)
+  getLocationUsers: async (locationId: string): Promise<any[]> => {
+    const token = localStorage.getItem('auth_token');
+    const response = await fetch(`${API_BASE_URL}/users/locations/?location_id=${locationId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await response.json();
+    
+    if (response.ok) {
+      return data || [];
+    }
+
+    throw new Error(data.detail || 'Failed to fetch location users');
+  },
+
+  // Get reservations for a location (Site Admin)
+  getLocationReservations: async (locationId: string, status: string): Promise<any[]> => {
+    const token = localStorage.getItem('auth_token');
+    const response = await fetch(`${API_BASE_URL}/reservations/?location_id=${locationId}&reservation_status=${status}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await response.json();
+    
+    if (response.ok) {
+      return data || [];
+    }
+
+    throw new Error(data.detail || 'Failed to fetch reservations');
+  },
+
+  // Remove user (Site Admin)
+  removeUser: async (userId: number): Promise<void> => {
+    const token = localStorage.getItem('auth_token');
+    const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.detail || 'Failed to remove user');
+    }
   }
 };

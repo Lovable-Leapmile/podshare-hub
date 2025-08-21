@@ -139,10 +139,10 @@ export default function Profile() {
 
     setIsLoading(true);
     try {
-      await apiService.updateUser(user.id, payload);
+      await apiService.updateUser(Number(user.id), payload);
       const updatedUser: UserShape = { ...user, ...payload };
       setUser(updatedUser);
-      setUserData(updatedUser);
+      setUserData(updatedUser as any);
       setIsEditing(false);
       toast.success("Profile updated successfully!");
     } catch (error: any) {
