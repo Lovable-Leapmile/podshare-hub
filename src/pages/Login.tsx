@@ -11,11 +11,10 @@ import { OTPInput } from "@/components/OTPInput";
 import { LocationDetectionPopup } from "@/components/LocationDetectionPopup";
 import { useLocationDetection } from "@/hooks/useLocationDetection";
 const qikpodLogo = "https://leapmile-website.blr1.cdn.digitaloceanspaces.com/Qikpod/Images/q70.png";
+
 export default function Login() {
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
@@ -23,13 +22,13 @@ export default function Login() {
   const [countdown, setCountdown] = useState(0);
   const [userData, setUserData] = useState<any>(null);
   const [currentLocationId, setCurrentLocationId] = useState<string | null>(null);
-  
+
   const { showLocationPopup, closeLocationPopup } = useLocationDetection(
     userData?.id,
     currentLocationId
   );
+
   useEffect(() => {
-    // Check if user is already logged in
     if (isLoggedIn()) {
       const userData = JSON.parse(localStorage.getItem('qikpod_user') || '{}');
       switch (userData.user_type) {
@@ -48,9 +47,9 @@ export default function Login() {
       return;
     }
 
-    // Extract POD value from URL if present
     extractPodNameFromUrl();
   }, [navigate]);
+
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (countdown > 0) {
@@ -60,6 +59,7 @@ export default function Login() {
     }
     return () => clearInterval(interval);
   }, [countdown]);
+
   const handleSendOTP = async () => {
     if (!phoneNumber || phoneNumber.length !== 10) {
       toast({
@@ -88,6 +88,7 @@ export default function Login() {
       setLoading(false);
     }
   };
+
   const handleVerifyOTP = async () => {
     if (!otp || otp.length !== 6) {
       toast({
@@ -100,16 +101,12 @@ export default function Login() {
     setLoading(true);
     try {
       const response = await apiService.validateOTP(phoneNumber, otp);
-
-      // Extract user data from the records array
       const userData = response.records[0];
       saveUserData(userData);
       toast({
         title: "Login Successful",
         description: `Welcome back, ${userData.user_name}!`
       });
-
-      // Handle location checking and navigation based on user type
       await handlePostLoginFlow(userData);
     } catch (error) {
       toast({
@@ -121,37 +118,26 @@ export default function Login() {
       setLoading(false);
     }
   };
+
   const handlePostLoginFlow = async (userData: any) => {
-      try {
-        // Get current pod name from localStorage
-        const podName = localStorage.getItem('qikpod_pod_name');
-
-        if (podName) {
-          // Get pod details
-          const podInfo = await apiService.getPodInfo(podName);
-
-          // Store the current location_id for use in dashboard
-          localStorage.setItem('current_location_id', podInfo.location_id);
-
-          // Check if user exists at this location using the specific API
-          const userExistsAtLocation = await apiService.checkUserAtLocation(userData.id, podInfo.location_id);
-
-          if (!userExistsAtLocation) {
-            // User is new to this location - show popup
-            setUserData(userData);
-            setCurrentLocationId(podInfo.location_id);
-            return; // Exit early to prevent navigation
-          }
+    try {
+      const podName = localStorage.getItem('qikpod_pod_name');
+      if (podName) {
+        const podInfo = await apiService.getPodInfo(podName);
+        localStorage.setItem('current_location_id', podInfo.location_id);
+        const userExistsAtLocation = await apiService.checkUserAtLocation(userData.id, podInfo.location_id);
+        if (!userExistsAtLocation) {
+          setUserData(userData);
+          setCurrentLocationId(podInfo.location_id);
+          return;
         }
-
-        // If user exists at location or no pod name, navigate immediately
-        navigateToUserDashboard(userData);
-      } catch (error) {
-        console.error('Post-login flow error:', error);
-        // Always navigate on error to prevent getting stuck
-        navigateToUserDashboard(userData);
       }
-    };
+      navigateToUserDashboard(userData);
+    } catch (error) {
+      console.error('Post-login flow error:', error);
+      navigateToUserDashboard(userData);
+    }
+  };
 
   const navigateToUserDashboard = (userData: any) => {
     switch (userData.user_type) {
@@ -168,31 +154,30 @@ export default function Login() {
         navigate('/login');
     }
   };
+
   const handleResendOTP = () => {
     if (countdown === 0) {
       handleSendOTP();
     }
   };
+
   const handleLocationPopupClose = () => {
     closeLocationPopup();
-    
-    // Navigate based on user type after closing popup
     if (userData) {
       navigateToUserDashboard(userData);
     }
   };
 
-  return <div className="min-h-screen bg-qikpod-light-bg flex items-start justify-center p-4 py-[40px]">
+  return (
+    <div className="min-h-screen bg-qikpod-light-bg flex items-start justify-center p-4 py-[40px]">
       <div className="w-full max-w-md">
-        {step === 'phone' ? <>
-            {/* Header */}
+        {step === 'phone' ? (
+          <>
             <div className="text-center mb-8">
-              
-              <h1 className="font-bold text-foreground mb-2 text-4xl text-left">Login</h1>
+              <h1 className="font-bold text-foreground mb-2 text-left text-4xl">Login</h1>
               <p className="text-muted-foreground text-left">Sign in with your registered mobile number</p>
             </div>
 
-            {/* Phone Input Form */}
             <Card className="card-modern p-6 mb-6">
               <div className="space-y-4">
                 <div>
@@ -203,20 +188,32 @@ export default function Login() {
                     <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground text-sm font-medium">
                       +91
                     </span>
-                    <Input type="tel" placeholder="Enter Your Mobile Number" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))} className="pl-12 h-12 text-base border-border/60 focus:border-primary" maxLength={10} />
+                    <Input
+                      type="tel"
+                      placeholder="Enter Your Mobile Number"
+                      value={phoneNumber}
+                      onChange={e => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                      className="pl-12 h-12 text-base border-border/60 focus:border-primary"
+                      maxLength={10}
+                    />
                   </div>
                 </div>
-                
-                <Button onClick={handleSendOTP} disabled={loading || phoneNumber.length !== 10} className="btn-primary w-full h-12 text-base font-semibold">
-                  {loading ? <>
+
+                <Button
+                  onClick={handleSendOTP}
+                  disabled={loading || phoneNumber.length !== 10}
+                  className="btn-primary w-full h-12 text-base font-semibold"
+                >
+                  {loading ? (
+                    <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Sending OTP...
-                    </> : 'Continue with OTP'}
+                    </>
+                  ) : 'Continue with OTP'}
                 </Button>
               </div>
             </Card>
 
-            {/* Footer Links */}
             <div className="text-center space-y-3">
               <div className="flex justify-center space-x-6 text-sm">
                 <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
@@ -227,21 +224,21 @@ export default function Login() {
                 </a>
               </div>
               <div className="space-y-2 text-sm text-center">
-                  <button onClick={() => navigate('/registration')} className="block text-black font-bold hover:text-gray-800 transition-colors mx-auto">
-                    Not a Registered User? Need to Register
-                  </button>
-                  <button 
-                    onClick={() => navigate('/how-it-works')} 
-                    className="block text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    How it works?
-                  </button>
-                </div>
+                <button onClick={() => navigate('/registration')} className="block text-black font-bold hover:text-gray-800 transition-colors mx-auto">
+                  Not a Registered User? Need to Register
+                </button>
+                <button
+                  onClick={() => navigate('/how-it-works')}
+                  className="block text-muted-foreground hover:text-primary transition-colors"
+                >
+                  How it works?
+                </button>
+              </div>
             </div>
-          </> : <>
-            {/* OTP Header */}
+          </>
+        ) : (
+          <>
             <div className="text-center mb-8">
-              
               <h1 className="font-bold text-foreground mb-2 text-left text-3xl">Verification Code</h1>
               <p className="text-muted-foreground mb-1 text-left">Enter 6-digit OTP</p>
               <p className="text-sm text-muted-foreground text-left">
@@ -249,39 +246,56 @@ export default function Login() {
               </p>
             </div>
 
-            {/* OTP Input Form */}
-            <Card className="card-modern p-6 mb-6">
+            <Card className="card-modern p-6 mb-6 overflow-visible">
               <div className="space-y-6">
-                <div>
-                  <OTPInput value={otp} onChange={setOtp} length={6} className="mb-4" />
+                <div className="flex justify-center w-full">
+                  <OTPInput
+                    value={otp}
+                    onChange={setOtp}
+                    length={6}
+                    className="flex flex-wrap justify-center gap-2 w-full"
+                  />
                 </div>
-                
-                <Button onClick={handleVerifyOTP} disabled={loading || otp.length !== 6} className="btn-primary w-full h-12 text-base font-semibold">
-                  {loading ? <>
+
+                <Button
+                  onClick={handleVerifyOTP}
+                  disabled={loading || otp.length !== 6}
+                  className="btn-primary w-full h-12 text-base font-semibold"
+                >
+                  {loading ? (
+                    <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Verifying...
-                    </> : 'Verify & Login'}
+                    </>
+                  ) : 'Verify & Login'}
                 </Button>
 
-                <Button onClick={handleResendOTP} disabled={countdown > 0} variant="outline" className="w-full h-12 text-base font-medium">
+                <Button
+                  onClick={handleResendOTP}
+                  disabled={countdown > 0}
+                  variant="outline"
+                  className="w-full h-12 text-base font-medium"
+                >
                   {countdown > 0 ? `Resend in ${countdown}s` : 'Resend OTP'}
                 </Button>
               </div>
             </Card>
 
-            {/* Change Number Link */}
             <div className="text-center">
-              <button onClick={() => {
-            setStep('phone');
-            setOtp('');
-          }} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+              <button
+                onClick={() => {
+                  setStep('phone');
+                  setOtp('');
+                }}
+                className="text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
                 Change number
               </button>
             </div>
-          </>}
+          </>
+        )}
       </div>
-      
-      {/* Location Detection Popup */}
+
       {userData && currentLocationId && (
         <LocationDetectionPopup
           isOpen={showLocationPopup}
@@ -290,5 +304,6 @@ export default function Login() {
           locationId={currentLocationId}
         />
       )}
-    </div>;
+    </div>
+  );
 }
