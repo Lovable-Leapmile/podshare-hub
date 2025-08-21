@@ -58,6 +58,21 @@ export default function Locations() {
             </p>
           </div>
 
+          {/* User Info */}
+          <Card className="card-modern p-3 rounded-xl h-16">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                <span className="text-primary font-bold text-xs">
+                  {user?.user_name?.charAt(0) || 'U'}
+                </span>
+              </div>
+              <div>
+                <p className="font-medium text-foreground text-sm">{user?.user_name}</p>
+                <p className="text-xs text-muted-foreground">{user?.user_phone}</p>
+              </div>
+            </div>
+          </Card>
+
           {loading ? <div className="space-y-3">
               {[1, 2, 3].map(i => <Card key={i} className="p-4 animate-pulse">
                   <div className="flex items-center space-x-3">
@@ -108,21 +123,6 @@ export default function Locations() {
                 </Card>
               </div>
             </div>}
-
-          {/* User Info */}
-          <Card className="card-modern p-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                <span className="text-primary font-bold text-sm">
-                  {user?.user_name?.charAt(0) || 'U'}
-                </span>
-              </div>
-              <div>
-                <p className="font-medium text-foreground">{user?.user_name}</p>
-                <p className="text-sm text-muted-foreground">{user?.user_phone}</p>
-              </div>
-            </div>
-          </Card>
         </div>
       </div>
     </div>;
