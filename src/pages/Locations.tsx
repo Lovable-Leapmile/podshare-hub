@@ -45,7 +45,7 @@ export default function Locations() {
     navigate('/customer-dashboard');
   };
   const user = getUserData();
-  return <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background text-xs">
       {/* Main Content */}
       <div className="p-4 max-w-md mx-auto">
         <div className="space-y-6">
@@ -57,21 +57,6 @@ export default function Locations() {
               Choose from your saved locations to access lockers
             </p>
           </div>
-
-          {/* User Info */}
-          <Card className="card-modern p-3 rounded-xl h-16">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                <span className="text-primary font-bold text-xs">
-                  {user?.user_name?.charAt(0) || 'U'}
-                </span>
-              </div>
-              <div>
-                <p className="font-medium text-foreground text-sm">{user?.user_name}</p>
-                <p className="text-xs text-muted-foreground">{user?.user_phone}</p>
-              </div>
-            </div>
-          </Card>
 
           {loading ? <div className="space-y-3">
               {[1, 2, 3].map(i => <Card key={i} className="p-4 animate-pulse">
@@ -101,7 +86,7 @@ export default function Locations() {
                           <p className="text-sm text-muted-foreground line-clamp-2">{location.location_address}</p>
                           <div className="flex items-center space-x-4 mt-1">
                             <span className="text-xs text-muted-foreground">PIN: {location.location_pincode}</span>
-                            <span className="text-xs font-medium text-green-500">{location.status.toUpperCase()}</span>
+                            <span className="text-xs text-primary font-medium">{location.status.toUpperCase()}</span>
                           </div>
                         </div>
                       </div>
@@ -123,6 +108,21 @@ export default function Locations() {
                 </Card>
               </div>
             </div>}
+
+          {/* User Info */}
+          <Card className="card-modern p-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                <span className="text-primary font-bold text-sm">
+                  {user?.user_name?.charAt(0) || 'U'}
+                </span>
+              </div>
+              <div>
+                <p className="font-medium text-foreground">{user?.user_name}</p>
+                <p className="text-sm text-muted-foreground">{user?.user_phone}</p>
+              </div>
+            </div>
+          </Card>
         </div>
       </div>
     </div>;
