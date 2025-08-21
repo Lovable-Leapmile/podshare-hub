@@ -42,7 +42,7 @@ export default function Profile() {
 
   if (!user) return null;
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
