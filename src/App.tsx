@@ -16,6 +16,7 @@ import Profile from "./pages/Profile";
 import Support from "./pages/Support";
 import Reservation from "./pages/Reservation";
 import ReservationDetails from "./pages/ReservationDetails";
+import HowItWorks from "./pages/HowItWorks";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/support" element={<PageLayout pageTitle="Support" showBack={true}><Support /></PageLayout>} />
           <Route path="/reservation" element={<PageLayout pageTitle="Create Reservation" showBack={true}><Reservation /></PageLayout>} />
           <Route path="/reservation-details/:reservationId" element={<PageLayout pageTitle="Reservation Details" showBack={true}><ReservationDetails /></PageLayout>} />
+          <Route path="/how-it-works" element={<PageLayout pageTitle="How it Works" showBack={true} showSettings={false}><HowItWorks /></PageLayout>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<PageLayout pageTitle="Not Found" showBack={true}><NotFound /></PageLayout>} />
         </Routes>

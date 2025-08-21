@@ -232,9 +232,12 @@ export default function Login() {
                   <button onClick={() => navigate('/registration')} className="block text-black font-bold hover:text-gray-800 transition-colors mx-auto">
                     Not a Registered User? Need to Register
                   </button>
-                  <a href="#" className="block text-muted-foreground hover:text-primary transition-colors">
+                  <button 
+                    onClick={() => navigate('/how-it-works')} 
+                    className="block text-muted-foreground hover:text-primary transition-colors"
+                  >
                     How it works?
-                  </a>
+                  </button>
                 </div>
             </div>
           </> : <>
