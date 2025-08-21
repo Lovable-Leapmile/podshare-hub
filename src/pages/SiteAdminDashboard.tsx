@@ -121,10 +121,11 @@ export default function SiteAdminDashboard() {
   const loadLocationUsers = async () => {
     try {
       const users = await apiService.getLocationUsers(currentLocationId!);
-      setLocationUsers(users);
+      setLocationUsers(Array.isArray(users) ? users : []);
     } catch (error) {
       console.error("Error loading users:", error);
       toast.error("Failed to load users");
+      setLocationUsers([]); // Reset to empty array on error
     }
   };
 
@@ -132,10 +133,11 @@ export default function SiteAdminDashboard() {
     try {
       const status = reservationSubTab === "pickup-pending" ? "PickupPending" : "DropPending";
       const reservationList = await apiService.getLocationReservations(currentLocationId!, status);
-      setReservations(reservationList);
+      setReservations(Array.isArray(reservationList) ? reservationList : []);
     } catch (error) {
       console.error("Error loading reservations:", error);
       toast.error("Failed to load reservations");
+      setReservations([]); // Reset to empty array on error
     }
   };
 
@@ -143,10 +145,11 @@ export default function SiteAdminDashboard() {
     try {
       const status = historySubTab === "drop-cancelled" ? "DropCancelled" : "PickupCompleted";
       const historyList = await apiService.getLocationReservations(currentLocationId!, status);
-      setReservations(historyList);
+      setReservations(Array.isArray(historyList) ? historyList : []);
     } catch (error) {
       console.error("Error loading history:", error);
       toast.error("Failed to load history");
+      setReservations([]); // Reset to empty array on error
     }
   };
 
@@ -211,18 +214,18 @@ export default function SiteAdminDashboard() {
     navigate(`/reservation-details/${reservation.id}`);
   };
 
-  const filteredUsers = locationUsers.filter(user =>
+  const filteredUsers = Array.isArray(locationUsers) ? locationUsers.filter(user =>
     user.user_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.user_phone.includes(searchQuery) ||
     user.user_email.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.user_flatno.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ) : [];
 
-  const filteredReservations = reservations.filter(reservation =>
+  const filteredReservations = Array.isArray(reservations) ? reservations.filter(reservation =>
     reservation.user_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     reservation.user_phone.includes(searchQuery) ||
     reservation.awb_number.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ) : [];
 
   if (!user) return null;
 
