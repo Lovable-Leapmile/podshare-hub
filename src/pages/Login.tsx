@@ -123,14 +123,13 @@ export default function Login() {
   };
   const handlePostLoginFlow = async (userData: any) => {
     try {
-      // Store current location_id in localStorage for dashboard use
-      const authToken = localStorage.getItem('auth_token');
-
       // Get user locations
       const userLocations = await apiService.getUserLocations(userData.id);
 
       // Get current pod name from localStorage
       const podName = localStorage.getItem('qikpod_pod_name');
+      let shouldShowPopup = false;
+      
       if (podName) {
         // Get pod details
         const podInfo = await apiService.getPodInfo(podName);
@@ -138,49 +137,43 @@ export default function Login() {
         // Store the current location_id for use in dashboard
         localStorage.setItem('current_location_id', podInfo.location_id);
 
-        // Get location details
-        const locationInfo = await apiService.getLocationInfo(podInfo.location_id);
-
         // Check if user has this location
         const hasLocation = userLocations.some(loc => loc.location_id.toString() === podInfo.location_id);
         if (!hasLocation) {
           // Set userData and currentLocationId to trigger the custom popup
           setUserData(userData);
           setCurrentLocationId(podInfo.location_id);
-          return; // Don't navigate yet, let the popup handle it
+          shouldShowPopup = true;
         }
       }
 
-      // Navigate based on user type
-      switch (userData.user_type) {
-        case 'SiteAdmin':
-          navigate('/site-admin-dashboard');
-          break;
-        case 'Customer':
-          navigate('/customer-dashboard');
-          break;
-        case 'SiteSecurity':
-          navigate('/site-security-dashboard');
-          break;
-        default:
-          navigate('/login');
+      // If popup should be shown, don't navigate yet
+      if (shouldShowPopup) {
+        return;
       }
+
+      // Navigate immediately based on user type
+      navigateToUserDashboard(userData);
     } catch (error) {
       console.error('Post-login flow error:', error);
-      // Fall back to default navigation based on user type
-      switch (userData.user_type) {
-        case 'SiteAdmin':
-          navigate('/site-admin-dashboard');
-          break;
-        case 'Customer':
-          navigate('/customer-dashboard');
-          break;
-        case 'SiteSecurity':
-          navigate('/site-security-dashboard');
-          break;
-        default:
-          navigate('/login');
-      }
+      // Always navigate on error to prevent getting stuck
+      navigateToUserDashboard(userData);
+    }
+  };
+
+  const navigateToUserDashboard = (userData: any) => {
+    switch (userData.user_type) {
+      case 'SiteAdmin':
+        navigate('/site-admin-dashboard');
+        break;
+      case 'Customer':
+        navigate('/customer-dashboard');
+        break;
+      case 'SiteSecurity':
+        navigate('/site-security-dashboard');
+        break;
+      default:
+        navigate('/login');
     }
   };
   const handleResendOTP = () => {
@@ -193,19 +186,7 @@ export default function Login() {
     
     // Navigate based on user type after closing popup
     if (userData) {
-      switch (userData.user_type) {
-        case 'SiteAdmin':
-          navigate('/site-admin-dashboard');
-          break;
-        case 'Customer':
-          navigate('/customer-dashboard');
-          break;
-        case 'SiteSecurity':
-          navigate('/site-security-dashboard');
-          break;
-        default:
-          navigate('/login');
-      }
+      navigateToUserDashboard(userData);
     }
   };
 
