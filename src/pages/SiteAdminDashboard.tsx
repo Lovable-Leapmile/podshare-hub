@@ -18,6 +18,7 @@ import { useLocationDetection } from "@/hooks/useLocationDetection";
 
 interface LocationUser {
   id: number;
+  user_id: number;
   user_name: string;
   user_email: string;
   user_phone: string;
@@ -273,12 +274,12 @@ export default function SiteAdminDashboard() {
 
   const handleConfirmUserForReservation = () => {
     if (selectedUser && currentLocationId) {
-      navigate(`/reservation?user_id=${selectedUser.id}&location_id=${currentLocationId}`);
+      navigate(`/reservation?user_id=${selectedUser.user_id}&location_id=${currentLocationId}`);
     }
   };
 
   const handleUserCardClick = (clickedUser: LocationUser) => {
-    navigate(`/profile?user_id=${clickedUser.id}&admin_view=true`);
+    navigate(`/profile?user_id=${clickedUser.user_id}&admin_view=true`);
   };
 
   const handleReservationCardClick = (reservation: Reservation) => {
