@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, UserPlus, Plus, User, Phone, Mail, Home, Trash2, Package } from "lucide-react";
+import { Search, UserPlus, Plus, User, Phone, Mail, Home, Trash2, Package, AlertCircle } from "lucide-react";
 import { PaginationFilter } from "@/components/PaginationFilter";
 import { getUserData, isLoggedIn } from "@/utils/storage";
 import { apiService } from "@/services/api";
@@ -51,13 +51,13 @@ export default function SiteAdminDashboard() {
   const user = getUserData();
   const [activeTab, setActiveTab] = useState("users");
   const [searchQuery, setSearchQuery] = useState("");
-  
+
   // Dialogs state
   const [showAddUserDialog, setShowAddUserDialog] = useState(false);
   const [showCreateReservationDialog, setShowCreateReservationDialog] = useState(false);
   const [showUserSelectionDialog, setShowUserSelectionDialog] = useState(false);
   const [showConfirmUserDialog, setShowConfirmUserDialog] = useState(false);
-  
+
   // Data state
   const [locationUsers, setLocationUsers] = useState<LocationUser[]>([]);
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -67,11 +67,12 @@ export default function SiteAdminDashboard() {
   const [isLoading, setIsLoading] = useState(false);
   const [showRemoveUserDialog, setShowRemoveUserDialog] = useState(false);
   const [userToRemove, setUserToRemove] = useState<LocationUser | null>(null);
-  
+  const [error, setError] = useState<string | null>(null);
+
   // Pagination state
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
-  
+
   // Form state
   const [newUserForm, setNewUserForm] = useState<NewUserForm>({
     user_name: "",
@@ -90,11 +91,14 @@ export default function SiteAdminDashboard() {
       navigate('/login');
       return;
     }
-    
+
     if (user?.user_type !== 'SiteAdmin') {
       navigate('/login');
       return;
     }
+
+    // Reset error state when loading new data
+    setError(null);
   }, [navigate, user]);
 
   useEffect(() => {
@@ -105,8 +109,10 @@ export default function SiteAdminDashboard() {
 
   const loadData = async () => {
     if (!currentLocationId) return;
-    
+
     setIsLoading(true);
+    setError(null);
+
     try {
       if (activeTab === "users") {
         await loadLocationUsers();
@@ -117,6 +123,7 @@ export default function SiteAdminDashboard() {
       }
     } catch (error) {
       console.error("Error loading data:", error);
+      setError("Failed to load data. Please try again.");
       toast.error("Failed to load data");
     } finally {
       setIsLoading(false);
@@ -126,35 +133,64 @@ export default function SiteAdminDashboard() {
   const loadLocationUsers = async () => {
     try {
       const users = await apiService.getLocationUsers(currentLocationId!);
-      setLocationUsers(Array.isArray(users) ? users : []);
+      if (users && Array.isArray(users)) {
+        setLocationUsers(users);
+      } else {
+        console.warn("Unexpected API response format for users:", users);
+        setLocationUsers([]);
+        setError("Received unexpected data format from server");
+      }
     } catch (error) {
       console.error("Error loading users:", error);
+      setError("Failed to load users");
       toast.error("Failed to load users");
-      setLocationUsers([]); // Reset to empty array on error
+      setLocationUsers([]);
     }
   };
 
   const loadReservations = async () => {
     try {
       const status = reservationSubTab === "pickup-pending" ? "PickupPending" : "DropPending";
+      console.log("Fetching reservations with status:", status);
+
       const reservationList = await apiService.getLocationReservations(currentLocationId!, status);
-      setReservations(Array.isArray(reservationList) ? reservationList : []);
+      console.log("API Response:", reservationList);
+
+      if (reservationList && Array.isArray(reservationList)) {
+        setReservations(reservationList);
+      } else {
+        console.warn("Unexpected API response format for reservations:", reservationList);
+        setReservations([]);
+        setError("Received unexpected data format from server");
+      }
     } catch (error) {
       console.error("Error loading reservations:", error);
+      setError("Failed to load reservations");
       toast.error("Failed to load reservations");
-      setReservations([]); // Reset to empty array on error
+      setReservations([]);
     }
   };
 
   const loadHistory = async () => {
     try {
       const status = historySubTab === "drop-cancelled" ? "DropCancelled" : "PickupCompleted";
+      console.log("Fetching history with status:", status);
+
       const historyList = await apiService.getLocationReservations(currentLocationId!, status);
-      setReservations(Array.isArray(historyList) ? historyList : []);
+      console.log("API Response:", historyList);
+
+      if (historyList && Array.isArray(historyList)) {
+        setReservations(historyList);
+      } else {
+        console.warn("Unexpected API response format for history:", historyList);
+        setReservations([]);
+        setError("Received unexpected data format from server");
+      }
     } catch (error) {
       console.error("Error loading history:", error);
+      setError("Failed to load history");
       toast.error("Failed to load history");
-      setReservations([]); // Reset to empty array on error
+      setReservations([]);
     }
   };
 
@@ -184,7 +220,7 @@ export default function SiteAdminDashboard() {
 
   const handleRemoveUser = async () => {
     if (!userToRemove) return;
-    
+
     setIsLoading(true);
     try {
       await apiService.removeUser(userToRemove.id);
@@ -273,24 +309,51 @@ export default function SiteAdminDashboard() {
           <p className="text-muted-foreground">Manage users, reservations, and location operations</p>
         </div>
 
+        {/* Error Display */}
+        {error && (
+          <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 text-destructive">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-5 h-5" />
+              <span>{error}</span>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-2"
+              onClick={loadData}
+            >
+              Retry
+            </Button>
+          </div>
+        )}
+
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex justify-center items-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          </div>
+        )}
+
         {/* Top Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <Button 
-            onClick={() => setShowAddUserDialog(true)}
-            className="flex items-center gap-2"
-          >
-            <UserPlus className="w-4 h-4" />
-            Add User
-          </Button>
-          <Button 
-            variant="outline"
-            onClick={handleOpenUserSelectionDialog}
-            className="flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Create Reservation
-          </Button>
-        </div>
+        {!isLoading && (
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <Button
+              onClick={() => setShowAddUserDialog(true)}
+              className="flex items-center gap-2"
+            >
+              <UserPlus className="w-4 h-4" />
+              Add User
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleOpenUserSelectionDialog}
+              className="flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Create Reservation
+            </Button>
+          </div>
+        )}
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -309,19 +372,19 @@ export default function SiteAdminDashboard() {
               onSearchChange={setSearchQuery}
               currentPage={currentPage}
               totalPages={
-                activeTab === "users" 
-                  ? totalUserPages 
+                activeTab === "users"
+                  ? totalUserPages
                   : totalReservationPages
               }
               onPageChange={setCurrentPage}
               totalItems={
-                activeTab === "users" 
-                  ? totalUsers 
+                activeTab === "users"
+                  ? totalUsers
                   : totalReservations
               }
               placeholder={
-                activeTab === "users" 
-                  ? "Search users by name, phone, email, or flat number..." 
+                activeTab === "users"
+                  ? "Search users by name, phone, email, or flat number..."
                   : "Search reservations by name, phone, or AWB number..."
               }
             />
@@ -339,8 +402,8 @@ export default function SiteAdminDashboard() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {currentUsers.map((locationUser) => (
-                  <Card 
-                    key={locationUser.id} 
+                  <Card
+                    key={locationUser.id}
                     className="p-4 cursor-pointer hover:shadow-md transition-shadow overflow-hidden"
                     onClick={() => handleUserCardClick(locationUser)}
                   >
@@ -392,18 +455,18 @@ export default function SiteAdminDashboard() {
                 <TabsTrigger value="pickup-pending">Pickup Pending</TabsTrigger>
                 <TabsTrigger value="drop-pending">Drop Pending</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="pickup-pending" className="space-y-4">
-                <ReservationList 
-                  reservations={currentReservations} 
+                <ReservationList
+                  reservations={currentReservations}
                   onReservationClick={handleReservationCardClick}
                   searchQuery={searchQuery}
                 />
               </TabsContent>
-              
+
               <TabsContent value="drop-pending" className="space-y-4">
-                <ReservationList 
-                  reservations={currentReservations} 
+                <ReservationList
+                  reservations={currentReservations}
                   onReservationClick={handleReservationCardClick}
                   searchQuery={searchQuery}
                 />
@@ -418,18 +481,18 @@ export default function SiteAdminDashboard() {
                 <TabsTrigger value="drop-cancelled">Drop Cancelled</TabsTrigger>
                 <TabsTrigger value="pickup-completed">Pickup Completed</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="drop-cancelled" className="space-y-4">
-                <ReservationList 
-                  reservations={currentReservations} 
+                <ReservationList
+                  reservations={currentReservations}
                   onReservationClick={handleReservationCardClick}
                   searchQuery={searchQuery}
                 />
               </TabsContent>
-              
+
               <TabsContent value="pickup-completed" className="space-y-4">
-                <ReservationList 
-                  reservations={currentReservations} 
+                <ReservationList
+                  reservations={currentReservations}
                   onReservationClick={handleReservationCardClick}
                   searchQuery={searchQuery}
                 />
@@ -448,7 +511,7 @@ export default function SiteAdminDashboard() {
               Create a new user account for this location.
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             <div>
               <Label htmlFor="name">Name *</Label>
@@ -460,7 +523,7 @@ export default function SiteAdminDashboard() {
                 disabled={isLoading}
               />
             </div>
-            
+
             <div>
               <Label htmlFor="email">Email</Label>
               <Input
@@ -472,7 +535,7 @@ export default function SiteAdminDashboard() {
                 disabled={isLoading}
               />
             </div>
-            
+
             <div>
               <Label htmlFor="phone">Phone Number *</Label>
               <Input
@@ -483,7 +546,7 @@ export default function SiteAdminDashboard() {
                 disabled={isLoading}
               />
             </div>
-            
+
             <div>
               <Label htmlFor="flatno">Flat Number</Label>
               <Input
@@ -494,7 +557,7 @@ export default function SiteAdminDashboard() {
                 disabled={isLoading}
               />
             </div>
-            
+
             <div>
               <Label htmlFor="address">Address</Label>
               <Textarea
@@ -506,9 +569,9 @@ export default function SiteAdminDashboard() {
                 disabled={isLoading}
               />
             </div>
-            
+
           </div>
-          
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddUserDialog(false)} disabled={isLoading}>
               Cancel
@@ -529,7 +592,7 @@ export default function SiteAdminDashboard() {
               Choose a user to create a reservation for.
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
@@ -540,7 +603,7 @@ export default function SiteAdminDashboard() {
                 className="pl-10"
               />
             </div>
-            
+
             <div className="max-h-96 overflow-y-auto space-y-2">
               {isLoading ? (
                 <div className="text-center py-4 text-muted-foreground">Loading users...</div>
@@ -548,8 +611,8 @@ export default function SiteAdminDashboard() {
                 <div className="text-center py-4 text-muted-foreground">No users found</div>
               ) : (
                 filteredUsers.map((locationUser) => (
-                  <Card 
-                    key={locationUser.id} 
+                  <Card
+                    key={locationUser.id}
                     className="p-3 cursor-pointer hover:shadow-md transition-shadow"
                     onClick={() => handleSelectUserForReservation(locationUser)}
                   >
@@ -585,7 +648,7 @@ export default function SiteAdminDashboard() {
               Create a reservation for this user?
             </DialogDescription>
           </DialogHeader>
-          
+
           {selectedUser && (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
@@ -602,7 +665,7 @@ export default function SiteAdminDashboard() {
               </div>
             </div>
           )}
-          
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowConfirmUserDialog(false)}>
               Cancel
@@ -623,7 +686,7 @@ export default function SiteAdminDashboard() {
               Are you sure you want to remove this user? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
-          
+
           {userToRemove && (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
@@ -640,7 +703,7 @@ export default function SiteAdminDashboard() {
               </div>
             </div>
           )}
-          
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowRemoveUserDialog(false)} disabled={isLoading}>
               Cancel
@@ -664,15 +727,25 @@ export default function SiteAdminDashboard() {
 }
 
 // Reservation List Component
-function ReservationList({ 
-  reservations, 
+function ReservationList({
+  reservations,
   onReservationClick,
-  searchQuery 
-}: { 
-  reservations: Reservation[]; 
+  searchQuery
+}: {
+  reservations: Reservation[];
   onReservationClick: (reservation: Reservation) => void;
   searchQuery?: string;
 }) {
+  // Add safety check for reservations
+  if (!reservations || !Array.isArray(reservations)) {
+    return (
+      <div className="text-center py-20">
+        <AlertCircle className="w-16 h-16 text-destructive mx-auto mb-4 opacity-50" />
+        <p className="text-destructive">Invalid reservation data</p>
+      </div>
+    );
+  }
+
   if (reservations.length === 0) {
     return (
       <div className="text-center py-20">
@@ -687,8 +760,8 @@ function ReservationList({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {reservations.map((reservation) => (
-        <Card 
-          key={reservation.id} 
+        <Card
+          key={reservation.id}
           className="p-4 cursor-pointer hover:shadow-md transition-shadow overflow-hidden"
           onClick={() => onReservationClick(reservation)}
         >
@@ -697,12 +770,16 @@ function ReservationList({
               <Package className="w-5 h-5 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-foreground truncate">{reservation.user_name}</h3>
+              <h3 className="font-semibold text-foreground truncate">
+                {reservation.user_name || "Unknown User"}
+              </h3>
               <div className="space-y-1 text-sm text-muted-foreground">
-                <div className="truncate">AWB: {reservation.awb_number}</div>
-                <div className="truncate">Phone: {reservation.user_phone}</div>
-                <div className="truncate">Status: {reservation.reservation_status}</div>
-                <div className="truncate">Created: {new Date(reservation.created_at).toLocaleDateString()}</div>
+                <div className="truncate">AWB: {reservation.awb_number || "N/A"}</div>
+                <div className="truncate">Phone: {reservation.user_phone || "N/A"}</div>
+                <div className="truncate">Status: {reservation.reservation_status || "Unknown"}</div>
+                <div className="truncate">
+                  Created: {reservation.created_at ? new Date(reservation.created_at).toLocaleDateString() : "Unknown"}
+                </div>
               </div>
             </div>
           </div>
