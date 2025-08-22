@@ -43,7 +43,6 @@ interface NewUserForm {
   user_phone: string;
   user_address: string;
   user_flatno: string;
-  user_type: string;
 }
 
 export default function SiteAdminDashboard() {
@@ -72,8 +71,7 @@ export default function SiteAdminDashboard() {
     user_email: "",
     user_phone: "",
     user_address: "",
-    user_flatno: "",
-    user_type: "Customer"
+    user_flatno: ""
   });
 
   // Location detection
@@ -164,8 +162,7 @@ export default function SiteAdminDashboard() {
         user_email: "",
         user_phone: "",
         user_address: "",
-        user_flatno: "",
-        user_type: "Customer"
+        user_flatno: ""
       });
       if (activeTab === "users") {
         await loadLocationUsers();
@@ -198,6 +195,14 @@ export default function SiteAdminDashboard() {
     setSelectedUser(selectedUser);
     setShowUserSelectionDialog(false);
     setShowConfirmUserDialog(true);
+  };
+
+  const handleOpenUserSelectionDialog = async () => {
+    setShowUserSelectionDialog(true);
+    // Load users when opening the dialog
+    if (currentLocationId && locationUsers.length === 0) {
+      await loadLocationUsers();
+    }
   };
 
   const handleConfirmUserForReservation = () => {
@@ -251,7 +256,7 @@ export default function SiteAdminDashboard() {
           </Button>
           <Button 
             variant="outline"
-            onClick={() => setShowUserSelectionDialog(true)}
+            onClick={handleOpenUserSelectionDialog}
             className="flex items-center gap-2"
           >
             <Plus className="w-4 h-4" />
@@ -449,23 +454,6 @@ export default function SiteAdminDashboard() {
               />
             </div>
             
-            <div>
-              <Label htmlFor="userType">User Type</Label>
-              <Select 
-                value={newUserForm.user_type} 
-                onValueChange={(value) => setNewUserForm(prev => ({ ...prev, user_type: value }))}
-                disabled={isLoading}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Customer">Customer</SelectItem>
-                  <SelectItem value="Employee">Employee</SelectItem>
-                  <SelectItem value="SiteSecurity">Site Security</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
           
           <DialogFooter>
@@ -501,29 +489,35 @@ export default function SiteAdminDashboard() {
             </div>
             
             <div className="max-h-96 overflow-y-auto space-y-2">
-              {filteredUsers.map((locationUser) => (
-                <Card 
-                  key={locationUser.id} 
-                  className="p-3 cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => handleSelectUserForReservation(locationUser)}
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                      <User className="w-4 h-4 text-primary" />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium">{locationUser.user_name}</h4>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span>{locationUser.user_phone}</span>
-                        <span>{locationUser.user_flatno || "No flat"}</span>
+              {isLoading ? (
+                <div className="text-center py-4 text-muted-foreground">Loading users...</div>
+              ) : filteredUsers.length === 0 ? (
+                <div className="text-center py-4 text-muted-foreground">No users found</div>
+              ) : (
+                filteredUsers.map((locationUser) => (
+                  <Card 
+                    key={locationUser.id} 
+                    className="p-3 cursor-pointer hover:shadow-md transition-shadow"
+                    onClick={() => handleSelectUserForReservation(locationUser)}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                        <User className="w-4 h-4 text-primary" />
                       </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium">{locationUser.user_name}</h4>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <span>{locationUser.user_phone}</span>
+                          <span>{locationUser.user_flatno || "No flat"}</span>
+                        </div>
+                      </div>
+                      <Button size="sm" variant="outline">
+                        Select
+                      </Button>
                     </div>
-                    <Button size="sm" variant="outline">
-                      Select
-                    </Button>
-                  </div>
-                </Card>
-              ))}
+                  </Card>
+                ))
+              )}
             </div>
           </div>
         </DialogContent>

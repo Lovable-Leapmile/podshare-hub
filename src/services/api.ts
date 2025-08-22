@@ -497,7 +497,7 @@ export const apiService = {
     const data = await response.json();
     
     if (response.ok) {
-      return data || [];
+      return data.records || [];
     }
 
     throw new Error(data.detail || 'Failed to fetch location users');
@@ -517,7 +517,7 @@ export const apiService = {
     const data = await response.json();
     
     if (response.ok) {
-      return data || [];
+      return data.records || [];
     }
 
     throw new Error(data.detail || 'Failed to fetch reservations');
