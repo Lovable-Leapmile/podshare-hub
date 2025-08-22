@@ -7,51 +7,44 @@ import { Package, Clock } from "lucide-react";
 import { getUserData, getPodValue, getLocationName, isLoggedIn } from "@/utils/storage";
 import { useToast } from "@/hooks/use-toast";
 import { apiService } from "@/services/api";
-
 export default function Reservation() {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const user = getUserData();
   const podValue = getPodValue();
-  
   const [formData, setFormData] = useState({
     awbNumber: '',
     executivePhone: ''
   });
   const [loading, setLoading] = useState(false);
-
   useEffect(() => {
     if (!isLoggedIn()) {
       navigate('/login');
       return;
     }
   }, [navigate]);
-
   const locationName = getLocationName() || 'Unknown Location';
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!formData.awbNumber || !formData.executivePhone) {
       toast({
         title: "Incomplete Form",
         description: "Please fill in all required fields.",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     if (!user) {
       toast({
         title: "Error",
         description: "User information not found.",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     setLoading(true);
-    
     try {
       const reservationData = {
         created_by_phone: user.user_phone,
@@ -60,29 +53,24 @@ export default function Reservation() {
         pod_id: "1001763",
         reservation_awbno: formData.awbNumber
       };
-
       const response = await apiService.createReservation(reservationData);
-      
       toast({
         title: "Reservation Created",
-        description: "Your reservation has been created successfully.",
+        description: "Your reservation has been created successfully."
       });
-      
       navigate(`/reservation-details/${response.reservation_id}`);
     } catch (error: any) {
       console.error('Error creating reservation:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to create reservation.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
   };
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       <div className="mobile-container space-y-6">
         {/* User & Location Info */}
         <Card className="card-3d bg-gradient-primary p-6 text-qikpod-black animate-fade-in">
@@ -119,52 +107,29 @@ export default function Reservation() {
               <label className="text-sm font-medium text-foreground mb-2 block">
                 Enter AWB No. / Product Details *
               </label>
-              <Input
-                value={formData.awbNumber}
-                onChange={(e) => setFormData(prev => ({ ...prev, awbNumber: e.target.value }))}
-                placeholder="Enter AWB number or product details"
-                className="h-12"
-              />
+              <Input value={formData.awbNumber} onChange={e => setFormData(prev => ({
+              ...prev,
+              awbNumber: e.target.value
+            }))} placeholder="Enter AWB number or product details" className="h-12" />
             </div>
 
             <div>
               <label className="text-sm font-medium text-foreground mb-2 block">
                 Enter the Delivery Executive Phone Number *
               </label>
-              <Input
-                value={formData.executivePhone}
-                onChange={(e) => setFormData(prev => ({ ...prev, executivePhone: e.target.value }))}
-                placeholder="Enter delivery executive phone number"
-                type="tel"
-                className="h-12"
-              />
+              <Input value={formData.executivePhone} onChange={e => setFormData(prev => ({
+              ...prev,
+              executivePhone: e.target.value
+            }))} placeholder="Enter delivery executive phone number" type="tel" className="h-12" />
             </div>
 
-            <div className="bg-muted/50 p-4 rounded-xl">
-              <div className="flex items-start space-x-3">
-                <Clock className="w-5 h-5 text-primary mt-0.5" />
-                <div>
-                  <h4 className="font-medium text-foreground mb-1">Important Information</h4>
-                  <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• Standard storage time is 48 hours</li>
-                    <li>• Use your drop code: {user?.user_dropcode}</li>
-                    <li>• Use your pickup code: {user?.user_pickupcode}</li>
-                    <li>• Contact support for any issues</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
+            
 
-            <Button 
-              type="submit" 
-              disabled={loading}
-              className="btn-qikpod w-full h-12"
-            >
+            <Button type="submit" disabled={loading} className="btn-qikpod w-full h-12">
               {loading ? 'Processing...' : 'Proceed'}
             </Button>
           </form>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 }
