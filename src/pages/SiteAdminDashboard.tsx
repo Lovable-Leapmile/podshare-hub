@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, UserPlus, Plus, User, Phone, Mail, Home, Trash2, Package } from "lucide-react";
+import { PaginationFilter } from "@/components/PaginationFilter";
 import { getUserData, isLoggedIn } from "@/utils/storage";
 import { apiService } from "@/services/api";
 import { toast } from "sonner";
@@ -64,6 +65,12 @@ export default function SiteAdminDashboard() {
   const [reservationSubTab, setReservationSubTab] = useState("pickup-pending");
   const [historySubTab, setHistorySubTab] = useState("drop-cancelled");
   const [isLoading, setIsLoading] = useState(false);
+  const [showRemoveUserDialog, setShowRemoveUserDialog] = useState(false);
+  const [userToRemove, setUserToRemove] = useState<LocationUser | null>(null);
+  
+  // Pagination state
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
   
   // Form state
   const [newUserForm, setNewUserForm] = useState<NewUserForm>({
@@ -175,20 +182,27 @@ export default function SiteAdminDashboard() {
     }
   };
 
-  const handleRemoveUser = async (userId: number) => {
-    if (!window.confirm("Are you sure you want to remove this user?")) return;
+  const handleRemoveUser = async () => {
+    if (!userToRemove) return;
     
     setIsLoading(true);
     try {
-      await apiService.removeUser(userId);
+      await apiService.removeUser(userToRemove.id);
       toast.success("User removed successfully!");
       await loadLocationUsers();
+      setShowRemoveUserDialog(false);
+      setUserToRemove(null);
     } catch (error: any) {
       console.error("Error removing user:", error);
       toast.error(error?.message || "Failed to remove user");
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const openRemoveUserDialog = (user: LocationUser) => {
+    setUserToRemove(user);
+    setShowRemoveUserDialog(true);
   };
 
   const handleSelectUserForReservation = (selectedUser: LocationUser) => {
@@ -232,6 +246,20 @@ export default function SiteAdminDashboard() {
     reservation.awb_number.toLowerCase().includes(searchQuery.toLowerCase())
   ) : [];
 
+  // Pagination calculations for users
+  const totalUsers = filteredUsers.length;
+  const totalUserPages = Math.ceil(totalUsers / itemsPerPage);
+  const userStartIndex = (currentPage - 1) * itemsPerPage;
+  const userEndIndex = userStartIndex + itemsPerPage;
+  const currentUsers = filteredUsers.slice(userStartIndex, userEndIndex);
+
+  // Pagination calculations for reservations
+  const totalReservations = filteredReservations.length;
+  const totalReservationPages = Math.ceil(totalReservations / itemsPerPage);
+  const reservationStartIndex = (currentPage - 1) * itemsPerPage;
+  const reservationEndIndex = reservationStartIndex + itemsPerPage;
+  const currentReservations = filteredReservations.slice(reservationStartIndex, reservationEndIndex);
+
   if (!user) return null;
 
   return (
@@ -272,68 +300,89 @@ export default function SiteAdminDashboard() {
             <TabsTrigger value="history">History</TabsTrigger>
           </TabsList>
 
-          {/* Search Bar */}
-          <div className="relative mt-4">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input
+          {/* Pagination Filter */}
+          <div className="mt-4">
+            <PaginationFilter
+              itemsPerPage={itemsPerPage}
+              onItemsPerPageChange={setItemsPerPage}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              currentPage={currentPage}
+              totalPages={
+                activeTab === "users" 
+                  ? totalUserPages 
+                  : totalReservationPages
+              }
+              onPageChange={setCurrentPage}
+              totalItems={
+                activeTab === "users" 
+                  ? totalUsers 
+                  : totalReservations
+              }
               placeholder={
                 activeTab === "users" 
                   ? "Search users by name, phone, email, or flat number..." 
                   : "Search reservations by name, phone, or AWB number..."
               }
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
             />
           </div>
 
           {/* Users Tab */}
           <TabsContent value="users" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filteredUsers.map((locationUser) => (
-                <Card 
-                  key={locationUser.id} 
-                  className="p-4 cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => handleUserCardClick(locationUser)}
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-center space-x-3 flex-1">
-                      <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                        <User className="w-5 h-5 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-foreground">{locationUser.user_name}</h3>
-                        <div className="space-y-1 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Mail className="w-3 h-3" />
-                            {locationUser.user_email || "No email"}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Phone className="w-3 h-3" />
-                            {locationUser.user_phone}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Home className="w-3 h-3" />
-                            {locationUser.user_flatno || "No flat number"}
+            {currentUsers.length === 0 ? (
+              <div className="text-center py-20">
+                <User className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                <p className="text-muted-foreground">
+                  {searchQuery ? "No users found matching your search." : "No users found for this location."}
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {currentUsers.map((locationUser) => (
+                  <Card 
+                    key={locationUser.id} 
+                    className="p-4 cursor-pointer hover:shadow-md transition-shadow overflow-hidden"
+                    onClick={() => handleUserCardClick(locationUser)}
+                  >
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="flex items-center space-x-3 flex-1 min-w-0">
+                        <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
+                          <User className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-foreground truncate">{locationUser.user_name}</h3>
+                          <div className="space-y-1 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <Mail className="w-3 h-3 shrink-0" />
+                              <span className="truncate">{locationUser.user_email || "No email"}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Phone className="w-3 h-3 shrink-0" />
+                              <span className="truncate">{locationUser.user_phone}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Home className="w-3 h-3 shrink-0" />
+                              <span className="truncate">{locationUser.user_flatno || "No flat number"}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openRemoveUserDialog(locationUser);
+                        }}
+                        className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRemoveUser(locationUser.id);
-                      }}
-                      className="ml-2"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </Card>
-              ))}
-            </div>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           {/* Reservations Tab */}
@@ -346,15 +395,17 @@ export default function SiteAdminDashboard() {
               
               <TabsContent value="pickup-pending" className="space-y-4">
                 <ReservationList 
-                  reservations={filteredReservations} 
+                  reservations={currentReservations} 
                   onReservationClick={handleReservationCardClick}
+                  searchQuery={searchQuery}
                 />
               </TabsContent>
               
               <TabsContent value="drop-pending" className="space-y-4">
                 <ReservationList 
-                  reservations={filteredReservations} 
+                  reservations={currentReservations} 
                   onReservationClick={handleReservationCardClick}
+                  searchQuery={searchQuery}
                 />
               </TabsContent>
             </Tabs>
@@ -370,15 +421,17 @@ export default function SiteAdminDashboard() {
               
               <TabsContent value="drop-cancelled" className="space-y-4">
                 <ReservationList 
-                  reservations={filteredReservations} 
+                  reservations={currentReservations} 
                   onReservationClick={handleReservationCardClick}
+                  searchQuery={searchQuery}
                 />
               </TabsContent>
               
               <TabsContent value="pickup-completed" className="space-y-4">
                 <ReservationList 
-                  reservations={filteredReservations} 
+                  reservations={currentReservations} 
                   onReservationClick={handleReservationCardClick}
+                  searchQuery={searchQuery}
                 />
               </TabsContent>
             </Tabs>
@@ -561,6 +614,44 @@ export default function SiteAdminDashboard() {
         </DialogContent>
       </Dialog>
 
+      {/* Remove User Confirmation Dialog */}
+      <Dialog open={showRemoveUserDialog} onOpenChange={setShowRemoveUserDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Remove User</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to remove this user? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {userToRemove && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <User className="w-4 h-4 text-muted-foreground" />
+                <span className="font-medium">{userToRemove.user_name}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-muted-foreground" />
+                <span>{userToRemove.user_phone}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-muted-foreground" />
+                <span>{userToRemove.user_email || "No email"}</span>
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowRemoveUserDialog(false)} disabled={isLoading}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleRemoveUser} disabled={isLoading}>
+              {isLoading ? "Removing..." : "Remove User"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Location Detection Popup */}
       <LocationDetectionPopup
         isOpen={showLocationPopup}
@@ -575,30 +666,43 @@ export default function SiteAdminDashboard() {
 // Reservation List Component
 function ReservationList({ 
   reservations, 
-  onReservationClick 
+  onReservationClick,
+  searchQuery 
 }: { 
   reservations: Reservation[]; 
   onReservationClick: (reservation: Reservation) => void;
+  searchQuery?: string;
 }) {
+  if (reservations.length === 0) {
+    return (
+      <div className="text-center py-20">
+        <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+        <p className="text-muted-foreground">
+          {searchQuery ? "No reservations found matching your search." : "No reservations found."}
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {reservations.map((reservation) => (
         <Card 
           key={reservation.id} 
-          className="p-4 cursor-pointer hover:shadow-md transition-shadow"
+          className="p-4 cursor-pointer hover:shadow-md transition-shadow overflow-hidden"
           onClick={() => onReservationClick(reservation)}
         >
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
               <Package className="w-5 h-5 text-primary" />
             </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-foreground">{reservation.user_name}</h3>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-foreground truncate">{reservation.user_name}</h3>
               <div className="space-y-1 text-sm text-muted-foreground">
-                <div>AWB: {reservation.awb_number}</div>
-                <div>Phone: {reservation.user_phone}</div>
-                <div>Status: {reservation.reservation_status}</div>
-                <div>Created: {new Date(reservation.created_at).toLocaleDateString()}</div>
+                <div className="truncate">AWB: {reservation.awb_number}</div>
+                <div className="truncate">Phone: {reservation.user_phone}</div>
+                <div className="truncate">Status: {reservation.reservation_status}</div>
+                <div className="truncate">Created: {new Date(reservation.created_at).toLocaleDateString()}</div>
               </div>
             </div>
           </div>

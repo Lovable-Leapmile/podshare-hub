@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { User, Phone, Mail, MapPin, Home, Edit2, X, Check, RefreshCw } from "lucide-react";
+import { User, Phone, Mail, MapPin, Home, Edit2, X, Check, RefreshCw, ArrowLeft } from "lucide-react";
 import { getUserData, isLoggedIn, setUserData } from "@/utils/storage";
 import { apiService } from "@/services/api";
 import { toast } from "sonner";
@@ -178,6 +178,18 @@ export default function Profile() {
   }, [isEditing, hasChanges]);
   return <div className="min-h-screen bg-background">
       <div className="p-4 max-w-md mx-auto space-y-6">
+        {/* Back Button and Profile Header */}
+        <div className="flex items-center gap-4 mb-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(-1)}
+            className="h-8 w-8 p-0"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+        </div>
+        
         {/* Profile Header */}
         <Card className="card-modern bg-gradient-primary p-6 text-white">
           <div className="flex items-center justify-between">

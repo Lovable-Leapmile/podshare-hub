@@ -11,6 +11,7 @@ import Registration from "./pages/Registration";
 import CustomerDashboard from "./pages/CustomerDashboard";
 import SiteAdminDashboard from "./pages/SiteAdminDashboard";
 import SiteSecurityDashboard from "./pages/SiteSecurityDashboard";
+import RTOPending from "./pages/RTOPending";
 import Locations from "./pages/Locations";
 import Profile from "./pages/Profile";
 import Support from "./pages/Support";
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/customer-dashboard" element={<PageLayout pageTitle="Customer Dashboard" showBack={false}><CustomerDashboard /></PageLayout>} />
           <Route path="/site-admin-dashboard" element={<PageLayout pageTitle="Site Admin" showBack={true}><SiteAdminDashboard /></PageLayout>} />
           <Route path="/site-security-dashboard" element={<PageLayout pageTitle="Site Security" showBack={true}><SiteSecurityDashboard /></PageLayout>} />
+          <Route path="/rto-pending" element={<PageLayout pageTitle="RTO Pending" showBack={true}><RTOPending /></PageLayout>} />
           <Route path="/locations" element={<PageLayout pageTitle="Your Locations" showBack={true}><Locations /></PageLayout>} />
           <Route path="/profile" element={<PageLayout pageTitle="Profile" showBack={true}><Profile /></PageLayout>} />
           <Route path="/support" element={<PageLayout pageTitle="Support" showBack={true}><Support /></PageLayout>} />

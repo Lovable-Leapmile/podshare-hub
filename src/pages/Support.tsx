@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { HelpCircle, Phone, Mail, MessageSquare } from "lucide-react";
+import { HelpCircle, Phone, Mail, MessageSquare, ArrowLeft } from "lucide-react";
 import { getUserData, isLoggedIn } from "@/utils/storage";
 import { useToast } from "@/hooks/use-toast";
 
@@ -76,12 +76,24 @@ export default function Support() {
     <div className="min-h-screen bg-background">
       <div className="mobile-container space-y-6">
         <div className="animate-fade-in">
-          <h1 className="text-2xl font-bold text-foreground mb-2">
-            Need Help?
-          </h1>
-          <p className="text-muted-foreground">
-            We're here to assist you with any questions or issues
-          </p>
+          <div className="flex items-center gap-4 mb-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(-1)}
+              className="h-8 w-8 p-0"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">
+                Need Help?
+              </h1>
+              <p className="text-muted-foreground">
+                We're here to assist you with any questions or issues
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Quick Contact Options */}

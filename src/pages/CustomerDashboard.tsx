@@ -246,13 +246,18 @@ export default function CustomerDashboard() {
               itemsPerPage={itemsPerPage} 
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
-              onItemsPerPageChange={value => {
+              onItemsPerPageChange={(value) => {
                 setItemsPerPage(value);
                 // Reset all pages to 1 when changing items per page
                 setDropPendingPage(1);
                 setPickupPendingPage(1);
                 setHistoryPage(1);
-              }} 
+              }}
+              currentPage={1}
+              totalPages={1}
+              onPageChange={() => {}}
+              totalItems={0}
+              placeholder="Search reservations..."
             />
           </div>
 

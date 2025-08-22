@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { User, MapPin, HelpCircle, LogOut, Menu } from "lucide-react";
+import { User, MapPin, HelpCircle, LogOut, Menu, Package } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
@@ -72,6 +72,14 @@ export function Header({
                           Profile
                         </Button>
                       </SheetClose>
+                      {user?.user_type === 'SiteSecurity' && (
+                        <SheetClose asChild>
+                          <Button variant="ghost" className="w-full justify-start h-12 px-4 rounded-none" onClick={() => navigate('/rto-pending')}>
+                            <Package className="mr-3 h-4 w-4" />
+                            RTO Pending
+                          </Button>
+                        </SheetClose>
+                      )}
                       <SheetClose asChild>
                         <Button variant="ghost" className="w-full justify-start h-12 px-4 rounded-none" onClick={() => navigate('/support')}>
                           <HelpCircle className="mr-3 h-4 w-4" />

@@ -55,7 +55,13 @@ export default function SiteSecurityDashboard() {
         <div className="flex justify-end">
           <PaginationFilter 
             itemsPerPage={itemsPerPage} 
-            onItemsPerPageChange={setItemsPerPage} 
+            onItemsPerPageChange={setItemsPerPage}
+            searchQuery=""
+            onSearchChange={() => {}}
+            currentPage={1}
+            totalPages={1}
+            onPageChange={() => {}}
+            totalItems={0}
           />
         </div>
 
