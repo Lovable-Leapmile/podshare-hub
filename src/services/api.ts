@@ -538,5 +538,25 @@ export const apiService = {
       const data = await response.json();
       throw new Error(data.detail || 'Failed to remove user');
     }
+  },
+
+  // Get user by ID (for profile viewing)
+  getUserById: async (userId: string): Promise<any> => {
+    const token = localStorage.getItem('auth_token');
+    const response = await fetch(`${API_BASE_URL}/users/?record_id=${userId}`, {
+      method: 'GET',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.detail || 'Failed to fetch user details');
+    }
+
+    const data = await response.json();
+    return data.records?.[0] || null;
   }
 };

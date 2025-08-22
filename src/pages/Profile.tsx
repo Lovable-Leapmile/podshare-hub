@@ -29,9 +29,14 @@ interface ProfileForm {
 }
 export default function Profile() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const userId = searchParams.get('user_id');
+  const isAdminView = searchParams.get('admin_view') === 'true';
+  
   const [user, setUser] = useState<UserShape | null>(() => getUserData());
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingUser, setIsFetchingUser] = useState(false);
   const [formData, setFormData] = useState<ProfileForm>({
     user_name: "",
     user_email: "",
@@ -45,7 +50,31 @@ export default function Profile() {
       navigate("/login");
       return;
     }
-  }, [navigate]);
+    
+    // If viewing another user's profile (admin view), fetch that user's data
+    if (userId && isAdminView) {
+      fetchUserById(userId);
+    }
+  }, [navigate, userId, isAdminView]);
+
+  const fetchUserById = async (id: string) => {
+    setIsFetchingUser(true);
+    try {
+      const userData = await apiService.getUserById(id);
+      if (userData) {
+        setUser(userData);
+      } else {
+        toast.error("User not found");
+        navigate(-1);
+      }
+    } catch (error: any) {
+      console.error("Error fetching user:", error);
+      toast.error(error?.message || "Failed to load user profile");
+      navigate(-1);
+    } finally {
+      setIsFetchingUser(false);
+    }
+  };
   useEffect(() => {
     if (user) {
       setFormData({
@@ -176,6 +205,14 @@ export default function Profile() {
     window.addEventListener("beforeunload", beforeUnload);
     return () => window.removeEventListener("beforeunload", beforeUnload);
   }, [isEditing, hasChanges]);
+  if (isFetchingUser) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return <div className="min-h-screen bg-background">
       <div className="p-4 max-w-md mx-auto space-y-6">
         {/* Back Button and Profile Header */}
@@ -188,6 +225,9 @@ export default function Profile() {
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
+          {isAdminView && (
+            <h2 className="text-lg font-semibold text-foreground">User Profile</h2>
+          )}
         </div>
         
         {/* Profile Header */}
@@ -205,9 +245,11 @@ export default function Profile() {
                 
               </div>
             </div>
-            <Button variant="secondary" size="icon" onClick={() => setIsEditing(true)} className="bg-white/20 hover:bg-white/30 text-white border-0">
-              <Edit2 className="w-4 h-4" />
-            </Button>
+            {!isAdminView && (
+              <Button variant="secondary" size="icon" onClick={() => setIsEditing(true)} className="bg-white/20 hover:bg-white/30 text-white border-0">
+                <Edit2 className="w-4 h-4" />
+              </Button>
+            )}
           </div>
         </Card>
 
@@ -229,8 +271,8 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Edit Dialog */}
-        {isEditing && <div className="fixed inset-0 flex items-center justify-center p-4 z-50">
+        {/* Edit Dialog - only show if not admin view */}
+        {isEditing && !isAdminView && <div className="fixed inset-0 flex items-center justify-center p-4 z-50">
             <Card className="w-full max-w-md p-6 mx-4">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold">Edit Profile</h2>

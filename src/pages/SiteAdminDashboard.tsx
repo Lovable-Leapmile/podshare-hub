@@ -157,7 +157,15 @@ export default function SiteAdminDashboard() {
       console.log("API Response:", reservationList);
 
       if (reservationList && Array.isArray(reservationList)) {
-        setReservations(reservationList);
+        // Map the data to ensure proper field names
+        const mappedReservations = reservationList.map(reservation => ({
+          ...reservation,
+          user_name: reservation.user_name || reservation.created_by_name || "Unknown User",
+          awb_number: reservation.awb_number || reservation.reservation_awbno || "N/A",
+          user_phone: reservation.user_phone || reservation.created_by_phone || "N/A"
+        }));
+        setReservations(mappedReservations);
+        setError(null);
       } else {
         console.warn("Unexpected API response format for reservations:", reservationList);
         setReservations([]);
@@ -180,7 +188,15 @@ export default function SiteAdminDashboard() {
       console.log("API Response:", historyList);
 
       if (historyList && Array.isArray(historyList)) {
-        setReservations(historyList);
+        // Map the data to ensure proper field names
+        const mappedHistory = historyList.map(reservation => ({
+          ...reservation,
+          user_name: reservation.user_name || reservation.created_by_name || "Unknown User",
+          awb_number: reservation.awb_number || reservation.reservation_awbno || "N/A",
+          user_phone: reservation.user_phone || reservation.created_by_phone || "N/A"
+        }));
+        setReservations(mappedHistory);
+        setError(null);
       } else {
         console.warn("Unexpected API response format for history:", historyList);
         setReservations([]);
