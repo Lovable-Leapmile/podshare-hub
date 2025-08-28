@@ -593,7 +593,9 @@ export default function SiteAdminDashboard() {
 
       {/* User Selection Dialog for Create Reservation */}
       <Dialog open={showUserSelectionDialog} onOpenChange={setShowUserSelectionDialog}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden p-6">
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden p-6"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          >
           <DialogHeader>
             <DialogTitle>Select User for Reservation</DialogTitle>
             <DialogDescription>
