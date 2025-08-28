@@ -7,19 +7,18 @@ import { Package, Clock } from "lucide-react";
 import { getUserData, getPodValue, getLocationName, isLoggedIn } from "@/utils/storage";
 import { useToast } from "@/hooks/use-toast";
 import { apiService } from "@/services/api";
-
 export default function Reservation() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { toast } = useToast();
-  
+  const {
+    toast
+  } = useToast();
   const loggedInUser = getUserData();
   const podValue = getPodValue();
-  
+
   // State for the user whose reservation we're creating (could be admin or customer)
   const [reservationUser, setReservationUser] = useState(loggedInUser);
   const [isLoadingCustomer, setIsLoadingCustomer] = useState(false);
-  
   const [formData, setFormData] = useState({
     awbNumber: '',
     executivePhone: ''
@@ -37,7 +36,6 @@ export default function Reservation() {
       loadCustomerData(userId);
     }
   }, [navigate, searchParams]);
-
   const loadCustomerData = async (userId: string) => {
     setIsLoadingCustomer(true);
     try {
@@ -120,21 +118,16 @@ export default function Reservation() {
               <div>
                 <p className="text-sm font-medium">User Name</p>
                 <p className="text-base">
-                  {isLoadingCustomer ? 'Loading...' : (reservationUser?.user_name || 'N/A')}
+                  {isLoadingCustomer ? 'Loading...' : reservationUser?.user_name || 'N/A'}
                 </p>
               </div>
               <div>
                 <p className="text-sm font-medium">Phone Number</p>
                 <p className="text-base">
-                  {isLoadingCustomer ? 'Loading...' : (reservationUser?.user_phone || 'N/A')}
+                  {isLoadingCustomer ? 'Loading...' : reservationUser?.user_phone || 'N/A'}
                 </p>
               </div>
-              <div>
-                <p className="text-sm font-medium">Pickup Code</p>
-                <p className="text-base">
-                  {isLoadingCustomer ? 'Loading...' : (reservationUser?.user_pickupcode || 'N/A')}
-                </p>
-              </div>
+              
             </div>
           </div>
         </Card>
