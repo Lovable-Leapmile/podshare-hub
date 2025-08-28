@@ -287,10 +287,12 @@ export default function SiteAdminDashboard() {
   };
 
   const filteredUsers = Array.isArray(locationUsers) ? locationUsers.filter(user =>
-    user.user_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.user_phone.includes(searchQuery) ||
-    user.user_email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.user_flatno.toLowerCase().includes(searchQuery.toLowerCase())
+    user.user_type === "Customer" && (
+      user.user_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.user_phone.includes(searchQuery) ||
+      user.user_email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.user_flatno.toLowerCase().includes(searchQuery.toLowerCase())
+    )
   ) : [];
 
   const filteredReservations = Array.isArray(reservations) ? reservations.filter(reservation =>
@@ -445,19 +447,8 @@ export default function SiteAdminDashboard() {
                               <span className="truncate">{locationUser.user_flatno || "No flat number"}</span>
                             </div>
                           </div>
-                        </div>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openRemoveUserDialog(locationUser);
-                        }}
-                        className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                    </div>
                     </div>
                   </Card>
                 ))}
@@ -602,7 +593,7 @@ export default function SiteAdminDashboard() {
 
       {/* User Selection Dialog for Create Reservation */}
       <Dialog open={showUserSelectionDialog} onOpenChange={setShowUserSelectionDialog}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden">
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden p-6">
           <DialogHeader>
             <DialogTitle>Select User for Reservation</DialogTitle>
             <DialogDescription>

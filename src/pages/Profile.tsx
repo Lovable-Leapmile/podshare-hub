@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { User, Phone, Mail, MapPin, Home, Edit2, X, Check, RefreshCw, ArrowLeft } from "lucide-react";
+import { User, Phone, Mail, MapPin, Home, Edit2, X, Check, RefreshCw, ArrowLeft, Trash2 } from "lucide-react";
 import { getUserData, isLoggedIn, setUserData } from "@/utils/storage";
 import { apiService } from "@/services/api";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 interface UserShape {
   id: number | string;
   user_name?: string;
@@ -37,6 +38,7 @@ export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingUser, setIsFetchingUser] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [formData, setFormData] = useState<ProfileForm>({
     user_name: "",
     user_email: "",
@@ -195,6 +197,26 @@ export default function Profile() {
     setFormData(original);
     setErrors({});
   };
+
+  const handleDeleteUser = async () => {
+    if (!user?.id) return;
+    
+    setIsLoading(true);
+    try {
+      await apiService.removeUser(Number(user.id));
+      toast.success("User deleted successfully!");
+      setShowDeleteDialog(false);
+      navigate(-1);
+    } catch (error: any) {
+      console.error("Error deleting user:", error);
+      toast.error(error?.message || "Failed to delete user");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const currentUser = getUserData();
+  const canDeleteUser = isAdminView && currentUser?.user_type === 'SiteAdmin';
   useEffect(() => {
     const beforeUnload = (e: BeforeUnloadEvent) => {
       if (isEditing && hasChanges) {
@@ -271,6 +293,26 @@ export default function Profile() {
           </div>
         </div>
 
+        {/* Delete User Button - Only for Site Admin */}
+        {canDeleteUser && (
+          <Card className="p-4 border-destructive/20">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-semibold text-destructive">Delete User</h3>
+                <p className="text-sm text-muted-foreground">This action cannot be undone.</p>
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => setShowDeleteDialog(true)}
+                className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete User
+              </Button>
+            </div>
+          </Card>
+        )}
+
         {/* Edit Dialog - only show if not admin view */}
         {isEditing && !isAdminView && <div className="fixed inset-0 flex items-center justify-center p-4 z-50">
             <Card className="w-full max-w-md p-6 mx-4">
@@ -342,6 +384,45 @@ export default function Profile() {
               </div>
             </Card>
           </div>}
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete User</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete {user.user_name}? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowDeleteDialog(false)}
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteUser}
+                disabled={isLoading}
+                className="flex items-center gap-2"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4" />
+                    Delete User
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>;
 }
