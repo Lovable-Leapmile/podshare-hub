@@ -609,6 +609,7 @@ export default function SiteAdminDashboard() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
+                autoFocus={false}
               />
             </div>
 
