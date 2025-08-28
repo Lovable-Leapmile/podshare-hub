@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,13 +7,19 @@ import { Package, Clock } from "lucide-react";
 import { getUserData, getPodValue, getLocationName, isLoggedIn } from "@/utils/storage";
 import { useToast } from "@/hooks/use-toast";
 import { apiService } from "@/services/api";
+
 export default function Reservation() {
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
-  const user = getUserData();
+  const [searchParams] = useSearchParams();
+  const { toast } = useToast();
+  
+  const loggedInUser = getUserData();
   const podValue = getPodValue();
+  
+  // State for the user whose reservation we're creating (could be admin or customer)
+  const [reservationUser, setReservationUser] = useState(loggedInUser);
+  const [isLoadingCustomer, setIsLoadingCustomer] = useState(false);
+  
   const [formData, setFormData] = useState({
     awbNumber: '',
     executivePhone: ''
@@ -24,7 +30,32 @@ export default function Reservation() {
       navigate('/login');
       return;
     }
-  }, [navigate]);
+
+    // Check if we're creating a reservation for a specific customer
+    const userId = searchParams.get('user_id');
+    if (userId) {
+      loadCustomerData(userId);
+    }
+  }, [navigate, searchParams]);
+
+  const loadCustomerData = async (userId: string) => {
+    setIsLoadingCustomer(true);
+    try {
+      const customerData = await apiService.getUserById(userId);
+      if (customerData) {
+        setReservationUser(customerData);
+      }
+    } catch (error) {
+      console.error('Error loading customer data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load customer data.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoadingCustomer(false);
+    }
+  };
   const locationName = getLocationName() || 'Unknown Location';
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +67,7 @@ export default function Reservation() {
       });
       return;
     }
-    if (!user) {
+    if (!reservationUser || !loggedInUser) {
       toast({
         title: "Error",
         description: "User information not found.",
@@ -47,9 +78,9 @@ export default function Reservation() {
     setLoading(true);
     try {
       const reservationData = {
-        created_by_phone: user.user_phone,
+        created_by_phone: loggedInUser.user_phone,
         drop_by_phone: formData.executivePhone,
-        pickup_by_phone: user.user_phone,
+        pickup_by_phone: reservationUser.user_phone,
         pod_id: "1001763",
         reservation_awbno: formData.awbNumber
       };
@@ -88,11 +119,21 @@ export default function Reservation() {
             <div className="grid grid-cols-1 gap-2 mt-4">
               <div>
                 <p className="text-sm font-medium">User Name</p>
-                <p className="text-base">{user?.user_name || 'N/A'}</p>
+                <p className="text-base">
+                  {isLoadingCustomer ? 'Loading...' : (reservationUser?.user_name || 'N/A')}
+                </p>
               </div>
               <div>
                 <p className="text-sm font-medium">Phone Number</p>
-                <p className="text-base">{user?.user_phone || 'N/A'}</p>
+                <p className="text-base">
+                  {isLoadingCustomer ? 'Loading...' : (reservationUser?.user_phone || 'N/A')}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Pickup Code</p>
+                <p className="text-base">
+                  {isLoadingCustomer ? 'Loading...' : (reservationUser?.user_pickupcode || 'N/A')}
+                </p>
               </div>
             </div>
           </div>
