@@ -16,6 +16,14 @@ export function OTPInput({ value, onChange, length = 6, className }: OTPInputPro
     inputsRef.current = inputsRef.current.slice(0, length);
   }, [length]);
 
+  // Auto-focus first input when component mounts
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      inputsRef.current[0]?.focus();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   const handleChange = (index: number, newValue: string) => {
     // Only allow digits
     const digit = newValue.replace(/\D/g, '').slice(-1);

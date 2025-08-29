@@ -188,14 +188,15 @@ export default function Login() {
                     <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground text-sm font-medium">
                       +91
                     </span>
-                    <Input
-                      type="tel"
-                      placeholder="Enter Your Mobile Number"
-                      value={phoneNumber}
-                      onChange={e => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                      className="pl-12 h-12 text-base border-border/60 focus:border-primary"
-                      maxLength={10}
-                    />
+                     <Input
+                       type="tel"
+                       placeholder="Enter Your Mobile Number"
+                       value={phoneNumber}
+                       onChange={e => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                       className="pl-12 h-12 text-base border-border/60 focus:border-primary"
+                       maxLength={10}
+                       autoFocus
+                     />
                   </div>
                 </div>
 

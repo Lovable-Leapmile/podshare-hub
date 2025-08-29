@@ -15,10 +15,12 @@ export default function Reservation() {
   } = useToast();
   const loggedInUser = getUserData();
   const podValue = getPodValue();
+  const currentLocationId = localStorage.getItem('current_location_id');
 
   // State for the user whose reservation we're creating (could be admin or customer)
   const [reservationUser, setReservationUser] = useState(loggedInUser);
   const [isLoadingCustomer, setIsLoadingCustomer] = useState(false);
+  const [locationName, setLocationName] = useState('Unknown Location');
   const [formData, setFormData] = useState({
     awbNumber: '',
     executivePhone: ''
@@ -35,7 +37,12 @@ export default function Reservation() {
     if (userId) {
       loadCustomerData(userId);
     }
-  }, [navigate, searchParams]);
+
+    // Load location info if we have location_id
+    if (currentLocationId) {
+      loadLocationInfo();
+    }
+  }, [navigate, searchParams, currentLocationId]);
   const loadCustomerData = async (userId: string) => {
     setIsLoadingCustomer(true);
     try {
@@ -54,7 +61,18 @@ export default function Reservation() {
       setIsLoadingCustomer(false);
     }
   };
-  const locationName = getLocationName() || 'Unknown Location';
+
+  const loadLocationInfo = async () => {
+    if (!currentLocationId) return;
+    
+    try {
+      const locationInfo = await apiService.getLocationInfo(currentLocationId);
+      setLocationName(locationInfo.location_name || 'Unknown Location');
+    } catch (error) {
+      console.error('Error loading location info:', error);
+      setLocationName('Unknown Location');
+    }
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.awbNumber || !formData.executivePhone) {
@@ -151,10 +169,20 @@ export default function Reservation() {
               <label className="text-sm font-medium text-foreground mb-2 block">
                 Enter the Delivery Executive Phone Number *
               </label>
-              <Input value={formData.executivePhone} onChange={e => setFormData(prev => ({
-              ...prev,
-              executivePhone: e.target.value
-            }))} placeholder="Enter delivery executive phone number" type="tel" className="h-12" />
+              <Input 
+                value={formData.executivePhone} 
+                onChange={e => {
+                  const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                  setFormData(prev => ({
+                    ...prev,
+                    executivePhone: value
+                  }));
+                }} 
+                placeholder="Enter delivery executive phone number" 
+                type="tel" 
+                className="h-12" 
+                maxLength={10}
+              />
             </div>
 
             

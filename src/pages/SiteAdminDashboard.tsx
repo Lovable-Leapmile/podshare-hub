@@ -512,7 +512,7 @@ export default function SiteAdminDashboard() {
 
       {/* Add User Dialog */}
       <Dialog open={showAddUserDialog} onOpenChange={setShowAddUserDialog}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add New User</DialogTitle>
             <DialogDescription>
@@ -520,7 +520,7 @@ export default function SiteAdminDashboard() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-4 max-h-[60vh] overflow-y-auto p-1">
             <div>
               <Label htmlFor="name">Name *</Label>
               <Input
@@ -549,9 +549,13 @@ export default function SiteAdminDashboard() {
               <Input
                 id="phone"
                 value={newUserForm.user_phone}
-                onChange={(e) => setNewUserForm(prev => ({ ...prev, user_phone: e.target.value }))}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                  setNewUserForm(prev => ({ ...prev, user_phone: value }));
+                }}
                 placeholder="Enter phone number"
                 disabled={isLoading}
+                maxLength={10}
               />
             </div>
 
@@ -609,11 +613,10 @@ export default function SiteAdminDashboard() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
-                autoFocus={false}
               />
             </div>
 
-            <div className="max-h-96 overflow-y-auto space-y-2">
+            <div className="max-h-96 overflow-y-auto space-y-2 p-1">
               {isLoading ? (
                 <div className="text-center py-4 text-muted-foreground">Loading users...</div>
               ) : filteredUsers.length === 0 ? (

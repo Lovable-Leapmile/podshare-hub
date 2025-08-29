@@ -185,13 +185,16 @@ export const apiService = {
 
   async getLocationInfo(locationId: string): Promise<LocationInfo> {
     try {
+      const authToken = localStorage.getItem('auth_token');
+      const authorization = authToken ? `Bearer ${authToken}` : AUTH_TOKEN;
+      
       const response = await fetch(
         `https://stagingv3.leapmile.com/podcore/locations/?record_id=${locationId}`,
         {
           method: 'GET',
           headers: {
             'accept': 'application/json',
-            'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2wiOiJhZG1pbiIsImV4cCI6MTkxMTYyMDE1OX0.RMEW55tHQ95GVap8ChrGdPRbuVxef4Shf0NRddNgGJo'
+            'Authorization': authorization
           }
         }
       );
@@ -558,5 +561,46 @@ export const apiService = {
 
     const data = await response.json();
     return data.records?.[0] || null;
+  },
+
+  // Get user-location mapping ID
+  getUserLocationMapping: async (userId: number, locationId: string): Promise<any> => {
+    const authToken = localStorage.getItem('auth_token');
+    const authorization = authToken ? `Bearer ${authToken}` : AUTH_TOKEN;
+    
+    const response = await fetch(`${API_BASE_URL}/users/locations/?user_id=${userId}&location_id=${locationId}`, {
+      method: 'GET',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': authorization,
+      },
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.detail || 'Failed to fetch user-location mapping');
+    }
+
+    const data = await response.json();
+    return data.records?.[0] || null;
+  },
+
+  // Remove user from location using mapping ID
+  removeUserFromLocation: async (mappingId: number): Promise<void> => {
+    const authToken = localStorage.getItem('auth_token');
+    const authorization = authToken ? `Bearer ${authToken}` : AUTH_TOKEN;
+    
+    const response = await fetch(`${API_BASE_URL}/users/locations/${mappingId}`, {
+      method: 'DELETE',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': authorization,
+      },
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.detail || 'Failed to remove user from location');
+    }
   }
 };

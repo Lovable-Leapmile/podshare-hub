@@ -201,15 +201,29 @@ export default function Profile() {
   const handleDeleteUser = async () => {
     if (!user?.id) return;
     
+    const currentLocationId = localStorage.getItem('current_location_id');
+    if (!currentLocationId) {
+      toast.error("Location information not found");
+      return;
+    }
+    
     setIsLoading(true);
     try {
-      await apiService.removeUser(Number(user.id));
-      toast.success("User deleted successfully!");
+      // First get the user-location mapping ID
+      const mapping = await apiService.getUserLocationMapping(Number(user.id), currentLocationId);
+      if (!mapping || !mapping.id) {
+        toast.error("User-location mapping not found");
+        return;
+      }
+      
+      // Then remove the user from location using the mapping ID
+      await apiService.removeUserFromLocation(mapping.id);
+      toast.success("User removed from location successfully!");
       setShowDeleteDialog(false);
       navigate(-1);
     } catch (error: any) {
-      console.error("Error deleting user:", error);
-      toast.error(error?.message || "Failed to delete user");
+      console.error("Error removing user from location:", error);
+      toast.error(error?.message || "Failed to remove user from location");
     } finally {
       setIsLoading(false);
     }
@@ -293,12 +307,12 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Delete User Button - Only for Site Admin */}
+        {/* Remove User Button - Only for Site Admin */}
         {canDeleteUser && (
           <Card className="p-4 border-destructive/20">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-semibold text-destructive">Delete User</h3>
+                <h3 className="font-semibold text-destructive">Remove the User from this Location</h3>
                 <p className="text-sm text-muted-foreground">This action cannot be undone.</p>
               </div>
               <Button
@@ -307,7 +321,7 @@ export default function Profile() {
                 className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground"
               >
                 <Trash2 className="w-4 h-4 mr-2" />
-                Delete User
+                Remove User
               </Button>
             </div>
           </Card>
@@ -385,13 +399,13 @@ export default function Profile() {
             </Card>
           </div>}
 
-        {/* Delete Confirmation Dialog */}
+        {/* Remove User Confirmation Dialog */}
         <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Delete User</DialogTitle>
+              <DialogTitle>Remove User from Location</DialogTitle>
               <DialogDescription>
-                Are you sure you want to delete {user.user_name}? This action cannot be undone.
+                Are you sure you want to remove {user.user_name} from this location? This action cannot be undone.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter className="gap-2">
@@ -411,12 +425,12 @@ export default function Profile() {
                 {isLoading ? (
                   <>
                     <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                    Deleting...
+                    Removing...
                   </>
                 ) : (
                   <>
                     <Trash2 className="w-4 h-4" />
-                    Delete User
+                    Remove
                   </>
                 )}
               </Button>
