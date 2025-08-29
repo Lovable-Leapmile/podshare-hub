@@ -7,7 +7,6 @@ import { Package, Clock } from "lucide-react";
 import { getUserData, getPodValue, getLocationName, isLoggedIn } from "@/utils/storage";
 import { useToast } from "@/hooks/use-toast";
 import { apiService } from "@/services/api";
-import { PageLayout } from "@/components/PageLayout";
 export default function Reservation() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -118,8 +117,7 @@ export default function Reservation() {
       setLoading(false);
     }
   };
-  return (
-    <PageLayout pageTitle="Create Reservation" showBack={true} showSettings={true}>
+  return <div className="min-h-screen bg-background">
       <div className="mobile-container space-y-6">
         {/* User & Location Info */}
         <Card className="card-3d bg-gradient-primary p-6 text-qikpod-black animate-fade-in">
@@ -195,6 +193,5 @@ export default function Reservation() {
           </form>
         </Card>
       </div>
-    </PageLayout>
-  );
+    </div>;
 }

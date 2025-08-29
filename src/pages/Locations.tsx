@@ -7,7 +7,6 @@ import { getUserData, isLoggedIn, saveLastLocation, saveLocationId } from "@/uti
 import { UserLocation } from "@/services/api";
 import { apiService } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
-import { PageLayout } from "@/components/PageLayout";
 export default function Locations() {
   const navigate = useNavigate();
   const {
@@ -46,11 +45,14 @@ export default function Locations() {
     navigate('/customer-dashboard');
   };
   const user = getUserData();
-  return (
-    <PageLayout pageTitle="Select Location" showBack={true} showSettings={true}>
-      <div className="p-4 max-w-md mx-auto py-0 text-xs">
+  return <div className="min-h-screen bg-background text-xs">
+      {/* Main Content */}
+      <div className="p-4 max-w-md mx-auto py-0">
         <div className="space-y-3 py-[10px]">
           <div>
+            <h1 className="text-2xl font-bold text-foreground mb-2">
+              Select Location
+            </h1>
             <p className="text-muted-foreground">
               Choose from your saved locations to access lockers
             </p>
@@ -114,6 +116,5 @@ export default function Locations() {
 
         </div>
       </div>
-    </PageLayout>
-  );
+    </div>;
 }
