@@ -68,12 +68,12 @@ export default function SiteSecurityDashboard() {
         {/* Security Cards */}
         <div className="grid grid-cols-1 gap-4">
           <Card className="p-6">
-            <h3 className="font-semibold text-lg mb-2">Security Monitoring</h3>
+            <h3 className="font-semibold text-lg mb-2">RTO Management</h3>
             <p className="text-muted-foreground text-sm mb-4">
-              Monitor all pod activities and security events
+              Manage return to origin pending and completed reservations
             </p>
-            <Button variant="outline" className="w-full">
-              View Monitoring
+            <Button variant="outline" className="w-full" onClick={() => navigate('/rto')}>
+              View RTO
             </Button>
           </Card>
 

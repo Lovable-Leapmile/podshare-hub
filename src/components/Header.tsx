@@ -74,10 +74,10 @@ export function Header({
                       </SheetClose>
                       {user?.user_type === 'SiteSecurity' && (
                         <SheetClose asChild>
-                          <Button variant="ghost" className="w-full justify-start h-12 px-4 rounded-none" onClick={() => navigate('/rto-pending')}>
-                            <Package className="mr-3 h-4 w-4" />
-                            RTO Pending
-                          </Button>
+                         <Button variant="ghost" className="w-full justify-start h-12 px-4 rounded-none" onClick={() => navigate('/rto')}>
+                           <Package className="mr-3 h-4 w-4" />
+                           RTO Management
+                         </Button>
                         </SheetClose>
                       )}
                       <SheetClose asChild>
