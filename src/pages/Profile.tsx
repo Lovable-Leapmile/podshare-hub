@@ -10,6 +10,7 @@ import { getUserData, isLoggedIn, setUserData } from "@/utils/storage";
 import { apiService } from "@/services/api";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { maskPhoneNumber } from "@/utils/phoneUtils";
 interface UserShape {
   id: number | string;
   user_name?: string;
@@ -111,7 +112,7 @@ export default function Profile() {
     icon: Phone,
     label: "Phone Number",
     field: "user_phone",
-    value: user.user_phone || "—",
+    value: user.user_phone ? (isAdminView && getUserData()?.user_type === 'SiteSecurity' ? maskPhoneNumber(user.user_phone) : user.user_phone) : "—",
     editable: false
   }, {
     icon: Mail,
@@ -374,7 +375,7 @@ export default function Profile() {
 
                 <div>
                   <Label htmlFor="phone" className="mb-2">Phone Number</Label>
-                  <Input id="phone" value={user.user_phone || "—"} readOnly disabled />
+                  <Input id="phone" value={user.user_phone ? (isAdminView && getUserData()?.user_type === 'SiteSecurity' ? maskPhoneNumber(user.user_phone) : user.user_phone) : "—"} readOnly disabled />
                 </div>
               </div>
 
