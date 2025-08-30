@@ -74,9 +74,34 @@ export default function RTO() {
     setIsLoading(true);
     try {
       const status = tab === 'pending' ? 'RTOPending' : 'RTOCompleted';
-      const rtoList = await apiService.getLocationReservations(currentLocationId, status);
+      console.log(`Fetching RTO ${tab} reservations with status:`, status);
 
-      const reservationsArray = Array.isArray(rtoList) ? rtoList : [];
+      const rtoList = await apiService.getLocationReservations(currentLocationId, status);
+      console.log(`RTO ${tab} API response:`, rtoList);
+
+      // Handle different response formats
+      let reservationsArray: RTOReservation[] = [];
+
+      if (Array.isArray(rtoList)) {
+        reservationsArray = rtoList;
+      } else if (rtoList && typeof rtoList === 'object') {
+        // Check if response has a data property
+        if (Array.isArray(rtoList.data)) {
+          reservationsArray = rtoList.data;
+        } else if (Array.isArray(rtoList.reservations)) {
+          reservationsArray = rtoList.reservations;
+        } else if (Array.isArray(rtoList.items)) {
+          reservationsArray = rtoList.items;
+        } else {
+          // Try to extract array from object values
+          const values = Object.values(rtoList);
+          if (values.length > 0 && Array.isArray(values[0])) {
+            reservationsArray = values[0];
+          }
+        }
+      }
+
+      console.log(`Processed RTO ${tab} reservations:`, reservationsArray);
 
       if (tab === 'pending') {
         setPendingReservations(reservationsArray);
@@ -144,6 +169,11 @@ export default function RTO() {
     setActiveTab(newTab);
     setSearchQuery("");
     setCurrentPage(1);
+
+    // Load data for the new tab
+    if (currentLocationId && isAuthorized) {
+      loadRTOReservations(newTab);
+    }
   };
 
   const handleRefresh = () => {
@@ -279,16 +309,24 @@ export default function RTO() {
           </div>
         )}
 
+        {/* Debug Info */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-800">
+          <p>Current Location ID: {currentLocationId || 'Not set'}</p>
+          <p>Pending Reservations: {pendingReservations.length}</p>
+          <p>Completed Reservations: {completedReservations.length}</p>
+          <p>Active Tab: {activeTab}</p>
+        </div>
+
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="pending" className="flex items-center gap-2">
               <Clock className="w-4 h-4" />
-              RTO Pending
+              RTO Pending ({pendingReservations.length})
             </TabsTrigger>
             <TabsTrigger value="completed" className="flex items-center gap-2">
               <CheckCircle className="w-4 h-4" />
-              RTO Completed
+              RTO Completed ({completedReservations.length})
             </TabsTrigger>
           </TabsList>
 
@@ -368,6 +406,11 @@ export default function RTO() {
                 <p className="text-muted-foreground">
                   {searchQuery ? "No reservations found matching your search." : "No RTO completed reservations found."}
                 </p>
+                {completedReservations.length > 0 && (
+                  <p className="text-sm text-orange-600 mt-2">
+                    Note: There are {completedReservations.length} completed reservations but they don't match your search.
+                  </p>
+                )}
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
