@@ -54,13 +54,14 @@ export default function RTO() {
       return;
     }
 
-    if (user?.user_type !== 'SiteSecurity') {
-      navigate('/site-security-dashboard');
-      toast.error('Access denied. Only Site Security personnel can access this page.');
+    // Only allow SiteAdmin access
+    if (user?.user_type !== 'SiteAdmin') {
+      navigate('/login');
+      toast.error('Access denied. Only Site Admin can access this page.');
       return;
     }
 
-    // Only set authorized if user is logged in AND is SiteSecurity
+    // Only set authorized if user is logged in AND is SiteAdmin
     setIsAuthorized(true);
   }, [navigate, user]);
 
@@ -247,7 +248,7 @@ export default function RTO() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate('/site-security-dashboard')}
+              onClick={() => navigate('/site-admin-dashboard')}
               className="h-8 w-8 p-0"
             >
               <ArrowLeft className="h-4 w-4" />
