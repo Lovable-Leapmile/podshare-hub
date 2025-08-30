@@ -42,6 +42,7 @@ export default function RTO() {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [apiResponse, setApiResponse] = useState<any>(null);
 
   // Location detection
   const currentLocationId = localStorage.getItem('current_location_id');
@@ -76,39 +77,71 @@ export default function RTO() {
       const status = tab === 'pending' ? 'RTOPending' : 'RTOCompleted';
       console.log(`Fetching RTO ${tab} reservations with status:`, status);
 
-      const rtoList = await apiService.getLocationReservations(currentLocationId, status);
-      console.log(`RTO ${tab} API response:`, rtoList);
+      const response = await apiService.getLocationReservations(currentLocationId, status);
+      console.log(`RTO ${tab} API response:`, response);
+      setApiResponse(response); // Store for debugging
 
       // Handle different response formats
       let reservationsArray: RTOReservation[] = [];
 
-      if (Array.isArray(rtoList)) {
-        reservationsArray = rtoList;
-      } else if (rtoList && typeof rtoList === 'object') {
-        // Check if response has a data property
-        if (Array.isArray(rtoList.data)) {
-          reservationsArray = rtoList.data;
-        } else if (Array.isArray(rtoList.reservations)) {
-          reservationsArray = rtoList.reservations;
-        } else if (Array.isArray(rtoList.items)) {
-          reservationsArray = rtoList.items;
+      if (Array.isArray(response)) {
+        // Direct array response
+        reservationsArray = response;
+      } else if (response && typeof response === 'object') {
+        // Check common response structures
+        if (Array.isArray(response.data)) {
+          reservationsArray = response.data;
+        } else if (Array.isArray(response.reservations)) {
+          reservationsArray = response.reservations;
+        } else if (Array.isArray(response.items)) {
+          reservationsArray = response.items;
+        } else if (Array.isArray(response.result)) {
+          reservationsArray = response.result;
+        } else if (response.reservations && Array.isArray(response.reservations.data)) {
+          reservationsArray = response.reservations.data;
         } else {
-          // Try to extract array from object values
-          const values = Object.values(rtoList);
-          if (values.length > 0 && Array.isArray(values[0])) {
-            reservationsArray = values[0];
+          // Try to find any array in the response object
+          const arrayKey = Object.keys(response).find(key => Array.isArray(response[key]));
+          if (arrayKey) {
+            reservationsArray = response[arrayKey];
+          } else {
+            // If no array found, try to extract values that might be objects
+            const values = Object.values(response);
+            const arrayValues = values.filter(value => Array.isArray(value));
+            if (arrayValues.length > 0) {
+              reservationsArray = arrayValues[0];
+            }
           }
         }
       }
 
       console.log(`Processed RTO ${tab} reservations:`, reservationsArray);
 
+      // Transform data if needed - ensure it matches RTOReservation interface
+      const transformedReservations = reservationsArray.map((item: any) => ({
+        id: item.id || item.reservation_id || item._id || '',
+        user_name: item.user_name || item.customer_name || item.name || 'Unknown User',
+        user_phone: item.user_phone || item.customer_phone || item.phone || '',
+        awb_number: item.awb_number || item.tracking_number || item.awb || '',
+        reservation_status: item.reservation_status || item.status || '',
+        created_at: item.created_at || item.created_date || item.date_created || '',
+        updated_at: item.updated_at || item.modified_date || '',
+        drop_otp: item.drop_otp || item.delivery_otp || '',
+        pickup_otp: item.pickup_otp || item.collection_otp || '',
+        rto_otp: item.rto_otp || item.return_otp || '',
+        pod_name: item.pod_name || item.hub_name || '',
+        location_name: item.location_name || item.site_name || '',
+        rto_picktime: item.rto_picktime || item.return_date || item.completed_at || ''
+      }));
+
+      console.log(`Transformed RTO ${tab} reservations:`, transformedReservations);
+
       if (tab === 'pending') {
-        setPendingReservations(reservationsArray);
-        setFilteredPendingReservations(reservationsArray);
+        setPendingReservations(transformedReservations);
+        setFilteredPendingReservations(transformedReservations);
       } else {
-        setCompletedReservations(reservationsArray);
-        setFilteredCompletedReservations(reservationsArray);
+        setCompletedReservations(transformedReservations);
+        setFilteredCompletedReservations(transformedReservations);
       }
     } catch (error: any) {
       console.error(`Error loading RTO ${tab} reservations:`, error);
@@ -310,11 +343,16 @@ export default function RTO() {
         )}
 
         {/* Debug Info */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-800">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-800 space-y-1">
+          <p><strong>Debug Information:</strong></p>
           <p>Current Location ID: {currentLocationId || 'Not set'}</p>
           <p>Pending Reservations: {pendingReservations.length}</p>
           <p>Completed Reservations: {completedReservations.length}</p>
           <p>Active Tab: {activeTab}</p>
+          <p>API Response Type: {apiResponse ? typeof apiResponse : 'No response yet'}</p>
+          {apiResponse && Array.isArray(apiResponse) && (
+            <p>API Response Array Length: {apiResponse.length}</p>
+          )}
         </div>
 
         {/* Tabs */}
