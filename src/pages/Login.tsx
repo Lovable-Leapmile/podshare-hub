@@ -225,16 +225,16 @@ export default function Login() {
                 </a>
               </div>
               <div className="space-y-2 text-sm text-center">
-                <button onClick={() => navigate('/registration')} className="block text-black font-bold hover:text-gray-800 transition-colors mx-auto">
-                  Not a Registered User? Need to Register
-                </button>
-                <button
-                  onClick={() => navigate('/how-it-works')}
-                  className="block text-muted-foreground hover:text-primary transition-colors"
-                >
-                  How it works?
-                </button>
-              </div>
+              <button onClick={() => navigate('/registration')} className="block text-black font-bold hover:text-gray-800 transition-colors mx-auto">
+                Not a Registered User? Need to Register
+              </button>
+              <button
+                onClick={() => navigate('/how-it-works')}
+                className="block text-muted-foreground hover:text-primary transition-colors mx-auto"
+              >
+                How it works?
+              </button>
+            </div>
             </div>
           </>
         ) : (
