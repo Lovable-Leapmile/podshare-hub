@@ -37,7 +37,7 @@ export default function CustomerDashboard() {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Location detection
+  // Location detection.
   const currentLocationId = localStorage.getItem('current_location_id');
   const {
     showLocationPopup,
