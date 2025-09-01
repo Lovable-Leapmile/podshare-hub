@@ -89,21 +89,21 @@ export default function RTO() {
         reservationsArray = response;
       } else if (response && typeof response === 'object') {
         // Check common response structures
-        if (Array.isArray(response.data)) {
-          reservationsArray = response.data;
-        } else if (Array.isArray(response.reservations)) {
-          reservationsArray = response.reservations;
-        } else if (Array.isArray(response.items)) {
-          reservationsArray = response.items;
-        } else if (Array.isArray(response.result)) {
-          reservationsArray = response.result;
-        } else if (response.reservations && Array.isArray(response.reservations.data)) {
-          reservationsArray = response.reservations.data;
+        if (Array.isArray((response as any).data)) {
+          reservationsArray = (response as any).data;
+        } else if (Array.isArray((response as any).reservations)) {
+          reservationsArray = (response as any).reservations;
+        } else if (Array.isArray((response as any).items)) {
+          reservationsArray = (response as any).items;
+        } else if (Array.isArray((response as any).result)) {
+          reservationsArray = (response as any).result;
+        } else if ((response as any).reservations && Array.isArray((response as any).reservations.data)) {
+          reservationsArray = (response as any).reservations.data;
         } else {
           // Try to find any array in the response object
-          const arrayKey = Object.keys(response).find(key => Array.isArray(response[key]));
+          const arrayKey = Object.keys(response).find(key => Array.isArray((response as any)[key]));
           if (arrayKey) {
-            reservationsArray = response[arrayKey];
+            reservationsArray = (response as any)[arrayKey];
           } else {
             // If no array found, try to extract values that might be objects
             const values = Object.values(response);
@@ -380,7 +380,6 @@ export default function RTO() {
               onPageChange={setCurrentPage}
               totalItems={totalItems}
               placeholder="Search pending reservations by name, phone, or AWB number..."
-              disabled={!currentLocationId || isLoading}
             />
 
             {/* Content */}
@@ -422,7 +421,6 @@ export default function RTO() {
               onPageChange={setCurrentPage}
               totalItems={totalItems}
               placeholder="Search completed reservations by name, phone, or AWB number..."
-              disabled={!currentLocationId || isLoading}
             />
 
             {/* Content */}

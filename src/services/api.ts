@@ -252,7 +252,7 @@ export const apiService = {
   async getReservations(phoneNum: string, locationId: string, status: string): Promise<Reservation[]> {
     try {
       const response = await fetch(
-        `https://stagingv3.leapmile.com/podcore/reservations/?phone_num=${phoneNum}&location_id=${locationId}&reservation_status=${status}`,
+        `https://stagingv3.leapmile.com/podcore/reservations/?reservation_status=${status}&createdby_phone=${phoneNum}`,
         {
           method: 'GET',
           headers: {
