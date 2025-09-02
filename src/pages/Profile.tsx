@@ -279,20 +279,21 @@ export default function Profile() {
       <div className="p-4 max-w-md mx-auto space-y-6">
         {/* Profile Header Card with Back Button */}
         <Card className="card-modern bg-gradient-primary p-4 text-white">
-          <div className="flex items-center justify-between mb-2">
-            <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="h-8 w-8 p-0 bg-white/20 text-gray-800 hover:bg-white/30">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="h-8 w-8 p-0 bg-white/20 text-gray-800 hover:bg-white/30">
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <div>
+                <h1 className="text-xl font-bold text-gray-800">{user.user_name}</h1>
+                <p className="opacity-90 text-gray-600 text-sm">{user.user_type}</p>
+              </div>
+            </div>
             {!isAdminView && (
               <Button variant="secondary" size="icon" onClick={() => setIsEditing(true)} className="bg-white/20 hover:bg-white/30 border-0 text-gray-800">
                 <Edit2 className="w-4 h-4" />
               </Button>
             )}
-          </div>
-
-          <div className="text-center">
-            <h1 className="text-xl font-bold text-gray-800">{user.user_name}</h1>
-            <p className="opacity-90 text-gray-600">{user.user_type}</p>
           </div>
         </Card>
 
