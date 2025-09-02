@@ -15,7 +15,6 @@ import { apiService } from "@/services/api";
 import { toast } from "sonner";
 import { LocationDetectionPopup } from "@/components/LocationDetectionPopup";
 import { useLocationDetection } from "@/hooks/useLocationDetection";
-
 interface LocationUser {
   id: number;
   user_id: number;
@@ -26,7 +25,6 @@ interface LocationUser {
   user_address: string;
   user_type: string;
 }
-
 interface Reservation {
   id: string;
   user_name: string;
@@ -38,7 +36,6 @@ interface Reservation {
   pod_name?: string;
   location_name?: string;
 }
-
 interface NewUserForm {
   user_name: string;
   user_email: string;
@@ -46,7 +43,6 @@ interface NewUserForm {
   user_address: string;
   user_flatno: string;
 }
-
 export default function SiteAdminDashboard() {
   const navigate = useNavigate();
   const user = getUserData();
@@ -85,14 +81,15 @@ export default function SiteAdminDashboard() {
 
   // Location detection
   const currentLocationId = localStorage.getItem('current_location_id');
-  const { showLocationPopup, closeLocationPopup } = useLocationDetection(user?.id, currentLocationId);
-
+  const {
+    showLocationPopup,
+    closeLocationPopup
+  } = useLocationDetection(user?.id, currentLocationId);
   useEffect(() => {
     if (!isLoggedIn()) {
       navigate('/login');
       return;
     }
-
     if (user?.user_type !== 'SiteAdmin') {
       navigate('/login');
       return;
@@ -101,19 +98,15 @@ export default function SiteAdminDashboard() {
     // Reset error state when loading new data
     setError(null);
   }, [navigate, user]);
-
   useEffect(() => {
     if (currentLocationId) {
       loadData();
     }
   }, [currentLocationId, activeTab, reservationSubTab, historySubTab]);
-
   const loadData = async () => {
     if (!currentLocationId) return;
-
     setIsLoading(true);
     setError(null);
-
     try {
       if (activeTab === "users") {
         await loadLocationUsers();
@@ -130,7 +123,6 @@ export default function SiteAdminDashboard() {
       setIsLoading(false);
     }
   };
-
   const loadLocationUsers = async () => {
     try {
       const users = await apiService.getLocationUsers(currentLocationId!);
@@ -148,15 +140,12 @@ export default function SiteAdminDashboard() {
       setLocationUsers([]);
     }
   };
-
   const loadReservations = async () => {
     try {
       const status = reservationSubTab === "pickup-pending" ? "PickupPending" : "DropPending";
       console.log("Fetching reservations with status:", status);
-
       const reservationList = await apiService.getLocationReservations(currentLocationId!, status);
       console.log("API Response:", reservationList);
-
       if (reservationList && Array.isArray(reservationList)) {
         // Map the data to ensure proper field names
         const mappedReservations = reservationList.map(reservation => ({
@@ -179,15 +168,12 @@ export default function SiteAdminDashboard() {
       setReservations([]);
     }
   };
-
   const loadHistory = async () => {
     try {
       const status = historySubTab === "drop-cancelled" ? "DropCancelled" : "PickupCompleted";
       console.log("Fetching history with status:", status);
-
       const historyList = await apiService.getLocationReservations(currentLocationId!, status);
       console.log("API Response:", historyList);
-
       if (historyList && Array.isArray(historyList)) {
         // Map the data to ensure proper field names
         const mappedHistory = historyList.map(reservation => ({
@@ -210,7 +196,6 @@ export default function SiteAdminDashboard() {
       setReservations([]);
     }
   };
-
   const handleAddUser = async () => {
     setIsLoading(true);
     try {
@@ -234,10 +219,8 @@ export default function SiteAdminDashboard() {
       setIsLoading(false);
     }
   };
-
   const handleRemoveUser = async () => {
     if (!userToRemove) return;
-
     setIsLoading(true);
     try {
       await apiService.removeUser(userToRemove.id);
@@ -252,18 +235,15 @@ export default function SiteAdminDashboard() {
       setIsLoading(false);
     }
   };
-
   const openRemoveUserDialog = (user: LocationUser) => {
     setUserToRemove(user);
     setShowRemoveUserDialog(true);
   };
-
   const handleSelectUserForReservation = (selectedUser: LocationUser) => {
     setSelectedUser(selectedUser);
     setShowUserSelectionDialog(false);
     setShowConfirmUserDialog(true);
   };
-
   const handleOpenUserSelectionDialog = async () => {
     setShowUserSelectionDialog(true);
     // Load users when opening the dialog
@@ -271,35 +251,19 @@ export default function SiteAdminDashboard() {
       await loadLocationUsers();
     }
   };
-
   const handleConfirmUserForReservation = () => {
     if (selectedUser && currentLocationId) {
       navigate(`/reservation?user_id=${selectedUser.user_id}&location_id=${currentLocationId}`);
     }
   };
-
   const handleUserCardClick = (clickedUser: LocationUser) => {
     navigate(`/profile?user_id=${clickedUser.user_id}&admin_view=true`);
   };
-
   const handleReservationCardClick = (reservation: Reservation) => {
     navigate(`/reservation-details/${reservation.id}`);
   };
-
-  const filteredUsers = Array.isArray(locationUsers) ? locationUsers.filter(user =>
-    user.user_type === "Customer" && (
-      user.user_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.user_phone.includes(searchQuery) ||
-      user.user_email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.user_flatno.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  ) : [];
-
-  const filteredReservations = Array.isArray(reservations) ? reservations.filter(reservation =>
-    reservation.user_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    reservation.user_phone.includes(searchQuery) ||
-    reservation.awb_number.toLowerCase().includes(searchQuery.toLowerCase())
-  ) : [];
+  const filteredUsers = Array.isArray(locationUsers) ? locationUsers.filter(user => user.user_type === "Customer" && (user.user_name.toLowerCase().includes(searchQuery.toLowerCase()) || user.user_phone.includes(searchQuery) || user.user_email.toLowerCase().includes(searchQuery.toLowerCase()) || user.user_flatno.toLowerCase().includes(searchQuery.toLowerCase()))) : [];
+  const filteredReservations = Array.isArray(reservations) ? reservations.filter(reservation => reservation.user_name.toLowerCase().includes(searchQuery.toLowerCase()) || reservation.user_phone.includes(searchQuery) || reservation.awb_number.toLowerCase().includes(searchQuery.toLowerCase())) : [];
 
   // Pagination calculations for users
   const totalUsers = filteredUsers.length;
@@ -314,65 +278,44 @@ export default function SiteAdminDashboard() {
   const reservationStartIndex = (currentPage - 1) * itemsPerPage;
   const reservationEndIndex = reservationStartIndex + itemsPerPage;
   const currentReservations = filteredReservations.slice(reservationStartIndex, reservationEndIndex);
-
   if (!user) return null;
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       <div className="p-4 max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div>
           <h1 className="text-2xl font-bold text-foreground mb-2">
             Site Admin Dashboard
           </h1>
-          <p className="text-muted-foreground">Manage users, reservations, and location operations</p>
+          
         </div>
 
         {/* Error Display */}
-        {error && (
-          <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 text-destructive">
+        {error && <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 text-destructive">
             <div className="flex items-center gap-2">
               <AlertCircle className="w-5 h-5" />
               <span>{error}</span>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="mt-2"
-              onClick={loadData}
-            >
+            <Button variant="outline" size="sm" className="mt-2" onClick={loadData}>
               Retry
             </Button>
-          </div>
-        )}
+          </div>}
 
         {/* Loading State */}
-        {isLoading && (
-          <div className="flex justify-center items-center py-20">
+        {isLoading && <div className="flex justify-center items-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          </div>
-        )}
+          </div>}
 
         {/* Top Action Buttons */}
-        {!isLoading && (
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <Button
-              onClick={() => setShowAddUserDialog(true)}
-              className="flex items-center gap-2"
-            >
+        {!isLoading && <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <Button onClick={() => setShowAddUserDialog(true)} className="flex items-center gap-2">
               <UserPlus className="w-4 h-4" />
               Add User
             </Button>
-            <Button
-              variant="outline"
-              onClick={handleOpenUserSelectionDialog}
-              className="flex items-center gap-2"
-            >
+            <Button variant="outline" onClick={handleOpenUserSelectionDialog} className="flex items-center gap-2">
               <Plus className="w-4 h-4" />
               Create Reservation
             </Button>
-          </div>
-        )}
+          </div>}
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -384,48 +327,18 @@ export default function SiteAdminDashboard() {
 
           {/* Pagination Filter */}
           <div className="mt-4">
-            <PaginationFilter
-              itemsPerPage={itemsPerPage}
-              onItemsPerPageChange={setItemsPerPage}
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              currentPage={currentPage}
-              totalPages={
-                activeTab === "users"
-                  ? totalUserPages
-                  : totalReservationPages
-              }
-              onPageChange={setCurrentPage}
-              totalItems={
-                activeTab === "users"
-                  ? totalUsers
-                  : totalReservations
-              }
-              placeholder={
-                activeTab === "users"
-                  ? "Search users by name, phone, email, or flat number..."
-                  : "Search reservations by name, phone, or AWB number..."
-              }
-            />
+            <PaginationFilter itemsPerPage={itemsPerPage} onItemsPerPageChange={setItemsPerPage} searchQuery={searchQuery} onSearchChange={setSearchQuery} currentPage={currentPage} totalPages={activeTab === "users" ? totalUserPages : totalReservationPages} onPageChange={setCurrentPage} totalItems={activeTab === "users" ? totalUsers : totalReservations} placeholder={activeTab === "users" ? "Search users by name, phone, email, or flat number..." : "Search reservations by name, phone, or AWB number..."} />
           </div>
 
           {/* Users Tab */}
           <TabsContent value="users" className="space-y-4">
-            {currentUsers.length === 0 ? (
-              <div className="text-center py-20">
+            {currentUsers.length === 0 ? <div className="text-center py-20">
                 <User className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
                 <p className="text-muted-foreground">
                   {searchQuery ? "No users found matching your search." : "No users found for this location."}
                 </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {currentUsers.map((locationUser) => (
-                  <Card
-                    key={locationUser.id}
-                    className="p-4 cursor-pointer hover:shadow-md transition-shadow overflow-hidden"
-                    onClick={() => handleUserCardClick(locationUser)}
-                  >
+              </div> : <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {currentUsers.map(locationUser => <Card key={locationUser.id} className="p-4 cursor-pointer hover:shadow-md transition-shadow overflow-hidden" onClick={() => handleUserCardClick(locationUser)}>
                     <div className="flex justify-between items-start gap-2">
                       <div className="flex items-center space-x-3 flex-1 min-w-0">
                         <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
@@ -450,10 +363,8 @@ export default function SiteAdminDashboard() {
                       </div>
                     </div>
                     </div>
-                  </Card>
-                ))}
-              </div>
-            )}
+                  </Card>)}
+              </div>}
           </TabsContent>
 
           {/* Reservations Tab */}
@@ -465,19 +376,11 @@ export default function SiteAdminDashboard() {
               </TabsList>
 
               <TabsContent value="pickup-pending" className="space-y-4">
-                <ReservationList
-                  reservations={currentReservations}
-                  onReservationClick={handleReservationCardClick}
-                  searchQuery={searchQuery}
-                />
+                <ReservationList reservations={currentReservations} onReservationClick={handleReservationCardClick} searchQuery={searchQuery} />
               </TabsContent>
 
               <TabsContent value="drop-pending" className="space-y-4">
-                <ReservationList
-                  reservations={currentReservations}
-                  onReservationClick={handleReservationCardClick}
-                  searchQuery={searchQuery}
-                />
+                <ReservationList reservations={currentReservations} onReservationClick={handleReservationCardClick} searchQuery={searchQuery} />
               </TabsContent>
             </Tabs>
           </TabsContent>
@@ -491,19 +394,11 @@ export default function SiteAdminDashboard() {
               </TabsList>
 
               <TabsContent value="drop-cancelled" className="space-y-4">
-                <ReservationList
-                  reservations={currentReservations}
-                  onReservationClick={handleReservationCardClick}
-                  searchQuery={searchQuery}
-                />
+                <ReservationList reservations={currentReservations} onReservationClick={handleReservationCardClick} searchQuery={searchQuery} />
               </TabsContent>
 
               <TabsContent value="pickup-completed" className="space-y-4">
-                <ReservationList
-                  reservations={currentReservations}
-                  onReservationClick={handleReservationCardClick}
-                  searchQuery={searchQuery}
-                />
+                <ReservationList reservations={currentReservations} onReservationClick={handleReservationCardClick} searchQuery={searchQuery} />
               </TabsContent>
             </Tabs>
           </TabsContent>
@@ -523,63 +418,45 @@ export default function SiteAdminDashboard() {
           <div className="space-y-4 max-h-[60vh] overflow-y-auto p-1">
             <div>
               <Label htmlFor="name">Name *</Label>
-              <Input
-                id="name"
-                value={newUserForm.user_name}
-                onChange={(e) => setNewUserForm(prev => ({ ...prev, user_name: e.target.value }))}
-                placeholder="Enter full name"
-                disabled={isLoading}
-              />
+              <Input id="name" value={newUserForm.user_name} onChange={e => setNewUserForm(prev => ({
+              ...prev,
+              user_name: e.target.value
+            }))} placeholder="Enter full name" disabled={isLoading} />
             </div>
 
             <div>
               <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={newUserForm.user_email}
-                onChange={(e) => setNewUserForm(prev => ({ ...prev, user_email: e.target.value }))}
-                placeholder="Enter email address"
-                disabled={isLoading}
-              />
+              <Input id="email" type="email" value={newUserForm.user_email} onChange={e => setNewUserForm(prev => ({
+              ...prev,
+              user_email: e.target.value
+            }))} placeholder="Enter email address" disabled={isLoading} />
             </div>
 
             <div>
               <Label htmlFor="phone">Phone Number *</Label>
-              <Input
-                id="phone"
-                value={newUserForm.user_phone}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, '').slice(0, 10);
-                  setNewUserForm(prev => ({ ...prev, user_phone: value }));
-                }}
-                placeholder="Enter phone number"
-                disabled={isLoading}
-                maxLength={10}
-              />
+              <Input id="phone" value={newUserForm.user_phone} onChange={e => {
+              const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+              setNewUserForm(prev => ({
+                ...prev,
+                user_phone: value
+              }));
+            }} placeholder="Enter phone number" disabled={isLoading} maxLength={10} />
             </div>
 
             <div>
               <Label htmlFor="flatno">Flat Number</Label>
-              <Input
-                id="flatno"
-                value={newUserForm.user_flatno}
-                onChange={(e) => setNewUserForm(prev => ({ ...prev, user_flatno: e.target.value }))}
-                placeholder="Enter flat/unit number"
-                disabled={isLoading}
-              />
+              <Input id="flatno" value={newUserForm.user_flatno} onChange={e => setNewUserForm(prev => ({
+              ...prev,
+              user_flatno: e.target.value
+            }))} placeholder="Enter flat/unit number" disabled={isLoading} />
             </div>
 
             <div>
               <Label htmlFor="address">Address</Label>
-              <Textarea
-                id="address"
-                value={newUserForm.user_address}
-                onChange={(e) => setNewUserForm(prev => ({ ...prev, user_address: e.target.value }))}
-                placeholder="Enter full address"
-                rows={3}
-                disabled={isLoading}
-              />
+              <Textarea id="address" value={newUserForm.user_address} onChange={e => setNewUserForm(prev => ({
+              ...prev,
+              user_address: e.target.value
+            }))} placeholder="Enter full address" rows={3} disabled={isLoading} />
             </div>
 
           </div>
@@ -608,26 +485,11 @@ export default function SiteAdminDashboard() {
           <div className="space-y-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                placeholder="Search users..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+              <Input placeholder="Search users..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10" />
             </div>
 
             <div className="max-h-96 overflow-y-auto space-y-2 p-1">
-              {isLoading ? (
-                <div className="text-center py-4 text-muted-foreground">Loading users...</div>
-              ) : filteredUsers.length === 0 ? (
-                <div className="text-center py-4 text-muted-foreground">No users found</div>
-              ) : (
-                filteredUsers.map((locationUser) => (
-                  <Card
-                    key={locationUser.id}
-                    className="p-3 cursor-pointer hover:shadow-md transition-shadow"
-                    onClick={() => handleSelectUserForReservation(locationUser)}
-                  >
+              {isLoading ? <div className="text-center py-4 text-muted-foreground">Loading users...</div> : filteredUsers.length === 0 ? <div className="text-center py-4 text-muted-foreground">No users found</div> : filteredUsers.map(locationUser => <Card key={locationUser.id} className="p-3 cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleSelectUserForReservation(locationUser)}>
                     <div className="flex items-center space-x-3">
                       <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
                         <User className="w-4 h-4 text-primary" />
@@ -643,9 +505,7 @@ export default function SiteAdminDashboard() {
                         Select
                       </Button>
                     </div>
-                  </Card>
-                ))
-              )}
+                  </Card>)}
             </div>
           </div>
         </DialogContent>
@@ -661,8 +521,7 @@ export default function SiteAdminDashboard() {
             </DialogDescription>
           </DialogHeader>
 
-          {selectedUser && (
-            <div className="space-y-2">
+          {selectedUser && <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <User className="w-4 h-4 text-muted-foreground" />
                 <span className="font-medium">{selectedUser.user_name}</span>
@@ -675,8 +534,7 @@ export default function SiteAdminDashboard() {
                 <Home className="w-4 h-4 text-muted-foreground" />
                 <span>{selectedUser.user_flatno || "No flat number"}</span>
               </div>
-            </div>
-          )}
+            </div>}
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowConfirmUserDialog(false)}>
@@ -699,8 +557,7 @@ export default function SiteAdminDashboard() {
             </DialogDescription>
           </DialogHeader>
 
-          {userToRemove && (
-            <div className="space-y-2">
+          {userToRemove && <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <User className="w-4 h-4 text-muted-foreground" />
                 <span className="font-medium">{userToRemove.user_name}</span>
@@ -713,8 +570,7 @@ export default function SiteAdminDashboard() {
                 <Mail className="w-4 h-4 text-muted-foreground" />
                 <span>{userToRemove.user_email || "No email"}</span>
               </div>
-            </div>
-          )}
+            </div>}
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowRemoveUserDialog(false)} disabled={isLoading}>
@@ -728,14 +584,8 @@ export default function SiteAdminDashboard() {
       </Dialog>
 
       {/* Location Detection Popup */}
-      <LocationDetectionPopup
-        isOpen={showLocationPopup}
-        onClose={closeLocationPopup}
-        userId={user?.id || 0}
-        locationId={currentLocationId || ""}
-      />
-    </div>
-  );
+      <LocationDetectionPopup isOpen={showLocationPopup} onClose={closeLocationPopup} userId={user?.id || 0} locationId={currentLocationId || ""} />
+    </div>;
 }
 
 // Reservation List Component
@@ -750,33 +600,21 @@ function ReservationList({
 }) {
   // Add safety check for reservations
   if (!reservations || !Array.isArray(reservations)) {
-    return (
-      <div className="text-center py-20">
+    return <div className="text-center py-20">
         <AlertCircle className="w-16 h-16 text-destructive mx-auto mb-4 opacity-50" />
         <p className="text-destructive">Invalid reservation data</p>
-      </div>
-    );
+      </div>;
   }
-
   if (reservations.length === 0) {
-    return (
-      <div className="text-center py-20">
+    return <div className="text-center py-20">
         <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
         <p className="text-muted-foreground">
           {searchQuery ? "No reservations found matching your search." : "No reservations found."}
         </p>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {reservations.map((reservation) => (
-        <Card
-          key={reservation.id}
-          className="p-4 cursor-pointer hover:shadow-md transition-shadow overflow-hidden"
-          onClick={() => onReservationClick(reservation)}
-        >
+  return <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {reservations.map(reservation => <Card key={reservation.id} className="p-4 cursor-pointer hover:shadow-md transition-shadow overflow-hidden" onClick={() => onReservationClick(reservation)}>
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
               <Package className="w-5 h-5 text-primary" />
@@ -795,8 +633,6 @@ function ReservationList({
               </div>
             </div>
           </div>
-        </Card>
-      ))}
-    </div>
-  );
+        </Card>)}
+    </div>;
 }
