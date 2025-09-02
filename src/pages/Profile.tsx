@@ -34,7 +34,6 @@ export default function Profile() {
   const [searchParams] = useSearchParams();
   const userId = searchParams.get('user_id');
   const isAdminView = searchParams.get('admin_view') === 'true';
-  
   const [user, setUser] = useState<UserShape | null>(() => getUserData());
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -53,13 +52,12 @@ export default function Profile() {
       navigate("/login");
       return;
     }
-    
+
     // If viewing another user's profile (admin view), fetch that user's data
     if (userId && isAdminView) {
       fetchUserById(userId);
     }
   }, [navigate, userId, isAdminView]);
-
   const fetchUserById = async (id: string) => {
     setIsFetchingUser(true);
     try {
@@ -112,7 +110,7 @@ export default function Profile() {
     icon: Phone,
     label: "Phone Number",
     field: "user_phone",
-    value: user.user_phone ? (isAdminView && getUserData()?.user_type === 'SiteSecurity' ? maskPhoneNumber(user.user_phone) : user.user_phone) : "—",
+    value: user.user_phone ? isAdminView && getUserData()?.user_type === 'SiteSecurity' ? maskPhoneNumber(user.user_phone) : user.user_phone : "—",
     editable: false
   }, {
     icon: Mail,
@@ -198,16 +196,13 @@ export default function Profile() {
     setFormData(original);
     setErrors({});
   };
-
   const handleDeleteUser = async () => {
     if (!user?.id) return;
-    
     const currentLocationId = localStorage.getItem('current_location_id');
     if (!currentLocationId) {
       toast.error("Location information not found");
       return;
     }
-    
     setIsLoading(true);
     try {
       // First get the user-location mapping ID
@@ -216,7 +211,7 @@ export default function Profile() {
         toast.error("User-location mapping not found");
         return;
       }
-      
+
       // Then remove the user from location using the mapping ID
       await apiService.removeUserFromLocation(mapping.id);
       toast.success("User removed from location successfully!");
@@ -229,7 +224,6 @@ export default function Profile() {
       setIsLoading(false);
     }
   };
-
   const currentUser = getUserData();
   const canDeleteUser = isAdminView && currentUser?.user_type === 'SiteAdmin';
   useEffect(() => {
@@ -243,28 +237,18 @@ export default function Profile() {
     return () => window.removeEventListener("beforeunload", beforeUnload);
   }, [isEditing, hasChanges]);
   if (isFetchingUser) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+    return <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
+      </div>;
   }
-
   return <div className="min-h-screen bg-background">
       <div className="p-4 max-w-md mx-auto space-y-6">
         {/* Back Button and Profile Header */}
         <div className="flex items-center gap-4 mb-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate(-1)}
-            className="h-8 w-8 p-0"
-          >
+          <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="h-8 w-8 p-0">
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          {isAdminView && (
-            <h2 className="text-lg font-semibold text-foreground">User Profile</h2>
-          )}
+          {isAdminView && <h2 className="text-lg font-semibold text-foreground">User Profile</h2>}
         </div>
         
         {/* Profile Header */}
@@ -272,21 +256,19 @@ export default function Profile() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
-                <span className="text-2xl font-bold text-white">
+                <span className="text-2xl font-bold text-gray-700">
                   {user.user_name?.charAt(0) || "U"}
                 </span>
               </div>
               <div>
-                <h1 className="text-xl font-bold">{user.user_name}</h1>
-                <p className="opacity-90">{user.user_type}</p>
+                <h1 className="text-xl font-bold text-gray-800">{user.user_name}</h1>
+                <p className="opacity-90 text-gray-600">{user.user_type}</p>
                 
               </div>
             </div>
-            {!isAdminView && (
-              <Button variant="secondary" size="icon" onClick={() => setIsEditing(true)} className="bg-white/20 hover:bg-white/30 text-white border-0">
+            {!isAdminView && <Button variant="secondary" size="icon" onClick={() => setIsEditing(true)} className="bg-white/20 hover:bg-white/30 border-0 text-gray-800">
                 <Edit2 className="w-4 h-4" />
-              </Button>
-            )}
+              </Button>}
           </div>
         </Card>
 
@@ -309,24 +291,18 @@ export default function Profile() {
         </div>
 
         {/* Remove User Button - Only for Site Admin */}
-        {canDeleteUser && (
-          <Card className="p-4 border-destructive/20">
+        {canDeleteUser && <Card className="p-4 border-destructive/20">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-semibold text-destructive">Remove the User from this Location</h3>
                 <p className="text-sm text-muted-foreground">This action cannot be undone.</p>
               </div>
-              <Button
-                variant="outline"
-                onClick={() => setShowDeleteDialog(true)}
-                className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground"
-              >
+              <Button variant="outline" onClick={() => setShowDeleteDialog(true)} className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground">
                 <Trash2 className="w-4 h-4 mr-2" />
                 Remove User
               </Button>
             </div>
-          </Card>
-        )}
+          </Card>}
 
         {/* Edit Dialog - only show if not admin view */}
         {isEditing && !isAdminView && <div className="fixed inset-0 flex items-center justify-center p-4 z-50">
@@ -375,7 +351,7 @@ export default function Profile() {
 
                 <div>
                   <Label htmlFor="phone" className="mb-2">Phone Number</Label>
-                  <Input id="phone" value={user.user_phone ? (isAdminView && getUserData()?.user_type === 'SiteSecurity' ? maskPhoneNumber(user.user_phone) : user.user_phone) : "—"} readOnly disabled />
+                  <Input id="phone" value={user.user_phone ? isAdminView && getUserData()?.user_type === 'SiteSecurity' ? maskPhoneNumber(user.user_phone) : user.user_phone : "—"} readOnly disabled />
                 </div>
               </div>
 
@@ -410,30 +386,17 @@ export default function Profile() {
               </DialogDescription>
             </DialogHeader>
             <DialogFooter className="gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setShowDeleteDialog(false)}
-                disabled={isLoading}
-              >
+              <Button variant="outline" onClick={() => setShowDeleteDialog(false)} disabled={isLoading}>
                 Cancel
               </Button>
-              <Button
-                variant="destructive"
-                onClick={handleDeleteUser}
-                disabled={isLoading}
-                className="flex items-center gap-2"
-              >
-                {isLoading ? (
-                  <>
+              <Button variant="destructive" onClick={handleDeleteUser} disabled={isLoading} className="flex items-center gap-2">
+                {isLoading ? <>
                     <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
                     Removing...
-                  </>
-                ) : (
-                  <>
+                  </> : <>
                     <Trash2 className="w-4 h-4" />
                     Remove
-                  </>
-                )}
+                  </>}
               </Button>
             </DialogFooter>
           </DialogContent>
