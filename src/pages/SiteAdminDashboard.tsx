@@ -407,7 +407,10 @@ export default function SiteAdminDashboard() {
 
       {/* Add User Dialog */}
       <Dialog open={showAddUserDialog} onOpenChange={setShowAddUserDialog}>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogContent 
+          className="max-w-md max-h-[90vh] overflow-y-auto"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
           <DialogHeader>
             <DialogTitle>Add New User</DialogTitle>
             <DialogDescription>
@@ -418,7 +421,7 @@ export default function SiteAdminDashboard() {
           <div className="space-y-4 max-h-[60vh] overflow-y-auto p-1">
             <div>
               <Label htmlFor="name">Name *</Label>
-              <Input id="name" autoFocus={false} value={newUserForm.user_name} onChange={e => setNewUserForm(prev => ({
+              <Input id="name" value={newUserForm.user_name} onChange={e => setNewUserForm(prev => ({
               ...prev,
               user_name: e.target.value
             }))} placeholder="Enter full name" disabled={isLoading} />
