@@ -89,7 +89,7 @@ export default function ReservationDetails() {
 
   const handleResendDropOTP = async () => {
     if (!reservationId || !reservationDetails) return;
-    
+
     setActionLoading(true);
     try {
       await apiService.resendDropOTP(reservationId);
@@ -112,7 +112,7 @@ export default function ReservationDetails() {
 
   const handleCancelReservation = async () => {
     if (!reservationId || !reservationDetails) return;
-    
+
     setActionLoading(true);
     try {
       await apiService.cancelReservation(reservationId);
@@ -164,22 +164,19 @@ export default function ReservationDetails() {
       </div>;
   }
   return <div className="min-h-screen bg-background">
-      
+
       <div className="mobile-container space-y-6">
         {/* Header Card */}
         <Card className="card-3d bg-gradient-primary p-6 text-qikpod-black animate-fade-in">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <Package className="w-8 h-8 opacity-30" />
-                <div>
-                  <h2 className="text-lg font-bold">{reservationDetails.pod_name}</h2>
-                  
-                </div>
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" size="sm" onClick={() => navigate('/customer-dashboard')} className="h-8 w-8 p-0 text-qikpod-black hover:bg-black/10 flex-shrink-0">
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+            <div className="flex items-center space-x-3">
+              <Package className="w-8 h-8 opacity-30" />
+              <div>
+                <h2 className="text-lg font-bold">{reservationDetails.pod_name}</h2>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => navigate('/customer-dashboard')} className="h-8 w-8 p-0 text-qikpod-black hover:bg-black/10">
-                <ArrowLeft className="w-4 h-4" />
-              </Button>
             </div>
           </div>
         </Card>
@@ -190,7 +187,7 @@ export default function ReservationDetails() {
             <MapPin className="w-5 h-5 mr-2 text-primary" />
             Location & Details
           </h3>
-          
+
           <div className="grid grid-cols-1 gap-4">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Location</p>
@@ -202,7 +199,7 @@ export default function ReservationDetails() {
                 <h4 className="text-sm font-semibold text-primary mb-1">🔐 Access Codes</h4>
                 <p className="text-xs text-muted-foreground">Use these OTPs when prompted</p>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="text-center p-3 rounded-lg bg-background/50 border">
                   <p className="text-xs font-medium text-muted-foreground mb-1">Drop OTP</p>
@@ -214,7 +211,7 @@ export default function ReservationDetails() {
                 </div>
               </div>
             </Card>
-            
+
             <div>
               <p className="text-sm font-medium text-muted-foreground">AWB Number</p>
               <p className="text-base text-foreground">{reservationDetails.reservation_awbno || 'N/A'}</p>
@@ -233,13 +230,13 @@ export default function ReservationDetails() {
             <Phone className="w-5 h-5 mr-2 text-primary" />
             Contact Information
           </h3>
-          
+
           <div className="grid grid-cols-1 gap-4">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Drop by Phone</p>
               <p className="text-base text-foreground">{reservationDetails.drop_by_phone || 'N/A'}</p>
             </div>
-            
+
             <div>
               <p className="text-sm font-medium text-muted-foreground">Pickup by Phone</p>
               <p className="text-base text-foreground">{reservationDetails.pickup_by_phone || 'N/A'}</p>
@@ -253,18 +250,18 @@ export default function ReservationDetails() {
             <Calendar className="w-5 h-5 mr-2 text-primary" />
             Timing Information
           </h3>
-          
+
           <div className="grid grid-cols-1 gap-4">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Created At</p>
               <p className="text-base text-foreground">{formatDateTime(reservationDetails.created_at)}</p>
             </div>
-            
+
             <div>
               <p className="text-sm font-medium text-muted-foreground">Drop Time</p>
               <p className="text-base text-foreground">{formatDateTime(reservationDetails.drop_time)}</p>
             </div>
-            
+
             <div>
               <p className="text-sm font-medium text-muted-foreground">Pickup Time</p>
               <p className="text-base text-foreground">{formatDateTime(reservationDetails.pickup_time)}</p>
@@ -280,7 +277,7 @@ export default function ReservationDetails() {
         {/* Action Buttons */}
         <div className="space-y-3 pb-6">
           {/* Re-send Drop OTP Button */}
-          <Button 
+          <Button
             onClick={handleResendDropOTP}
             disabled={!canResendDropOTP || actionLoading}
             variant="outline"
@@ -291,7 +288,7 @@ export default function ReservationDetails() {
           </Button>
 
           {/* Cancel Reservation Button */}
-          <Button 
+          <Button
             onClick={handleCancelReservation}
             disabled={!canCancelReservation || actionLoading}
             variant="destructive"
