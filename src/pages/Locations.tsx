@@ -130,7 +130,7 @@ export default function Locations() {
                           </div>
                         </div>
                       </div>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      <ChevronRight className="w-5 h-5 text-muted-foreground" />
                     </div>
                   </Card>
                 ))}
