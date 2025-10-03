@@ -79,6 +79,31 @@ export default function Login() {
     }
     setLoading(true);
     try {
+      // Check user type before sending OTP
+      const user = await apiService.getUserByPhone(phoneNumber);
+      
+      if (!user) {
+        toast({
+          title: "User Not Found",
+          description: "This phone number is not registered. Please register first.",
+          variant: "destructive"
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Block QPStaff users immediately
+      if (user.user_type === 'QPStaff') {
+        toast({
+          title: "Access Denied",
+          description: "QPStaff users are not allowed to login through this app.",
+          variant: "destructive"
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Proceed with OTP for allowed users
       await apiService.generateOTP(phoneNumber);
       toast({
         title: "OTP Sent",

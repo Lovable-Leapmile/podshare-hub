@@ -602,5 +602,23 @@ export const apiService = {
       const data = await response.json();
       throw new Error(data.detail || 'Failed to remove user from location');
     }
+  },
+
+  // Get user by phone number (to check user_type before OTP)
+  getUserByPhone: async (userPhone: string): Promise<any> => {
+    const response = await fetch(`${API_BASE_URL}/users/?user_phone=${userPhone}`, {
+      method: 'GET',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': AUTH_TOKEN,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('User not found');
+    }
+
+    const data = await response.json();
+    return data.records?.[0] || null;
   }
 };
