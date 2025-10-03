@@ -31,6 +31,14 @@ export default function Login() {
   useEffect(() => {
     if (isLoggedIn()) {
       const userData = JSON.parse(localStorage.getItem('qikpod_user') || '{}');
+      
+      // Block QPStaff users
+      if (userData.user_type === 'QPStaff') {
+        localStorage.removeItem('qikpod_user');
+        navigate('/login');
+        return;
+      }
+      
       switch (userData.user_type) {
         case 'SiteAdmin':
           navigate('/site-admin-dashboard');
@@ -102,6 +110,18 @@ export default function Login() {
     try {
       const response = await apiService.validateOTP(phoneNumber, otp);
       const userData = response.records[0];
+      
+      // Block QPStaff users from logging in
+      if (userData.user_type === 'QPStaff') {
+        toast({
+          title: "Access Denied",
+          description: "QPStaff users are not allowed to login through this app.",
+          variant: "destructive"
+        });
+        setLoading(false);
+        return;
+      }
+      
       saveUserData(userData);
       toast({
         title: "Login Successful",

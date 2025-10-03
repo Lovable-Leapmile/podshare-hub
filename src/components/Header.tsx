@@ -23,7 +23,8 @@ export function Header({
     if (userType === 'Customer') return 'Customer';
     if (userType === 'SiteSecurity') return 'Site Security';
     if (userType === 'SiteAdmin') return 'Site Admin';
-    return userType;
+    if (userType === 'QPStaff') return ""; // Never show QPStaff
+    return "";
   }, [user]);
   const handleLogout = () => {
     clearUserData();

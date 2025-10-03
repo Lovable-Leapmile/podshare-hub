@@ -25,6 +25,14 @@ const Index = () => {
     // Check if user is logged in and redirect accordingly
     if (isLoggedIn()) {
       const userData = JSON.parse(localStorage.getItem('qikpod_user') || '{}');
+      
+      // Block QPStaff users
+      if (userData.user_type === 'QPStaff') {
+        localStorage.removeItem('qikpod_user');
+        navigate('/login');
+        return;
+      }
+      
       switch (userData.user_type) {
         case 'SiteAdmin':
           navigate('/site-admin-dashboard');
