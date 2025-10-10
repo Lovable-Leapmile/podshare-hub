@@ -32,14 +32,10 @@ export default function Login() {
     if (isLoggedIn()) {
       const userData = JSON.parse(localStorage.getItem('qikpod_user') || '{}');
       
-      // Block QPStaff users
-      if (userData.user_type === 'QPStaff') {
-        localStorage.removeItem('qikpod_user');
-        navigate('/login');
-        return;
-      }
+      // Treat QPStaff as SiteAdmin
+      const userType = userData.user_type === 'QPStaff' ? 'SiteAdmin' : userData.user_type;
       
-      switch (userData.user_type) {
+      switch (userType) {
         case 'SiteAdmin':
           navigate('/site-admin-dashboard');
           break;
@@ -92,18 +88,7 @@ export default function Login() {
         return;
       }
 
-      // Block QPStaff users immediately
-      if (user.user_type === 'QPStaff') {
-        toast({
-          title: "Access Denied",
-          description: "QPStaff users are not allowed to login through this app.",
-          variant: "destructive"
-        });
-        setLoading(false);
-        return;
-      }
-
-      // Proceed with OTP for allowed users
+      // Proceed with OTP for all users (QPStaff will be treated as SiteAdmin)
       await apiService.generateOTP(phoneNumber);
       toast({
         title: "OTP Sent",
@@ -134,17 +119,11 @@ export default function Login() {
     setLoading(true);
     try {
       const response = await apiService.validateOTP(phoneNumber, otp);
-      const userData = response.records[0];
+      let userData = response.records[0];
       
-      // Block QPStaff users from logging in
+      // Treat QPStaff as SiteAdmin
       if (userData.user_type === 'QPStaff') {
-        toast({
-          title: "Access Denied",
-          description: "QPStaff users are not allowed to login through this app.",
-          variant: "destructive"
-        });
-        setLoading(false);
-        return;
+        userData = { ...userData, user_type: 'SiteAdmin' };
       }
       
       saveUserData(userData);
@@ -185,7 +164,10 @@ export default function Login() {
   };
 
   const navigateToUserDashboard = (userData: any) => {
-    switch (userData.user_type) {
+    // Treat QPStaff as SiteAdmin
+    const userType = userData.user_type === 'QPStaff' ? 'SiteAdmin' : userData.user_type;
+    
+    switch (userType) {
       case 'SiteAdmin':
         navigate('/site-admin-dashboard');
         break;

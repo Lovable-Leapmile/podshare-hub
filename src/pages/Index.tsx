@@ -26,14 +26,10 @@ const Index = () => {
     if (isLoggedIn()) {
       const userData = JSON.parse(localStorage.getItem('qikpod_user') || '{}');
       
-      // Block QPStaff users
-      if (userData.user_type === 'QPStaff') {
-        localStorage.removeItem('qikpod_user');
-        navigate('/login');
-        return;
-      }
+      // Treat QPStaff as SiteAdmin
+      const userType = userData.user_type === 'QPStaff' ? 'SiteAdmin' : userData.user_type;
       
-      switch (userData.user_type) {
+      switch (userType) {
         case 'SiteAdmin':
           navigate('/site-admin-dashboard');
           break;
